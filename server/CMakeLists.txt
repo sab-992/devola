@@ -13,6 +13,7 @@ set(CORE_DIR "${LIB_DIR}/core")
 add_library(HTTP SHARED "${CORE_DIR}/http/http.cpp")
 target_include_directories(HTTP PRIVATE "${CORE_DIR}/http")
 
+
 add_subdirectory("src/authentication")
 set_target_properties(authentication PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${BUILD_DIR}/authentication")
 
