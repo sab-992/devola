@@ -1,0 +1,58 @@
+networks:
+  app-network:
+    driver: bridge
+    name: app-network
+services:
+  angular:
+    build:
+      context: ../client
+      dockerfile: Dockerfile
+    container_name: angular
+    networks:
+    - app-network
+    restart: unless-stopped
+    volumes:
+    - ../client:/app
+    - /app/node_modules
+  database:
+    build:
+      context: ../database
+      dockerfile: Dockerfile
+    container_name: database
+    env_file:
+    - ../.env
+    networks:
+    - app-network
+    ports:
+    - 5432:5432
+    restart: unless-stopped
+    volumes:
+    - postgre:/var/lib/postgresql/data
+  nginx:
+    container_name: nginx
+    depends_on:
+    - angular
+    image: nginx:alpine
+    networks:
+    - app-network
+    ports:
+    - 80:80
+    restart: unless-stopped
+    volumes:
+    - ../nginx/conf.d:/etc/nginx/conf.d:ro
+  pgadmin:
+    container_name: pgadmin
+    depends_on:
+    - database
+    env_file:
+    - ../.env
+    image: dpage/pgadmin4
+    networks:
+    - app-network
+    ports:
+    - 5050:80
+    restart: unless-stopped
+volumes:
+  postgre:
+    driver: local
+    name: postgre

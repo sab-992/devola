@@ -1,0 +1,17 @@
+{
+  "image": "nginx:alpine",
+  "container_name": "nginx",
+  "ports": [
+    "80:80"
+  ],
+  "depends_on": [
+    "angular"
+  ],
+  "networks": [
+    "app-network"
+  ],
+  "volumes": [
+    "../nginx/conf.d:/etc/nginx/conf.d:ro"
+  ],
+  "restart": "unless-stopped"
+}

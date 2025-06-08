@@ -1,0 +1,21 @@
+services:
+  microservice:
+    image: silkeh/clang:latest
+    working_dir: /app
+    env_file:
+      - ../../.env
+    container_name: ${SERVICE_NAME}
+    environment:
+      - SERVICE_NAME=${SERVICE_NAME}
+    networks:
+      - app-network
+    volumes:
+      - ../src/${SERVICE_NAME}/CMakeLists.txt:/app/src/${SERVICE_NAME}/CMakeLists.txt
+      - ../src/${SERVICE_NAME}:/app/src/${SERVICE_NAME}
+      - ../lib:/app/lib
+      - ../setup:/app/setup
+    restart: unless-stopped
+    command: sh -c "mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ../src/${SERVICE_NAME} && cmake --build . --parallel $$(nproc); ./${SERVICE_NAME}"
+networks:
+  app-network:
+    external: true

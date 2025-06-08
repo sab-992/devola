@@ -1,0 +1,15 @@
+{
+  "build": {
+    "context": "../client",
+    "dockerfile": "Dockerfile"
+  },
+  "container_name": "angular",
+  "networks": [
+    "app-network"
+  ],
+  "volumes": [
+    "../client:/app",
+    "/app/node_modules"
+  ],
+  "restart": "unless-stopped"
+}

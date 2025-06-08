@@ -1,0 +1,20 @@
+{
+  "build": {
+    "context": "../database",
+    "dockerfile": "Dockerfile"
+  },
+  "container_name": "database",
+  "env_file": [
+    "../.env"
+  ],
+  "volumes": [
+    "postgre:/var/lib/postgresql/data"
+  ],
+  "networks": [
+    "app-network"
+  ],
+  "ports": [
+    "5432:5432"
+  ],
+  "restart": "unless-stopped"
+}
