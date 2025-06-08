@@ -7,8 +7,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(VOICE_DIR "${PROJECT_SOURCE_DIR}/src/voice")
-set(LIB_DIR "${PROJECT_SOURCE_DIR}/lib")
-set(CORE_DIR "${LIB_DIR}/core")
 
 add_executable (voice "main.cpp")
 

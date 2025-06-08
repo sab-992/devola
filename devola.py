@@ -161,8 +161,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set({service_name.upper()}_DIR "${'{'}PROJECT_SOURCE_DIR{'}'}/src/{service_name_lower}")
-set(LIB_DIR "${'{'}PROJECT_SOURCE_DIR{'}'}/lib")
-set(CORE_DIR "${'{'}LIB_DIR{'}'}/core")
 
 add_executable ({service_name_lower} "main.cpp")
 
