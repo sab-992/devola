@@ -2,7 +2,6 @@ import os
 from dotenv import dotenv_values
 import subprocess
 import argparse
-from pathlib import Path
 
 DOTENV_PATH = "./"
 SERVICE_NAME_SUFFIX = "_SERVICE"
@@ -19,11 +18,18 @@ SERVER_DOCKER_COMPOSE_FOLDER = "./server/docker"
 
 SERVICES_PATH = "/server/src/"
 
+# Colors
+GREEN = '\033[0;32m'
+RED = '\033[0;31m'
+YELLOW = '\033[0;33m'
+NC = '\033[0m'
+
 def main():
     parser = argparse.ArgumentParser(description="Server deployment and stop script.")
-    parser.add_argument("operation", help="Operation <deploy | stop | service>")
+    parser.add_argument("operation", help="Operation <deploy | stop | add_service>")
 
     parser.add_argument("-p", "--prod", action="store_true", help="Deploy in production mode.")
+    parser.add_argument("-w", "--windows", action="store_true", help="Deploy in debug mode for Windows.")
     parser.add_argument("-c", "--clean", action="store_true", help="Removes EVERYTHING about Docker (for development and test modes ONLY), \
                                                                     it also removes the database for every mode except 'Production'.")
     parser.add_argument("-l", "--logs", type=str, help="Display logs for the chosen docker")
@@ -31,24 +37,21 @@ def main():
     parser.add_argument("-sp", "--service_path", type=str, help="Path of the created service.")
     args = parser.parse_args()
 
-    if args.operation == "service":
-        if not args.service_name or len(args.service_name) == 0:
-            print("ERROR: Missing name of service to create !")
-            return
-        
-        if not args.service_path or len(args.service_path) == 0:
-            create_service(args.service_name)
-        else:
+    match args.operation:
+        case "add_service":
+            if not args.service_name or len(args.service_name) == 0:
+                log(f"Missing name of service to create !", False, RED)
+                return
+            
             create_service(args.service_name, args.service_path)
-        
-        return
+            return
+        case "deploy":
+            deploy(get_services(), args)
+        case "stop":
+            stop(args)
 
-    if args.operation == "deploy":
-        deploy(get_services(), args)
-    elif args.operation == "stop":
-        stop(args)
     if args.logs:
-        subprocess.Popen(f"docker logs -f {str(args.logs)}", shell=True)
+        subprocess.run(f"docker logs -f {str(args.logs)}", shell=True)
 
 def get_services() -> list[str]:
     services_name: list[str] = []
@@ -60,26 +63,26 @@ def get_services() -> list[str]:
 
 def deploy(services_name: list[str], args: argparse.Namespace):
     try:
-        subprocess.run("echo \"Generating docker compose...\"", shell=True)
+        log(f"Generating docker compose...", False, GREEN)
         subprocess.run(f"python ./docker/generate_docker_file.py{" -p" if args.prod else ""}", shell=True)
 
-        subprocess.run("echo \"Starting development environment...\"", shell=True)
+        log(f"Starting development environment...", False, GREEN)
         subprocess.run(f"docker compose -f {DOCKER_COMPOSE_FOLDER}/docker-compose.yml up -d --build {DATABASE_DOCKER_SERVICE_NAME}", shell=True)
 
         for i in range(len(services_name)):
-            print(services_name[i])
-            subprocess.run(f"echo \"Deploying backend services: {services_name[i]} ...\"", shell=True)
+            log(f"Deploying {services_name[i]}...", False, GREEN)
             env = os.environ.copy()
             env["SERVICE_NAME"] = services_name[i]
             subprocess.run(f"SERVICE_NAME={services_name[i]} BUILD_TYPE={"Release" if args.prod else "Debug"} docker compose -p {services_name[i]} -f {SERVER_DOCKER_COMPOSE_FOLDER}/docker-compose.service.yml up -d --build", shell=True, env=env)
 
-        subprocess.run('echo "Starting other containers..."', shell=True)
+        log(f"Starting other containers...", False, GREEN)
         subprocess.run(f"docker compose -f {DOCKER_COMPOSE_FOLDER}/docker-compose.yml up -d --build {FRONT_END_DOCKER_SERVICE_NAME} {NGINX_DOCKER_SERVICE_NAME}{"" if args.prod else f" {PGADMIN_DOCKER_SERVICE_NAME}"}", shell=True)
-        subprocess.run("echo \"Deployment completed.\"", shell=True)
-        subprocess.run("echo \"Currently running containers:\"", shell=True)
+        
+        log(f"Deployment complete.", False, GREEN)
+        log(f"Currently running containers:", False, GREEN)
         subprocess.run("docker ps", shell=True)
     except Exception as e:
-        print("Something went wrong while deploying in development mode: ", e)
+        log(f"Something went wrong while deploying: {e}", False, RED)
 
 def stop(args: argparse.Namespace):
     try:
@@ -89,10 +92,15 @@ def stop(args: argparse.Namespace):
             subprocess.run("docker rm -f $(docker ps -aq)", shell=True)
             subprocess.run("docker rmi -f $(docker images -q)", shell=True)
             subprocess.run("docker network rm app-network", shell=True)
-    except Exception as e:
-        print("Something went wrong while stopping: ", e)
 
-def create_service(name: str, path=SERVICES_PATH):
+        log(f"Cleaning complete", False, GREEN)
+    except Exception as e:
+        log(f"Something went wrong while stopping: {e}", False, RED)
+
+def create_service(name: str, path):
+    if not path or len(path) == 0:
+        path = SERVICES_PATH
+
     current_directory = os.path.dirname(os.path.abspath(__file__))
     new_service_directory_path = f"{current_directory}{path}{name}"
 
@@ -103,39 +111,47 @@ def create_service(name: str, path=SERVICES_PATH):
     if not generate_main_file(new_service_directory_path, name):
         return
     
-    # CMakeLists.txt
+    # server/<service_name>/CMakeLists.txt
     if not generate_cmake_file(new_service_directory_path, name):
+        return
+    
+    # server/CMakeLists.txt
+    if not update_main_cmake_file(f"{current_directory}/server", name):
         return
 
 def generate_main_file(path, service_name):
-    os.makedirs(path, exist_ok=True)
-    
-    file_path = os.path.join(path, "main.cpp")
-    
-    # Create the content
-    content = \
+    try:
+        os.makedirs(path, exist_ok=True)
+        
+        file_path = os.path.join(path, "main.cpp")
+        
+        # Create the content
+        content = \
 f"""
 #include <iostream>
 
 
 int main() {'{'}
-    std::cout << "Hello world !" << std::endl;
+    std::cout << "Hello world from {service_name.lower()} !" << std::endl;
     return 0;
 {'}'}
 """
-    
-    with open(file_path, 'w') as f:
-        f.write(content)
-    
-    print(f"main.cpp created at: {file_path}")
-    return True
+        with open(file_path, 'w') as f:
+            f.write(content)
+        
+        log(f"\"main.cpp\" created at: {file_path}", True, GREEN)
+        return True
+    except Exception as e:
+        log(f"Something went wrong while generating the service's \"main.cpp\" file: {e}", True, RED)
+        return False
 
 def generate_cmake_file(path, service_name):
-    os.makedirs(path, exist_ok=True)
-    
-    file_path = os.path.join(path, "CMakeLists.txt")
-    service_name_lower = service_name.lower()
-    content = \
+    try:
+        os.makedirs(path, exist_ok=True)
+        
+        file_path = os.path.join(path, "CMakeLists.txt")
+        service_name_lower = service_name.lower()
+        content = \
 f"""
 cmake_minimum_required (VERSION 3.10)
 
@@ -156,12 +172,39 @@ endif()
 
 target_include_directories({service_name_lower} PRIVATE ${'{'}CORE_DIR{'}'})
 """
+        with open(file_path, 'w') as f:
+            f.write(content)
 
-    with open(file_path, 'w') as f:
-        f.write(content)
-    
-    print(f"CMakeLists.txt created at: {file_path}")
-    return True
+        log(f"\"CMakeLists.txt\" created at: {file_path}", True, GREEN)
+        return True
+    except Exception as e:
+        log(f"Something went wrong while generating the service's \"CMakeLists.txt\" file: {e}", True, RED)
+        return False
+
+def update_main_cmake_file(path, service_name):
+    try:
+        os.makedirs(path, exist_ok=True)
+        
+        file_path = os.path.join(path, "CMakeLists.txt")
+        content = \
+f"""
+add_subdirectory(\"src/{service_name.lower()}\")
+set_target_properties({service_name.lower()} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${'{'}BUILD_DIR{'}'}/{service_name.lower()}")
+"""
+        with open(file_path, 'a') as f:
+            f.write(content)
+
+        log(f"\"CMakeLists.txt\" updated at: {file_path}", True, GREEN)
+        return True
+    except Exception as e:
+        log(f"Something went wrong while updating the main \"CMakeLists.txt\" file: ", True, RED)
+        return False
+
+def log(message: str, ressource_creation: bool, mode=GREEN):
+    if ressource_creation:
+        print(f"{mode}{"[+]"if mode != RED else "[x]"}{NC} {message}")
+    else:
+        print(f"{mode}{message}{NC}")
 
 if __name__ == "__main__":
     main()
