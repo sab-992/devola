@@ -160,7 +160,7 @@ project({service_name_lower} VERSION 1.0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set({service_name.upper()}_DIR "${'{'}PROJECT_SOURCE_DIR{'}'}/src/{service_name_lower}")
+set({service_name.upper()}_PATH "${'{'}PROJECT_SOURCE_DIR{'}'}/src/{service_name_lower}")
 
 add_executable ({service_name_lower} "main.cpp")
 
@@ -168,7 +168,9 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET {service_name_lower} PROPERTY CXX_STANDARD 20)
 endif()
 
-target_include_directories({service_name_lower} PRIVATE ${'{'}CORE_DIR{'}'})
+target_link_libraries({service_name_lower} PRIVATE HTTP JSON LOGGER MEMORY PROCESS RPC THREADS)
+target_include_directories({service_name_lower} PRIVATE ${'{'}CORE_DIRECTORIES{'}'})
+set_target_properties({service_name.lower()} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${'{'}BUILD_PATH{'}'}/{service_name.lower()}")
 """
         with open(file_path, 'w') as f:
             f.write(content)
@@ -184,11 +186,8 @@ def update_main_cmake_file(path, service_name):
         os.makedirs(path, exist_ok=True)
         
         file_path = os.path.join(path, "CMakeLists.txt")
-        content = \
-f"""
-add_subdirectory(\"src/{service_name.lower()}\")
-set_target_properties({service_name.lower()} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${'{'}BUILD_DIR{'}'}/{service_name.lower()}")
-"""
+        content = f"add_subdirectory(\"src/{service_name.lower()}\")"
+
         with open(file_path, 'a') as f:
             f.write(content)
 
