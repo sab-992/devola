@@ -46,6 +46,22 @@ set(CORE_DIRECTORIES "${HTTP_PATH}"
                      "${RPC_PATH}"
                      "${THREADS_PATH}")
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+
+add_executable (devola "${PROJECT_SOURCE_DIR}/main.cpp")
+
+if (CMAKE_VERSION VERSION_GREATER 3.12)
+  set_property(TARGET devola PROPERTY CXX_STANDARD 20)
+endif()
+
+target_link_libraries(devola PRIVATE HTTP JSON LOGGER MEMORY PROCESS RPC THREADS)
+target_include_directories(devola PRIVATE ${CORE_DIRECTORIES})
+
+
 add_subdirectory("src/voice")
 
 add_subdirectory("src/authentication")
