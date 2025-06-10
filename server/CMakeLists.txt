@@ -3,7 +3,8 @@ project(devola VERSION 1.0)
 
 include(FetchContent)
 FetchContent_Declare(asio GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git GIT_TAG asio-1-34-2)
-
+# Add PostgreSQL
+# Add a JSON lib
 
 set(BUILD_PATH "${PROJECT_SOURCE_DIR}/build")
 set(LIB_PATH "${PROJECT_SOURCE_DIR}/lib")
