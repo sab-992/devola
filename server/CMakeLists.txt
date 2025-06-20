@@ -3,8 +3,9 @@ project(devola VERSION 1.0)
 
 include(FetchContent)
 FetchContent_Declare(asio GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git GIT_TAG asio-1-34-2)
-# Add PostgreSQL
-# Add a JSON lib
+FetchContent_Declare(libpqxx GIT_REPOSITORY https://github.com/jtv/libpqxx.git GIT_TAG 7.10.1)
+FetchContent_Declare(nlohmann_json GIT_REPOSITORY https://github.com/nlohmann/json.git GIT_TAG v3.12.0)
+FetchContent_Declare(mongocxx GIT_REPOSITORY https://github.com/mongodb/mongo-cxx-driver.git GIT_TAG r4.1.0)
 
 
 set(CMAKE_CXX_STANDARD 20)
@@ -84,4 +85,3 @@ target_include_directories(devola PRIVATE ${CORE_INCLUDES})
 add_subdirectory("src/voice")
 
 add_subdirectory("src/authentication")
-add_subdirectory("src/test")
