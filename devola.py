@@ -127,7 +127,7 @@ def generate_main_file(path, service_name):
         
         # Create the content
         content = \
-f"""
+f"""\
 #include <iostream>
 
 
@@ -152,8 +152,8 @@ def generate_cmake_file(path, service_name):
         file_path = os.path.join(path, "CMakeLists.txt")
         service_name_lower = service_name.lower()
         content = \
-f"""
-cmake_minimum_required (VERSION 3.10)
+f"""\
+cmake_minimum_required(VERSION 3.16)
 
 project({service_name_lower} VERSION 1.0)
 

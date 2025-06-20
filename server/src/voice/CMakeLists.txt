@@ -1,5 +1,4 @@
-
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 
 project(voice VERSION 1.0)
 
@@ -14,6 +13,6 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET voice PROPERTY CXX_STANDARD 20)
 endif()
 
-target_link_libraries(voice PRIVATE HTTP JSON LOGGER MEMORY PROCESS RPC THREADS)
-target_include_directories(voice PRIVATE ${CORE_DIRECTORIES})
+target_link_libraries(voice PRIVATE CORE)
+target_include_directories(voice PRIVATE ${CORE_INCLUDES})
 set_target_properties(voice PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${BUILD_PATH}/voice")
