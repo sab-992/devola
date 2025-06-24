@@ -14,8 +14,8 @@ set(CMAKE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include("${CMAKE_PATH}/External.cmake")
 
 include("${CMAKE_PATH}/Lib.cmake")
-FindCXXFiles(CORE_SOURCES "${LIB_PATH}/core")
-FindIncludes(CORE_INCLUDES "${LIB_PATH}/core")
+find_CXX_files(CORE_SOURCES "${LIB_PATH}/core")
+find_includes(CORE_INCLUDES "${LIB_PATH}/core")
 
 if(CORE_SOURCES)
   add_library(CORE SHARED ${CORE_SOURCES})

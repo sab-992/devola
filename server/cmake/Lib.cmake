@@ -1,4 +1,4 @@
-function(FindCXXFiles RESULT SEARCH_PATH)
+function(find_CXX_files RESULT SEARCH_PATH)
   file(GLOB_RECURSE FILES "${SEARCH_PATH}/*.cpp")
   set(FILTERED_FILES "")
   
@@ -14,7 +14,7 @@ function(FindCXXFiles RESULT SEARCH_PATH)
   set(${RESULT} ${FILTERED_FILES} PARENT_SCOPE)
 endfunction()
 
-function(FindIncludes RESULT SEARCH_PATH)
+function(find_includes RESULT SEARCH_PATH)
   file(GLOB_RECURSE FILES "${SEARCH_PATH}/*")
   set(INCLUDES_DIR "")
   foreach(FILE ${FILES})

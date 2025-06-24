@@ -1,5 +1,5 @@
 message(STATUS "Found Services:")
-function(IncludeAllServices)
+function(cmake_include_services)
     set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
     file(GLOB SRC_SUBDIRS RELATIVE "${SRC_DIR}" "${SRC_DIR}/*")
     foreach(SUBDIR ${SRC_SUBDIRS})

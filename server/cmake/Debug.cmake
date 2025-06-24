@@ -18,4 +18,4 @@ target_link_libraries(devola PRIVATE CORE)
 target_include_directories(devola PRIVATE ${CORE_INCLUDES})
 
 include("${CMAKE_PATH}/Services.cmake")
-IncludeAllServices()
+cmake_include_services()
