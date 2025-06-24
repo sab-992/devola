@@ -1,0 +1,13 @@
+message(STATUS "Found Services:")
+function(IncludeAllServices)
+    set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
+    file(GLOB SRC_SUBDIRS RELATIVE "${SRC_DIR}" "${SRC_DIR}/*")
+    foreach(SUBDIR ${SRC_SUBDIRS})
+        set(FULL_SUBDIR_PATH "${SRC_DIR}/${SUBDIR}")
+        
+        if(IS_DIRECTORY "${FULL_SUBDIR_PATH}")
+            include("${FULL_SUBDIR_PATH}/CMakeLists.txt")
+            message(STATUS "  ${FULL_SUBDIR_PATH}")
+        endif()
+    endforeach()
+endfunction()
