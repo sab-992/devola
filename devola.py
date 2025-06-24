@@ -28,11 +28,13 @@ def main():
     parser = argparse.ArgumentParser(description="Server deployment and stop script.")
     parser.add_argument("operation", help="Operation <deploy | stop | add_service>")
 
+    parser.add_argument("-pg", "--pgadmin", action="store_true", help="Deploy in docker with pgAdmin")
     parser.add_argument("-p", "--prod", action="store_true", help="Deploy in production mode.")
-    parser.add_argument("-w", "--windows", action="store_true", help="Deploy in debug mode for Windows.")
+
     parser.add_argument("-c", "--clean", action="store_true", help="Removes EVERYTHING about Docker (for development and test modes ONLY), \
                                                                     it also removes the database for every mode except 'Production'.")
     parser.add_argument("-l", "--logs", type=str, help="Display logs for the chosen docker")
+    
     parser.add_argument("-n", "--name", type=str, help="Name of the created service.")
     parser.add_argument("-sp", "--service_path", type=str, help="Path of the created service.")
     args = parser.parse_args()
@@ -64,7 +66,7 @@ def get_services() -> list[str]:
 def deploy(services_name: list[str], args: argparse.Namespace):
     try:
         env = os.environ.copy()
-        if not args.prod:
+        if not args.pgadmin and not args.prod:
             subprocess.run(f"cd server; mkdir -p build; cd build; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --parallel $(nproc); ./devola; cd ../..", shell=True, env=env)
             return
 
