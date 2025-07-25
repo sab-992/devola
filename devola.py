@@ -28,7 +28,6 @@ def main():
     parser = argparse.ArgumentParser(description="Server deployment and stop script.")
     parser.add_argument("operation", help="Operation <make | cmake | makeall | deploy | stop | add_service>")
 
-    parser.add_argument("-pg", "--pgadmin", action="store_true", help="Deploy in docker with pgAdmin")
     parser.add_argument("-p", "--prod", action="store_true", help="Deploy in production mode.")
 
     parser.add_argument("-s", "--start", action="store_true", help="Starts the application locally.")
@@ -65,7 +64,7 @@ def main():
 def make(args: argparse.Namespace):
     try:
         env = os.environ.copy()
-        subprocess.run(f"cd server; cd build; cmake --build . --parallel $(nproc); {"./devola; " if args.start else ""} cd ../..", shell=True, env=env)
+        subprocess.run(f"cd server; cd build; cmake --build . --parallel $(nproc); {"./devola; " if args.start else ""}cd ../..", shell=True, env=env)
     except Exception as e:
         log(f"Something went wrong while compiling: {e}", False, RED)
 
@@ -79,17 +78,13 @@ def cmake():
 def makeall(args: argparse.Namespace):
     try:
         env = os.environ.copy()
-        subprocess.run(f"cd server; mkdir -p build; cd build; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --parallel $(nproc); {"./devola; " if args.start else ""} cd ../..", shell=True, env=env)
+        subprocess.run(f"cd server; mkdir -p build; cd build; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --parallel $(nproc); {"./devola; " if args.start else ""}cd ../..", shell=True, env=env)
     except Exception as e:
         log(f"Something went wrong while compiling: {e}", False, RED)
 
 def deploy(services_name: list[str], args: argparse.Namespace):
     try:
         env = os.environ.copy()
-        if not args.pgadmin and not args.prod:
-            subprocess.run(f"cd server; mkdir -p build; cd build; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --parallel $(nproc); ./devola; cd ../..", shell=True, env=env)
-            return
-
         log(f"Generating docker compose...", False, GREEN)
         subprocess.run(f"python ./docker/generate_docker_file.py{" -p" if args.prod else ""}", shell=True)
 
