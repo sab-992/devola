@@ -26,11 +26,12 @@ NC = '\033[0m'
 
 def main():
     parser = argparse.ArgumentParser(description="Server deployment and stop script.")
-    parser.add_argument("operation", help="Operation <deploy | stop | add_service>")
+    parser.add_argument("operation", help="Operation <make | cmake | makeall | deploy | stop | add_service>")
 
     parser.add_argument("-pg", "--pgadmin", action="store_true", help="Deploy in docker with pgAdmin")
     parser.add_argument("-p", "--prod", action="store_true", help="Deploy in production mode.")
 
+    parser.add_argument("-s", "--start", action="store_true", help="Starts the application locally.")
     parser.add_argument("-c", "--clean", action="store_true", help="Removes EVERYTHING about Docker (for development and test modes ONLY), \
                                                                     it also removes the database for every mode except 'Production'.")
     parser.add_argument("-l", "--logs", type=str, help="Display logs for the chosen docker")
@@ -47,6 +48,12 @@ def main():
             
             create_service(args.name, args.service_path)
             return
+        case "make":
+            make(args)
+        case "cmake":
+            cmake()
+        case "makeall":
+            makeall(args)
         case "deploy":
             deploy(get_services(), args)
         case "stop":
@@ -55,13 +62,26 @@ def main():
     if args.logs:
         subprocess.run(f"docker logs -f {str(args.logs)}", shell=True)
 
-def get_services() -> list[str]:
-    services_name: list[str] = []
-    env_vars = dotenv_values(".env")
-    for key in env_vars.keys():
-        if key.endswith(SERVICE_NAME_SUFFIX):
-            services_name.append(env_vars.get(key))
-    return services_name
+def make(args: argparse.Namespace):
+    try:
+        env = os.environ.copy()
+        subprocess.run(f"cd server; cd build; cmake --build . --parallel $(nproc); {"./devola; " if args.start else ""} cd ../..", shell=True, env=env)
+    except Exception as e:
+        log(f"Something went wrong while compiling: {e}", False, RED)
+
+def cmake():
+    try:
+        env = os.environ.copy()
+        subprocess.run(f"cd server; mkdir -p build; cd build; cmake -DCMAKE_BUILD_TYPE=Debug ..; cd ../..", shell=True, env=env)
+    except Exception as e:
+        log(f"Something went wrong while compiling: {e}", False, RED)
+
+def makeall(args: argparse.Namespace):
+    try:
+        env = os.environ.copy()
+        subprocess.run(f"cd server; mkdir -p build; cd build; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --parallel $(nproc); {"./devola; " if args.start else ""} cd ../..", shell=True, env=env)
+    except Exception as e:
+        log(f"Something went wrong while compiling: {e}", False, RED)
 
 def deploy(services_name: list[str], args: argparse.Namespace):
     try:
@@ -102,6 +122,20 @@ def stop(args: argparse.Namespace):
         log(f"Cleaning complete", False, GREEN)
     except Exception as e:
         log(f"Something went wrong while stopping: {e}", False, RED)
+
+# --------------------------------------------------------------------------------------
+# -                                                                                    -
+# - HELPER FUNCTIONS                                                                   -
+# -                                                                                    -
+# --------------------------------------------------------------------------------------
+
+def get_services() -> list[str]:
+    services_name: list[str] = []
+    env_vars = dotenv_values(".env")
+    for key in env_vars.keys():
+        if key.endswith(SERVICE_NAME_SUFFIX):
+            services_name.append(env_vars.get(key))
+    return services_name
 
 def create_service(name: str, path):
     if not path or len(path) == 0:
