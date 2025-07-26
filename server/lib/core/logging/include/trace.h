@@ -1,14 +1,16 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 
 #include <log-type.h>
 #include <trim.h>
+#include <rang.h>
 
 template<typename T, typename... Args>
-void Log(T FirstArg, Args... OtherArgs) {
+void Trace(const std::unique_ptr<DisplayColor_i>& DisplayColor, T FirstArg, Args... OtherArgs) {
     if (not FirstArg)
         return;
 
@@ -16,13 +18,14 @@ void Log(T FirstArg, Args... OtherArgs) {
     Oss << FirstArg;
     std::string CurrentWord = Oss.str();
     if (Trim(CurrentWord).empty()) {
-        std::cout << std::endl;
+        std::cout << rang::style::reset << std::endl;
         return ;
     }
 
-    std::cout << CurrentWord << ' ';
+    std::cout << DisplayColor->Color() << CurrentWord << ' ';
     if constexpr (sizeof...(Args) > 0)
-        Log<Args...>(OtherArgs...);
+        Trace<Args...>(DisplayColor, OtherArgs...);
     else 
-        Log<Args...>(OtherArgs..., "");
+        Trace<Args...>(DisplayColor, OtherArgs..., "");
 }
+
