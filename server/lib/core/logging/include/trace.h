@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include<functional>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -10,7 +11,7 @@
 #include <rang.h>
 
 template<typename T, typename... Args>
-void Trace(const std::unique_ptr<DisplayColor_i>& DisplayColor, T FirstArg, Args... OtherArgs) {
+void Trace(std::function<std::unique_ptr<DisplayColor_i>()> DisplayColorFunction, T FirstArg, Args... OtherArgs) {
     if (not FirstArg)
         return;
 
@@ -22,10 +23,10 @@ void Trace(const std::unique_ptr<DisplayColor_i>& DisplayColor, T FirstArg, Args
         return ;
     }
 
-    std::cout << DisplayColor->Color() << CurrentWord << ' ';
+    std::cout << DisplayColorFunction()->Color() << CurrentWord << ' ';
     if constexpr (sizeof...(Args) > 0)
-        Trace<Args...>(DisplayColor, OtherArgs...);
+        Trace<Args...>(DisplayColorFunction, OtherArgs...);
     else 
-        Trace<Args...>(DisplayColor, OtherArgs..., "");
+        Trace<Args...>(DisplayColorFunction, OtherArgs..., "");
 }
 
