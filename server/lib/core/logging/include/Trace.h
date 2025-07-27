@@ -6,9 +6,9 @@
 #include <sstream>
 #include <string>
 
-#include <log-type.h>
+#include <LogType.h>
 #include <trim.h>
-#include <rang.h>
+#include <Rang.h>
 
 template<typename T, typename... Args>
 void Trace(std::function<std::unique_ptr<DisplayColor_i>()> DisplayColorFunction, T FirstArg, Args... OtherArgs) {

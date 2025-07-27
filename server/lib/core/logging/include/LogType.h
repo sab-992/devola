@@ -1,5 +1,7 @@
 #include <memory>
-#include <rang.h>
+#include <Rang.h>
+
+
 class DisplayColor_i {
 public:
 	DisplayColor_i() = default;

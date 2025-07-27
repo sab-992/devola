@@ -17,5 +17,7 @@ endif()
 target_link_libraries(devola PRIVATE CORE)
 target_include_directories(devola PRIVATE ${CORE_INCLUDES})
 
-include("${CMAKE_PATH}/Services.cmake")
+message(STATUS "Found Services:")
 cmake_include_services()
+
+include("${CMAKE_PATH}/Tests.cmake")

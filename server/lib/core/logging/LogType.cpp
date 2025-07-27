@@ -1,4 +1,4 @@
-#include <log-type.h>
+#include <LogType.h>
 
 rang::fg LogType::m_Color;
 

@@ -12,8 +12,9 @@ set(CMAKE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 
 include("${CMAKE_PATH}/External.cmake")
+include("${CMAKE_PATH}/Functions.cmake")
 
-include("${CMAKE_PATH}/Lib.cmake")
+
 find_CXX_files(CORE_SOURCES "${LIB_PATH}/core")
 find_includes(CORE_INCLUDES "${LIB_PATH}/core")
 

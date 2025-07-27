@@ -26,7 +26,7 @@ NC = '\033[0m'
 
 def main():
     parser = argparse.ArgumentParser(description="Server deployment and stop script.")
-    parser.add_argument("operation", help="Operation <make | cmake | makeall | deploy | stop | add_service>")
+    parser.add_argument("operation", help="Operation <make | cmake | makeall | deploy | stop | test | add_service>")
 
     parser.add_argument("-p", "--prod", action="store_true", help="Deploy in production mode.")
 
@@ -57,6 +57,10 @@ def main():
             deploy(get_services(), args)
         case "stop":
             stop(args)
+        case "stop":
+            stop(args)
+        case "test":
+            test()
 
     if args.logs:
         subprocess.run(f"docker logs -f {str(args.logs)}", shell=True)
@@ -115,6 +119,13 @@ def stop(args: argparse.Namespace):
             subprocess.run("docker network rm app-network", shell=True)
 
         log(f"Cleaning complete", False, GREEN)
+    except Exception as e:
+        log(f"Something went wrong while stopping: {e}", False, RED)
+
+def test():
+    try:
+        env = os.environ.copy()
+        subprocess.run(f"cd server; mkdir -p build; cd build; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --parallel $(nproc); ctest; cd ../..", shell=True, env=env)
     except Exception as e:
         log(f"Something went wrong while stopping: {e}", False, RED)
 
