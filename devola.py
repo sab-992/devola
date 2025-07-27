@@ -28,15 +28,17 @@ def main():
     parser = argparse.ArgumentParser(description="Server deployment and stop script.")
     parser.add_argument("operation", help="Operation <make | cmake | makeall | deploy | stop | test | add_service>")
 
-    parser.add_argument("-p", "--prod", action="store_true", help="Deploy in production mode.")
-
-    parser.add_argument("-s", "--start", action="store_true", help="Starts the application locally.")
-    parser.add_argument("-c", "--clean", action="store_true", help="Removes EVERYTHING about Docker (for development and test modes ONLY), \
+    parser.add_argument("-s", "--start", action="store_true", help="(For 'make' and 'makeall' only) Starts the application locally.")
+    parser.add_argument("-p", "--prod", action="store_true", help="(For 'deploy' only) Deploy in production mode.")
+    parser.add_argument("-c", "--clean", action="store_true", help="(For 'deploy' only) Removes EVERYTHING about Docker (for development and test modes ONLY), \
                                                                     it also removes the database for every mode except 'Production'.")
-    parser.add_argument("-l", "--logs", type=str, help="Display logs for the chosen docker")
+
+    parser.add_argument("-r", "--regex", type=str, help="(For 'tests' only) To launch specific tests")
+    parser.add_argument("-l", "--logs", type=str, help="(For 'deploy' only) Display logs for the chosen docker")
     
-    parser.add_argument("-n", "--name", type=str, help="Name of the created service.")
-    parser.add_argument("-sp", "--service_path", type=str, help="Path of the created service.")
+    parser.add_argument("-sp", "--service_path", type=str, help="(For 'add_service' only) Path of the created service.")
+    parser.add_argument("-n", "--name", type=str, help="(For 'add_service' only) Name of the created service.")
+
     args = parser.parse_args()
 
     match args.operation:
@@ -60,7 +62,7 @@ def main():
         case "stop":
             stop(args)
         case "test":
-            test()
+            test(args)
 
     if args.logs:
         subprocess.run(f"docker logs -f {str(args.logs)}", shell=True)
@@ -122,10 +124,10 @@ def stop(args: argparse.Namespace):
     except Exception as e:
         log(f"Something went wrong while stopping: {e}", False, RED)
 
-def test():
+def test(args: argparse.Namespace):
     try:
         env = os.environ.copy()
-        subprocess.run(f"cd server; mkdir -p build; cd build; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --parallel $(nproc); ctest; cd ../..", shell=True, env=env)
+        subprocess.run(f"cd server; mkdir -p build; cd build; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --parallel $(nproc); ctest {f"-R \"{args.regex}\"" if args.regex else ""}; cd ../..", shell=True, env=env)
     except Exception as e:
         log(f"Something went wrong while stopping: {e}", False, RED)
 

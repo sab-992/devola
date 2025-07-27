@@ -12,7 +12,7 @@ std::string LTrim(T Element) {
     if (String.empty())
         return "";
 
-    size_t FirstIndexNotWhiteSpace = String.find_first_not_of(' ');
+    size_t FirstIndexNotWhiteSpace = String.find_first_not_of(" \t\n\r");
 
     if (FirstIndexNotWhiteSpace == std::string::npos)
         return "";
