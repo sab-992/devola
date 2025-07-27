@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include<functional>
+#include <functional>
 #include <memory>
 #include <sstream>
 #include <string>
