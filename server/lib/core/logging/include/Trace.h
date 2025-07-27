@@ -7,7 +7,7 @@
 #include <string>
 
 #include <LogType.h>
-#include <trim.h>
+#include <Trim.h>
 #include <Rang.h>
 
 template<typename T, typename... Args>
