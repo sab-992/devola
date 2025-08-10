@@ -23,10 +23,8 @@ if(CORE_SOURCES)
   if (CORE_INCLUDES)
     target_include_directories(CORE PUBLIC ${CORE_INCLUDES}
                                            ${asio_SOURCE_DIR}/asio/include)
-    target_link_libraries(CORE PUBLIC 
-    libpqxx::pqxx
-    nlohmann_json::nlohmann_json
-  )
+    target_link_libraries(CORE PUBLIC libpqxx::pqxx
+                                      nlohmann_json::nlohmann_json)
   else()
     message(WARNING "No includes files found for CORE library")
   endif()
@@ -40,6 +38,5 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release" AND DEFINED SERVICE_NAME)
     include("src/${SERVICE_NAME}/CMakeLists.txt")
 else()
     # This block will be run once. All services will be launched on the current device.
-    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
     include("${CMAKE_PATH}/Debug.cmake")
 endif()
