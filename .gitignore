@@ -1,6 +1,7 @@
 ## Ignore compiled files
 */out/*
 */build/*
+build
 
 ## Ignore environment files
 *.env

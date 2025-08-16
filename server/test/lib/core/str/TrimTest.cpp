@@ -9,7 +9,7 @@ TEST_P(TrimTest, TrimStrings) {
     EXPECT_EQ(Trim(Input), Expected);
 }
 
-INSTANTIATE_TEST_SUITE_P(TrimTestCases,
+INSTANTIATE_TEST_SUITE_P(TrimTestSuite,
                          TrimTest,
                          ::testing::Values(std::make_pair("T", "T"),
                                            std::make_pair("    T T T T ", "T T T T"),

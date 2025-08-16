@@ -27,6 +27,8 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests) 
 add_executable(tests ${TEST_SOURCES})
 
 target_link_libraries(tests PRIVATE CORE gtest_main gtest)
@@ -40,3 +42,7 @@ endif()
 
 include(GoogleTest)
 gtest_discover_tests(tests)
+add_custom_target(run_all_tests COMMAND tests --gtest_color=yes
+                                DEPENDS tests
+                                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+                                USES_TERMINAL)

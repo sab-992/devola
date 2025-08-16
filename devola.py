@@ -127,7 +127,7 @@ def stop(args: argparse.Namespace):
 def test(args: argparse.Namespace):
     try:
         env = os.environ.copy()
-        subprocess.run(f"cd server; mkdir -p build; cd build; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --parallel $(nproc); ctest {f"-R \"{args.regex}\"" if args.regex else ""}; cd ../..", shell=True, env=env)
+        subprocess.run(f"cd server; mkdir -p build; cd build; cmake -DCMAKE_BUILD_TYPE=Tests ..; cmake --build . --parallel $(nproc) {f"--target run_all_tests" if not args.regex else ""}; {f"./tests/tests --gtest_filter=\"{args.regex}\";" if args.regex else ""}cd ../..", shell=True, env=env)
     except Exception as e:
         log(f"Something went wrong while stopping: {e}", False, RED)
 

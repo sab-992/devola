@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
-set(BUILD_PATH "${PROJECT_SOURCE_DIR}/build")
 set(LIB_PATH "${CMAKE_CURRENT_LIST_DIR}/lib")
 set(CMAKE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
@@ -36,6 +35,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release" AND DEFINED SERVICE_NAME)
     # This block will be run for each services in its own Docker container.
     include("${CMAKE_PATH}/Release.cmake")
     include("src/${SERVICE_NAME}/CMakeLists.txt")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Tests")
+    include("${CMAKE_PATH}/Tests.cmake")
 else()
     # This block will be run once. All services will be launched on the current device.
     include("${CMAKE_PATH}/Debug.cmake")

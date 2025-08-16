@@ -11,7 +11,7 @@ endforeach()
 add_executable (devola "${PROJECT_SOURCE_DIR}/main.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET devola PROPERTY CXX_STANDARD 20)
+    set_property(TARGET devola PROPERTY CXX_STANDARD 20)
 endif()
 
 target_link_libraries(devola PRIVATE CORE)
@@ -19,5 +19,3 @@ target_include_directories(devola PRIVATE ${CORE_INCLUDES})
 
 message(STATUS "Found Services:")
 cmake_include_services()
-
-include("${CMAKE_PATH}/Tests.cmake")
