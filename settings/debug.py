@@ -15,9 +15,9 @@ class Debug(Command):
 
     def command_explicit(self, args: Namespace) -> str:
         if args.manual:
-            return f"echo {self.manual()}"
+            return f"echo \"{self.manual()}\""
         super().validate_arguments(args)
         return f"{DEBUG_EXECUTABLE_PATH_FROM_BUILD_DIR}"
     
-    def manual(self) -> str:
-        return ""
+    def details(self) -> str:
+        return "Starts the application."

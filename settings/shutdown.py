@@ -19,11 +19,11 @@ class Shutdown(Command):
 
     def command_explicit(self, args: Namespace) -> str:
         if args.manual:
-            return f"echo {self.manual()}"
+            return f"echo \"{self.manual()}\""
         super().validate_arguments(args)
         return f"{REMOVE_DOCKER_CONTAINERS_CMD};\
                  {REMOVE_DOCKER_IMAGES_CMD};\
                  {REMOVE_DOCKER_NETWORK_CMD}{f"; {CLEAN_ALL_CMD}" if args.clean else ""}"
 
-    def manual(self) -> str:
-        return ""
+    def details(self) -> str:
+        return "Stops and removes ALL locally running containers."

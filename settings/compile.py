@@ -15,12 +15,12 @@ class CMake(Command, DirectoryChanger):
 
     def command_explicit(self, args: Namespace) -> str:
         if args.manual:
-            return f"echo {self.manual()}"
+            return f"echo \"{self.manual()}\""
         super().validate_arguments(args)
         return f"{self.change_to_build_dir_command()} cmake -DCMAKE_BUILD_TYPE=Debug ..; {self.reset_directory_command()}"
     
-    def manual(self) -> str:
-        return ""
+    def details(self) -> str:
+        return "Use the CMakeLists.txt to prepare the environment for the application."
 
 class Make(Command, DirectoryChanger):
     def __init__(self):
@@ -34,12 +34,12 @@ class Make(Command, DirectoryChanger):
 
     def command_explicit(self, args: Namespace) -> str:
         if args.manual:
-            return f"echo {self.manual()}"
+            return f"echo \"{self.manual()}\""
         super().validate_arguments(args)
         return f"{self.change_to_build_dir_command()} cmake --build . --parallel $(nproc); {"./devola; " if args.debug else ""} {self.reset_directory_command()}"
     
-    def manual(self) -> str:
-        return ""
+    def details(self) -> str:
+        return "Use the environment made by the 'cmake' command and build/compiles the application."
 
 class MakeAll(Command, DirectoryChanger):
     def __init__(self):
@@ -54,8 +54,8 @@ class MakeAll(Command, DirectoryChanger):
 
     def command_explicit(self, args: Namespace) -> str:
         if args.manual:
-            return f"echo {self.manual()}"
+            return f"echo \"{self.manual()}\""
         return f"{self.__cmake.command_explicit(args)} {self.__make.command_explicit(args)}"
     
-    def manual(self) -> str:
-        return ""
+    def details(self) -> str:
+        return "Combines the 'cmake' command and the 'make' command to prepare the application environment and build it."

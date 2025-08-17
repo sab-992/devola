@@ -27,11 +27,20 @@ class Command(ABC):
         pass
 
     @abstractmethod
+    def details(self) -> str:
+        """
+        Explain what the command do.
+        """
+        pass
+    
     def manual(self) -> str:
         """
         Gives the detailed description on how to use the command.
         """
-        pass
+        options = "Options:\n"
+        for argument, arguments_info in self.arguments().items():
+            options += f"-{argument[0]}, {argument} - {arguments_info["help"]}\n"
+        return f"{self.details()}\n\n{options[:-1]}"
 
     def validate_arguments(self, args: Namespace):
         for argument, argument_infos in self.arguments().items():

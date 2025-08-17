@@ -17,13 +17,13 @@ class AddService(Command):
 
     def command_explicit(self, args: Namespace) -> str:
         if args.manual:
-            return f"echo {self.manual()}"
+            return f"echo \"{self.manual()}\""
         super().validate_arguments(args)
         self.__add_service(args.name, args.service_path)
         return "" # We return no command.
     
-    def manual(self) -> str:
-        return ""
+    def details(self) -> str:
+        return "Add a service and all the necessary start files."
 
     def __add_service(self, name: str, path):
         if not path or len(path) == 0:

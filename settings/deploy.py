@@ -17,12 +17,12 @@ class Deploy(Command):
 
     def command_explicit(self, args: Namespace) -> str:
         if args.manual:
-            return f"echo {self.manual()}"
+            return f"echo \"{self.manual()}\""
         super().validate_arguments(args)
         return self.__deploy(args)
     
-    def manual(self) -> str:
-        return ""
+    def details(self) -> str:
+        return "Deploy the application in docker containers."
     
     def __deploy(self, args: Namespace) -> str:
         services_name = self.__get_services()
