@@ -3,7 +3,7 @@ import subprocess
 import argparse
 from settings.helper.command import Command
 from settings.helper.log import log, Color
-from settings import compile, debug, deploy, service, shutdown, test
+from settings import compile, debug, deploy, install, service, shutdown, test
 from settings.helper.options import OptionsType
 
 COMMANDS: dict[str, Command] = { "cmake"       : compile.CMake(), 
@@ -11,6 +11,7 @@ COMMANDS: dict[str, Command] = { "cmake"       : compile.CMake(),
                                  "makeall"     : compile.MakeAll(),
                                  "debug"       : debug.Debug(),
                                  "deploy"      : deploy.Deploy(),
+                                 "install"     : install.Install(),
                                  "add_service" : service.AddService(),
                                  "shutdown"    : shutdown.Shutdown(),
                                  "test"        : test.Test() }
