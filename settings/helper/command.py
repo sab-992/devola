@@ -43,6 +43,9 @@ class Command(ABC):
         return f"{self.details()}\n\n{options[:-1]}"
 
     def validate_arguments(self, args: Namespace):
+        """
+        Verifies that all required arguments have been given.
+        """
         for argument, argument_infos in self.arguments().items():
             if argument_infos.get("required", True) and not getattr(args, argument, None):
                 raise errors.InvalidInputError(f"Missing argument \"--{argument}\" !\n\
