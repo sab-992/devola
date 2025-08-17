@@ -1,4 +1,5 @@
 import os
+import platform
 import subprocess
 import argparse
 from settings.helper.command import Command
@@ -41,7 +42,7 @@ def main():
     try:
         env = os.environ.copy()
         if args.command:
-            subprocess.run(COMMANDS[args.command].command_explicit(args), shell=True, env=env)
+            subprocess.run(COMMANDS[args.command].command_explicit(args), shell=True, executable=None if platform.system() != "Windows" else "powershell",  env=env)
     except Exception as e:
         log(f"Something went wrong while running {args.command}: {e}", False, Color.RED)
 
