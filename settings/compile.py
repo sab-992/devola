@@ -1,3 +1,4 @@
+from shlex import quote
 from argparse import Namespace
 from settings.helper.command import Command
 from settings.helper.directory import DirectoryChanger
@@ -15,7 +16,7 @@ class CMake(Command, DirectoryChanger):
 
     def command_explicit(self, args: Namespace) -> str:
         if args.manual:
-            return f"echo \"{self.manual()}\""
+            return f"echo {quote(self.manual())}"
         super().validate_arguments(args)
         return f"{self.change_to_build_dir_command()} cmake -DCMAKE_BUILD_TYPE=Debug ..; {self.reset_directory_command()}"
     
@@ -34,7 +35,7 @@ class Make(Command, DirectoryChanger):
 
     def command_explicit(self, args: Namespace) -> str:
         if args.manual:
-            return f"echo \"{self.manual()}\""
+            return f"echo {quote(self.manual())}"
         super().validate_arguments(args)
         return f"{self.change_to_build_dir_command()} cmake --build . --parallel $(nproc); {"./devola; " if args.debug else ""} {self.reset_directory_command()}"
     
@@ -54,7 +55,7 @@ class MakeAll(Command, DirectoryChanger):
 
     def command_explicit(self, args: Namespace) -> str:
         if args.manual:
-            return f"echo \"{self.manual()}\""
+            return f"echo {quote(self.manual())}"
         return f"{self.__cmake.command_explicit(args)} {self.__make.command_explicit(args)}"
     
     def details(self) -> str:

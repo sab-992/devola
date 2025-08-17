@@ -1,3 +1,4 @@
+from shlex import quote
 from argparse import Namespace
 from settings.helper.command import Command
 from settings.helper.directory import DirectoryChanger
@@ -15,7 +16,7 @@ class Test(Command, DirectoryChanger):
 
     def command_explicit(self, args: Namespace) -> str:
         if args.manual:
-            return f"echo \"{self.manual()}\""
+            return f"echo {quote(self.manual())}"
         super().validate_arguments(args)
         return f"{self.change_to_build_dir_command()} cmake -DCMAKE_BUILD_TYPE=Tests ..; cmake --build . --parallel $(nproc) {f"--target run_all_tests" if not args.regex else ""}; {f"./tests/tests --gtest_filter=\"{args.regex}\";" if args.regex else ""} {self.reset_directory_command()}"
     

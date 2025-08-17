@@ -1,3 +1,4 @@
+from shlex import quote
 from settings.helper import config
 from argparse import Namespace
 from settings.helper.command import Command
@@ -17,7 +18,7 @@ class Deploy(Command):
 
     def command_explicit(self, args: Namespace) -> str:
         if args.manual:
-            return f"echo \"{self.manual()}\""
+            return f"echo {quote(self.manual())}"
         super().validate_arguments(args)
         return self.__deploy(args)
     
@@ -26,22 +27,22 @@ class Deploy(Command):
     
     def __deploy(self, args: Namespace) -> str:
         services_name = self.__get_services()
-        generate_docker_compose_cmd = f"echo \"{build_msg("Generating docker compose...", False, Color.GREEN)}\"; \
+        generate_docker_compose_cmd = f"echo {quote(build_msg("Generating docker compose...", False, Color.GREEN))}; \
                                         python ./docker/generate_docker_file.py{" -p" if args.prod else ""};"
         
-        starting_db_cmd = f"echo \"{build_msg("Starting development environment...", False, Color.GREEN)}\"; \
+        starting_db_cmd = f"echo {quote(build_msg("Starting development environment...", False, Color.GREEN))}; \
                             docker compose -f {config.DOCKER_COMPOSE_FOLDER}/docker-compose.yml up -d --build {config.DATABASE_DOCKER_SERVICE_NAME};"
         
         deploy_services_cmd = ""
         for i in range(len(services_name)):
-            deploy_services_cmd += f"echo \"{build_msg(f"Deploying {services_name[i]}...", False, Color.GREEN)}\"; \
+            deploy_services_cmd += f"echo {quote(build_msg(f"Deploying {services_name[i]}...", False, Color.GREEN))}; \
                                      SERVICE_NAME={services_name[i]} docker compose -p {services_name[i]} -f {config.SERVER_DOCKER_COMPOSE_FOLDER}/docker-compose.service.yml up -d --build;"
 
-        starting_other_containers = f"echo \"{build_msg(f"Starting other containers...", False, Color.GREEN)}\"; \
+        starting_other_containers = f"echo {quote(build_msg(f"Starting other containers...", False, Color.GREEN))}; \
                                       docker compose -f {config.DOCKER_COMPOSE_FOLDER}/docker-compose.yml up -d --build {config.FRONT_END_DOCKER_SERVICE_NAME} {config.NGINX_DOCKER_SERVICE_NAME}{"" if args.prod else f" {config.PGADMIN_DOCKER_SERVICE_NAME}"};"
 
-        end_cmd = f"echo \"{build_msg(f"Deployment complete.", False, Color.GREEN)}\"; \
-                    echo \"{build_msg(f"Currently running containers:", False, Color.GREEN)}\"; \
+        end_cmd = f"echo {quote(build_msg(f"Deployment complete.", False, Color.GREEN))}; \
+                    echo {quote(build_msg(f"Currently running containers:", False, Color.GREEN))}; \
                     docker ps;"
         
         return f"{generate_docker_compose_cmd} \

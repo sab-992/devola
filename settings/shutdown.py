@@ -1,3 +1,4 @@
+from shlex import quote
 from argparse import Namespace
 from settings.helper.command import Command
 from settings.helper.options import CLEAN_OPTION, MANUAL_OPTION
@@ -19,7 +20,7 @@ class Shutdown(Command):
 
     def command_explicit(self, args: Namespace) -> str:
         if args.manual:
-            return f"echo \"{self.manual()}\""
+            return f"echo {quote(self.manual())}"
         super().validate_arguments(args)
         return f"{REMOVE_DOCKER_CONTAINERS_CMD};\
                  {REMOVE_DOCKER_IMAGES_CMD};\
