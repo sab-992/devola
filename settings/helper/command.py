@@ -39,7 +39,7 @@ class Command(ABC):
         """
         options = "Options:\n"
         for argument, arguments_info in self.arguments().items():
-            options += f"-{argument[0]}, {argument} - {arguments_info["help"]}\n"
+            options += f"\t-{argument[0]}, {argument} - {arguments_info["help"]}\n"
         return f"{self.details()}\n\n{options[:-1]}"
 
     def validate_arguments(self, args: Namespace):
