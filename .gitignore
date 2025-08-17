@@ -2,6 +2,7 @@
 */out/*
 */build/*
 build
+*.pyc
 
 ## Ignore environment files
 *.env
