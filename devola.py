@@ -3,8 +3,8 @@ import subprocess
 import argparse
 from settings.helper.command import Command
 from settings.helper.log import log, Color
-
 from settings import compile, debug, deploy, service, shutdown, test
+from settings.helper.options import OptionsType
 
 COMMANDS: dict[str, Command] = { "cmake"       : compile.CMake(), 
                                  "make"        : compile.Make(),
@@ -16,19 +16,24 @@ COMMANDS: dict[str, Command] = { "cmake"       : compile.CMake(),
                                  "test"        : test.Test() }
 
 def main():
-    parser = argparse.ArgumentParser(description="Server deployment and stop script.")
-    # Main command
-    parser.add_argument("command", help="Command < add_service | deploy | make | cmake | makeall | debug | shutdown | test >")
+    parser = argparse.ArgumentParser(description="Application deployment and stop script.")
+    added_arguments = set()
+    program_help = "<"
+    for command_name, command in COMMANDS.items():
+        for argument, argument_infos in command.arguments().items():
+            if argument in added_arguments:
+                continue
 
-    parser.add_argument("-c", "--clean", action="store_true", help="(For 'shutdown' only) Removes EVERYTHING about Docker (for development and test modes ONLY), \
-                                                                    it also removes the database for every mode except 'Production'.")
-    parser.add_argument("-l", "--logs", type=str, help="(For 'deploy' only) Display logs for the chosen docker")
-    parser.add_argument("-n", "--name", type=str, help="(For 'add_service' only) Name of the created service.")
-    parser.add_argument("-p", "--prod", action="store_true", help="(For 'deploy' only) Deploy in production mode.")
-    parser.add_argument("-r", "--regex", type=str, help="(For 'tests' only) To launch specific tests")
-    parser.add_argument("-man", "--manual", action="store_true", help="Describes a specific command.")
-    parser.add_argument("-d", "--debug", action="store_true", help="(For 'make' and 'makeall' only) Starts the application in debug mode.")
-    parser.add_argument("-sp", "--service_path", type=str, help="(For 'add_service' only) Path of the created service.")
+            if argument_infos["type"] == OptionsType.ACTION:
+                parser.add_argument(f"-{argument[0]}", f"--{argument}", action=argument_infos["value"], help=argument_infos["help"])
+            else:
+                parser.add_argument(f"-{argument[0]}", f"--{argument}", type=argument_infos["value"], help=argument_infos["help"])
+
+            added_arguments.add(argument)
+        program_help += f" {command_name} |"
+        
+    program_help = program_help[:-1] + ">"
+    parser.add_argument("command", help=program_help)
 
     args = parser.parse_args()
 

@@ -3,13 +3,14 @@ from argparse import Namespace
 from settings.helper.command import Command
 from settings.helper.log import log, Color
 from settings.helper.config import SERVICES_PATH
+from settings.helper.options import NAME_OPTION, SERVICE_PATH_OPTION, MANUAL_OPTION
 
 class AddService(Command):
     def __init__(self):
         pass
 
-    def arguments(self) -> dict[str, bool]:
-        return { "name": True, "service_path": False, "manual": False }
+    def arguments(self) -> dict[str, dict]:
+        return { "name": NAME_OPTION, "service_path": SERVICE_PATH_OPTION, "manual": MANUAL_OPTION }
 
     def command(self) -> str:
         return "add_service"

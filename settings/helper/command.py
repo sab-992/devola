@@ -7,7 +7,7 @@ class Command(ABC):
         pass
 
     @abstractmethod
-    def arguments(self) -> dict[str, bool]:
+    def arguments(self) -> dict[str, dict]:
         """
         Gives the accepted arguments (key) and their requirement status (value).
         """
@@ -34,7 +34,7 @@ class Command(ABC):
         pass
 
     def validate_arguments(self, args: Namespace):
-        for argument, required in self.arguments().items():
-            if required and not getattr(args, argument, None):
+        for argument, argument_infos in self.arguments().items():
+            if argument_infos.get("required", True) and not getattr(args, argument, None):
                 raise errors.InvalidInputError(f"Missing argument \"--{argument}\" !\n\
                                                  Try \"{self.command()} -man\" to learn how to use this command properly.")

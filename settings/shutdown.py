@@ -1,5 +1,6 @@
 from argparse import Namespace
 from settings.helper.command import Command
+from settings.helper.options import CLEAN_OPTION, MANUAL_OPTION
 
 REMOVE_DOCKER_CONTAINERS_CMD = "docker rm -f $(docker ps -aq)"
 REMOVE_DOCKER_IMAGES_CMD = "docker rmi -f $(docker images -q)"
@@ -10,8 +11,8 @@ class Shutdown(Command):
     def __init__(self):
         pass
 
-    def arguments(self) -> dict[str, bool]:
-        return { "clean": False, "manual": False }
+    def arguments(self) -> dict[str, dict]:
+        return { "clean": CLEAN_OPTION, "manual": MANUAL_OPTION }
 
     def command(self) -> str:
         return "shutdown"

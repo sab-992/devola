@@ -1,13 +1,14 @@
 from argparse import Namespace
 from settings.helper.command import Command
 from settings.helper.directory import DirectoryChanger
+from settings.helper.options import REGEX_OPTION, MANUAL_OPTION
 
 class Test(Command, DirectoryChanger):
     def __init__(self):
         pass
 
-    def arguments(self) -> dict[str, bool]:
-        return { "regex": False, "manual": False }
+    def arguments(self) -> dict[str, dict]:
+        return { "regex": REGEX_OPTION, "manual": MANUAL_OPTION }
 
     def command(self) -> str:
         return "test"

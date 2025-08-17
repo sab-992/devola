@@ -1,13 +1,14 @@
 from argparse import Namespace
 from settings.helper.command import Command
 from settings.helper.config import DEBUG_EXECUTABLE_PATH_FROM_BUILD_DIR
+from settings.helper.options import MANUAL_OPTION
 
 class Debug(Command):
     def __init__(self):
         pass
 
-    def arguments(self) -> dict[str, bool]:
-        return { "manual": False }
+    def arguments(self) -> dict[str, dict]:
+        return { "manual": MANUAL_OPTION }
 
     def command(self) -> str:
         return "debug"

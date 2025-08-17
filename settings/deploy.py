@@ -3,14 +3,14 @@ from argparse import Namespace
 from settings.helper.command import Command
 from dotenv import dotenv_values
 from settings.helper.log import Color, build_msg
-
+from settings.helper.options import LOGS_OPTION, PROD_OPTION, MANUAL_OPTION
 
 class Deploy(Command):
     def __init__(self):
         pass
 
-    def arguments(self) -> dict[str, bool]:
-        return { "logs": False, "prod": False, "manual": False }
+    def arguments(self) -> dict[str, dict]:
+        return { "logs": LOGS_OPTION, "prod": PROD_OPTION, "manual": MANUAL_OPTION }
 
     def command(self) -> str:
         return "deploy"

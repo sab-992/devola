@@ -1,13 +1,14 @@
 from argparse import Namespace
 from settings.helper.command import Command
 from settings.helper.directory import DirectoryChanger
+from settings.helper.options import DEBUG_OPTION, MANUAL_OPTION
 
 class CMake(Command, DirectoryChanger):
     def __init__(self):
         pass
 
-    def arguments(self) -> dict[str, bool]:
-        return { "manual": False }
+    def arguments(self) -> dict[str, dict]:
+        return { "manual": MANUAL_OPTION }
 
     def command(self) -> str:
         return "cmake"
@@ -25,8 +26,8 @@ class Make(Command, DirectoryChanger):
     def __init__(self):
         pass
 
-    def arguments(self) -> dict[str, bool]:
-        return { "debug": False, "manual": False } 
+    def arguments(self) -> dict[str, dict]:
+        return { "debug": DEBUG_OPTION, "manual": MANUAL_OPTION } 
 
     def command(self) -> str:
         return "make"
@@ -45,8 +46,8 @@ class MakeAll(Command, DirectoryChanger):
         self.__make = Make()
         self.__cmake = CMake()
 
-    def arguments(self) -> dict[str, bool]:
-        return { "debug": False, "manual": False } 
+    def arguments(self) -> dict[str, dict]:
+        return { "debug": DEBUG_OPTION, "manual": MANUAL_OPTION } 
 
     def command(self) -> str:
         return "makeall"
