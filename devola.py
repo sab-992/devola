@@ -42,7 +42,7 @@ def main():
     try:
         env = os.environ.copy()
         if args.command:
-            subprocess.run(COMMANDS[args.command].command_explicit(args), shell=True, executable=None if platform.system() != "Windows" else "powershell",  env=env)
+            subprocess.run(COMMANDS[args.command].command_explicit(args), shell=None if platform.system() != "Linux" else True, env=env)
     except Exception as e:
         log(f"Something went wrong while running {args.command}: {e}", False, Color.RED)
 
