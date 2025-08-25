@@ -42,8 +42,6 @@ class Command(ABC):
         if args.manual:
             return print(f"{self.manual()}")
 
-        log("test")
-
         try:
             self.validate_arguments(args)
             command = self.command_explicit(args)
