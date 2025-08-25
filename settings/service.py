@@ -16,6 +16,7 @@ class AddService(Command):
         return "add_service"
 
     def command_explicit(self, args: Namespace) -> str:
+        self.__add_service(args.name, args.service_path)
         return "" # We return no command.
     
     def details(self) -> str:
