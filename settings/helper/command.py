@@ -39,6 +39,9 @@ class Command(ABC):
         pass
 
     def run(self, args: Namespace) -> None:
+        """
+        Runs the current command.
+        """
         if args.manual:
             return print(f"{self.manual()}")
 
