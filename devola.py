@@ -39,12 +39,8 @@ def main():
 
     args = parser.parse_args()
 
-    try:
-        env = os.environ.copy()
-        if args.command:
-            subprocess.run(COMMANDS[args.command].command_explicit(args), shell=None if platform.system() != "Linux" else True, env=env)
-    except Exception as e:
-        log(f"Something went wrong while running {args.command}: {e}", False, Color.RED)
+    if args.command:
+        COMMANDS[args.command].run(args);
 
 if __name__ == "__main__":
     main()

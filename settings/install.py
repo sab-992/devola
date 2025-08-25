@@ -1,5 +1,4 @@
 import platform
-from shlex import quote
 from argparse import Namespace
 from settings.helper.errors import NotSupportedOperatingSystem
 from settings.helper.command import Command
@@ -17,10 +16,6 @@ class Install(Command):
         return "install"
 
     def command_explicit(self, args: Namespace) -> str:
-        if args.manual:
-            return f"echo {quote(self.manual())}"
-        super().validate_arguments(args)
-
         cmd = "";
         match platform.system():
             case "Windows":

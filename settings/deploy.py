@@ -1,5 +1,7 @@
-from shlex import quote
+import os
+import subprocess
 from settings.helper import config
+from settings.helper.log import log, Color
 from argparse import Namespace
 from settings.helper.command import Command
 from dotenv import dotenv_values
@@ -17,9 +19,6 @@ class Deploy(Command):
         return "deploy"
 
     def command_explicit(self, args: Namespace) -> str:
-        if args.manual:
-            return f"echo {quote(self.manual())}"
-        super().validate_arguments(args)
         return self.__deploy(args)
     
     def details(self) -> str:
@@ -27,29 +26,34 @@ class Deploy(Command):
     
     def __deploy(self, args: Namespace) -> str:
         services_name = self.__get_services()
-        generate_docker_compose_cmd = f"echo {quote(build_msg("Generating docker compose...", False, Color.GREEN))}; \
-                                        python ./docker/generate_docker_file.py{" -p" if args.prod else ""};"
+        env = os.environ.copy()
+
+        # Creating Docker Compose file :
+        log("Generating docker compose...", False, Color.GREEN)
+        generate_docker_compose_cmd = f"python ./docker/generate_docker_file.py{" -p" if args.prod else ""}"
+        subprocess.run(generate_docker_compose_cmd, shell=True, env=env)
         
-        starting_db_cmd = f"echo {quote(build_msg("Starting development environment...", False, Color.GREEN))}; \
-                            docker compose -f {config.DOCKER_COMPOSE_FOLDER}/docker-compose.yml up -d --build {config.DATABASE_DOCKER_SERVICE_NAME};"
+        # Starting Database container :
+        log("Starting development environment...", False, Color.GREEN)
+        starting_db_cmd = f"docker compose -f {config.DOCKER_COMPOSE_FOLDER}/docker-compose.yml up -d --build {config.DATABASE_DOCKER_SERVICE_NAME}"
+        subprocess.run(starting_db_cmd, shell=True, env=env)
         
-        deploy_services_cmd = ""
+        # Starting each service's container :
         for i in range(len(services_name)):
-            deploy_services_cmd += f"echo {quote(build_msg(f"Deploying {services_name[i]}...", False, Color.GREEN))}; \
-                                     SERVICE_NAME={services_name[i]} docker compose -p {services_name[i]} -f {config.SERVER_DOCKER_COMPOSE_FOLDER}/docker-compose.service.yml up -d --build;"
+            deploy_services_cmd = f"SERVICE_NAME={services_name[i]} docker compose -p {services_name[i]} -f {config.SERVER_DOCKER_COMPOSE_FOLDER}/docker-compose.service.yml up -d --build"
+            log(f"Deploying {services_name[i]}...", False, Color.GREEN)
+            subprocess.run(deploy_services_cmd, shell=True, env=env)
 
-        starting_other_containers = f"echo {quote(build_msg(f"Starting other containers...", False, Color.GREEN))}; \
-                                      docker compose -f {config.DOCKER_COMPOSE_FOLDER}/docker-compose.yml up -d --build {config.FRONT_END_DOCKER_SERVICE_NAME} {config.NGINX_DOCKER_SERVICE_NAME}{"" if args.prod else f" {config.PGADMIN_DOCKER_SERVICE_NAME}"};"
+        # Starting Front-end, nginx (and pgadmin) containers :
+        log(f"Starting other containers...", False, Color.GREEN)
+        starting_other_containers = f"docker compose -f {config.DOCKER_COMPOSE_FOLDER}/docker-compose.yml up -d --build {config.FRONT_END_DOCKER_SERVICE_NAME} {config.NGINX_DOCKER_SERVICE_NAME}{"" if args.prod else f" {config.PGADMIN_DOCKER_SERVICE_NAME}"};"
+        subprocess.run(starting_other_containers, shell=True, env=env)
 
-        end_cmd = f"echo {quote(build_msg(f"Deployment complete.", False, Color.GREEN))}; \
-                    echo {quote(build_msg(f"Currently running containers:", False, Color.GREEN))}; \
-                    docker ps;"
+        log(f"Deployment complete.", False, Color.GREEN)
+        log(f"Currently running containers:", False, Color.NC)
+        end_cmd = f"docker ps"
         
-        return f"{generate_docker_compose_cmd} \
-                 {starting_db_cmd} \
-                 {deploy_services_cmd} \
-                 {starting_other_containers} \
-                 {end_cmd} {f"docker logs -f {str(args.logs)};" if args.logs else ""}"
+        return f"{end_cmd}{f" && docker logs -f {str(args.logs)};" if args.logs else ""}"
 
     def __get_services(self) -> list[str]:
         services_name: list[str] = []

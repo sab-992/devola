@@ -1,6 +1,11 @@
+import os
+import subprocess
+
 from argparse import Namespace
 from abc import ABC, abstractmethod
 from . import errors
+from settings.helper.log import log, Color
+
 
 class Command(ABC):
     def __init__():
@@ -32,7 +37,21 @@ class Command(ABC):
         Explain what the command do.
         """
         pass
-    
+
+    def run(self, args: Namespace) -> None:
+        if args.manual:
+            return print(f"{self.manual()}")
+
+        log("test")
+
+        try:
+            self.validate_arguments(args)
+            command = self.command_explicit(args)
+            if command:
+                subprocess.run(command, shell=True, env=os.environ.copy())
+        except Exception as e:
+            log(f"Something went wrong while running the command \"{self.command}\": {e}", True, Color.RED)
+
     def manual(self) -> str:
         """
         Gives the detailed description on how to use the command.
