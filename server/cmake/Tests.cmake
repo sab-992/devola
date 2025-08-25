@@ -35,11 +35,6 @@ target_link_libraries(tests PRIVATE CORE gtest_main gtest)
 
 target_include_directories(tests PRIVATE ${CORE_INCLUDES})
 
-if(WIN32)
-    # Windows might need additional libraries
-    target_link_libraries(tests ws2_32)
-endif()
-
 include(GoogleTest)
 gtest_discover_tests(tests)
 add_custom_target(run_all_tests COMMAND tests --gtest_color=yes

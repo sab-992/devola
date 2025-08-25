@@ -32,12 +32,21 @@ else()
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND DEFINED SERVICE_NAME)
-    # This block will be run for each services in its own Docker container.
+    # This block will be run for each services in its own Docker container (ONLY FOR Docker with linux).
     include("${CMAKE_PATH}/Release.cmake")
     include("src/${SERVICE_NAME}/CMakeLists.txt")
-elseif(CMAKE_BUILD_TYPE STREQUAL "Tests")
-    include("${CMAKE_PATH}/Tests.cmake")
 else()
-    # This block will be run once. All services will be launched on the current device.
-    include("${CMAKE_PATH}/Debug.cmake")
+    if (WIN32)
+        set_target_properties(CORE PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR})
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR})
+    endif()
+
+    if(CMAKE_BUILD_TYPE STREQUAL "Tests")
+        include("${CMAKE_PATH}/Tests.cmake")
+    else()
+        # This block will be run once. All services will be launched on the current device.
+        include("${CMAKE_PATH}/Debug.cmake")
+    endif()
 endif()

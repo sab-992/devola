@@ -6,6 +6,7 @@ build
 
 ## Ignore environment files
 *.env
+CMakeSettings.json
 
 ## Ignore the generated docker compose file
 docker/docker-compose.yml
