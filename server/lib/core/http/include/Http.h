@@ -1,6 +1,11 @@
+#pragma once
+
 #include <iostream>
 
 #include <asio.hpp>
+#include <HttpHeader.h>
+#include <HttpMethod.h>
+#include <Time.h>
 
 
 class Http {
@@ -15,4 +20,7 @@ public:
     void Patch();
     void Post();
     void Put();
+
+private:
+    void SendRequest(HttpHeader Header, std::string Body);
 };
