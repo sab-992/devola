@@ -6,20 +6,12 @@
 #include <iostream>
 #include <string>
 
-class Time_i {
+class Time {
 public:
-    virtual ~Time_i() = default;
+    Time() = delete;
 
-    virtual std::chrono::time_point<std::chrono::system_clock> Now() = 0;
-    virtual std::string ToUTC() = 0;
-};
-
-class Time : Time_i {
-public:
-    Time();
-
-    std::chrono::time_point<std::chrono::system_clock> Now() override;
-    std::string ToUTC() override;
+    static std::chrono::time_point<std::chrono::system_clock> Now();
+    static std::string ToUTC(std::chrono::time_point<std::chrono::system_clock> Time);
 private:
     std::chrono::time_point<std::chrono::system_clock> m_CreationTimePoint;
 };
