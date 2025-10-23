@@ -12,9 +12,6 @@
 
 template<typename T, typename... Args>
 void Trace(std::function<std::unique_ptr<DisplayColor_i>()> DisplayColorFunction, T FirstArg, Args... OtherArgs) {
-    if (not FirstArg)
-        return;
-
     std::ostringstream Oss;
     Oss << FirstArg;
     std::string CurrentWord = Oss.str();
