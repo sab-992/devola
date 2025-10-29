@@ -12,16 +12,16 @@
 template<typename T>
 class Http {
 public:
-    static std::unique_ptr<HttpResponse_i<std::string>> Delete(std::string Method, std::string Path, const Http_n::Endpoint& Endpoint) {
+    static std::unique_ptr<HttpResponse_i<std::string>> Delete(std::string Path, const Http_n::Endpoint& Endpoint) {
         return HttpResponse<std::string>::Create("");
     };
 
     template <typename U = T>
-    static std::unique_ptr<HttpResponse_i<T>> Get(std::string Method, std::string Path, const Http_n::Endpoint& Endpoint) {
+    static std::unique_ptr<HttpResponse_i<T>> Get(std::string Path, const Http_n::Endpoint& Endpoint) {
         HeadersUMap_t HeadersMap = { { "Accept",  Accept(T()) },
                                      { "User-Agent", Http_n::USER_AGENT },
                                      { "Connection", Http_n::CLOSE_CONNECTION } };
-        asio::ip::tcp::socket Socket(Send(HttpRequest<T>::Create(Method, Path, Endpoint, HeadersMap)));
+        asio::ip::tcp::socket Socket(Send(HttpRequest<T>::Create("GET", Path, Endpoint, HeadersMap)));
         
         return HttpResponse<T>::Create(Receive(Socket));
     };
