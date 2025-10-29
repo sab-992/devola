@@ -16,7 +16,6 @@ public:
         return HttpResponse<std::string>::Create("");
     };
 
-    template <typename U = T>
     static std::unique_ptr<HttpResponse_i<T>> Get(std::string Path, const Http_n::Endpoint& Endpoint) {
         HeadersUMap_t HeadersMap = { { "Accept",  Accept(T()) },
                                      { "User-Agent", Http_n::USER_AGENT },
