@@ -34,7 +34,7 @@ public:
 
 private:
     HttpRequest(std::string RawRequest) {
-        std::pair<std::string, std::string> SeparatedRequest = Http_n::HttpMessageSplitter::Split(RawRequest);
+        std::pair<std::string, std::string> SeparatedRequest = HttpMessage_c<T>::Split(RawRequest);
         HttpMessage_c<T>::m_Headers = std::make_unique<HttpHeaders>(SeparatedRequest.first);
         HttpMessage_c<T>::m_Body = std::make_unique<HttpBody<T>>(SeparatedRequest.second);
     };

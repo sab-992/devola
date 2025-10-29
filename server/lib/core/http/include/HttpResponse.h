@@ -32,7 +32,7 @@ public:
 
 private:
     HttpResponse(std::string RawResponse) {
-        std::pair<std::string, std::string> SeparatedResponse = Http_n::HttpMessageSplitter::Split(RawResponse);
+        std::pair<std::string, std::string> SeparatedResponse = HttpMessage_c<T>::Split(RawResponse);
         HttpMessage_c<T>::m_Headers = std::make_unique<HttpHeaders>(SeparatedResponse.first);
         HttpMessage_c<T>::m_Body = std::make_unique<HttpBody<T>>(SeparatedResponse.second);
 

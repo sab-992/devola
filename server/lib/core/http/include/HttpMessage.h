@@ -3,8 +3,11 @@
 #include <format>
 #include <HttpCommon.h>
 #include <memory>
+#include <regex>
 #include <string>
 #include <stdexcept>
+
+const std::string HEADER_END_TOKEN = "\r\n\r\n";
 
 template<typename T>
 class HttpMessage_i {
@@ -68,4 +71,33 @@ protected:
         if (HttpMessage_c<T>::m_Body == nullptr)
             throw std::logic_error("Http message m_Body is null");
     }
+
+    std::pair<std::string, std::string> Split(std::string Message) {
+        return std::make_pair(ExtractHeaders(Message), ExtractBody(Message));
+    };
+
+private:
+    std::string ExtractBody(std::string Message) {
+        std::size_t BodyStartPosition = Message.find(HEADER_END_TOKEN);
+
+        if (BodyStartPosition == std::string::npos)
+            return "";
+
+        std::regex Pattern("\r\n\\d+\r\n");
+        std::sregex_iterator Begin(Message.begin(), Message.end(), Pattern);
+        std::sregex_iterator End;
+
+        std::size_t LastPosition = std::string::npos;
+        for (auto It = Begin; It != End; ++It)
+            LastPosition = It->position();
+
+        if (LastPosition == std::string::npos)
+            return "";
+
+        return Message.substr(BodyStartPosition, LastPosition - BodyStartPosition);
+    };
+
+    std::string ExtractHeaders(std::string Message) {
+        return Message.substr(0, Message.find(HEADER_END_TOKEN));
+    };
 };
