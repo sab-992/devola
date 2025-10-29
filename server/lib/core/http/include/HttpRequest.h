@@ -43,5 +43,7 @@ private:
     HttpRequest(std::string Method, std::string Path, const Http_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap, U&& Body = T{}) {
         HttpMessage_c<T>::m_Headers = std::make_unique<HttpHeaders>(Method, Path, Endpoint, HeadersMap);
         HttpMessage_c<T>::m_Body = std::make_unique<HttpBody<T>>(std::forward<U>(Body));
+
+        HttpMessage_c<T>::ValidateMemberVariables();
     }
 };

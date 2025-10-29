@@ -35,5 +35,7 @@ private:
         std::pair<std::string, std::string> SeparatedResponse = Http_n::HttpMessageSplitter::Split(RawResponse);
         HttpMessage_c<T>::m_Headers = std::make_unique<HttpHeaders>(SeparatedResponse.first);
         HttpMessage_c<T>::m_Body = std::make_unique<HttpBody<T>>(SeparatedResponse.second);
+
+        HttpMessage_c<T>::ValidateMemberVariables();
     };
 };
