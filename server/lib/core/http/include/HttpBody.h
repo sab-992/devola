@@ -1,9 +1,11 @@
 #pragma once
 
+#include <format>
 #include <HttpCommon.h>
 #include <nlohmann/json.hpp>
+#include <regex>
 #include <string>
-
+#include <Trim.h>
 
 const unsigned int SPACES_FOR_INDENT = 4;
 
@@ -12,28 +14,68 @@ class HttpBody {
 public:
     HttpBody(json Body) { Build(Body); };
     template<typename U = T>
-    HttpBody(U&& RawBody = T{}) { Parse(std::forward<U>(RawBody)); };
+    HttpBody(U&& RawBody = T{}, bool IsChunked = false) { Parse(std::forward<U>(RawBody), IsChunked); };
 
-    std::string AsString() { 
+    std::string AsString() {
         if constexpr (std::is_same_v<T, nlohmann::json>)
             return m_Body.dump(SPACES_FOR_INDENT);
         return m_Body;
     };
-    
+
     T Body() { return m_Body; };
     std::string Raw() { return m_RawBody; };
 private:
     T m_Body;
     std::string m_RawBody;
 
-    void Parse(std::string RawBody) {
+    void Parse(std::string RawBody, bool IsChunked) {
         m_RawBody = RawBody;
+
+        std::string Body = RawBody;
+        if (IsChunked)
+            Body = ExtractChunkedContent(Body);
+        Body = Trim(Body);
+
         if constexpr (std::is_same_v<T, nlohmann::json>)
-            m_Body = json::parse(RawBody);
-        else m_Body = RawBody;
+            m_Body = json::parse(Body);
+
+        else m_Body = Body;
     };
 
     void Build(json Body) {
         m_Body = Body;
     };
+
+    std::string ExtractChunkedContent(std::string Message) const {
+        if (Message.empty())
+            return "";
+
+        // Remove the start (Chunk-length) of the first chunk.
+        Message = LTrim(Message);
+        const std::string NextLine = "\r\n";
+        Message = Message.substr(Message.find(NextLine) + NextLine.size());
+
+        // Find and fuse all the chunks.
+        const std::string FusedChunks = FuseChunks(Message);
+
+        // Remove the "0\r\n" marking the end of the transfer.
+        return FusedChunks.substr(0, FusedChunks.find("0\r\n\r\n"));
+    };
+
+    std::string FuseChunks(std::string Message) const {
+        std::regex Pattern("^[0-9A-Fa-f]+\r\n", std::regex::multiline);
+        std::sregex_iterator Begin(Message.begin(), Message.end(), Pattern);
+        std::sregex_iterator End;
+
+        std::size_t StartOfLastChunk = 0;
+        std::string FusedChunks;
+
+        for (auto It = Begin; It != End; ++It) {
+            // Add current chunk to the result message.
+            FusedChunks.append(Message.substr(StartOfLastChunk, It->position()));
+            StartOfLastChunk = It->position() +  It->str().size();
+        }
+
+        return FusedChunks;
+    }
 };

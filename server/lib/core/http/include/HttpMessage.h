@@ -1,9 +1,7 @@
 #pragma once
 
-#include <format>
 #include <HttpCommon.h>
 #include <memory>
-#include <regex>
 #include <string>
 #include <stdexcept>
 
@@ -73,31 +71,9 @@ protected:
     }
 
     std::pair<std::string, std::string> Split(std::string Message) {
-        return std::make_pair(ExtractHeaders(Message), ExtractBody(Message));
-    };
+        const size_t EndOfHeaders = Message.find(HEADER_END_TOKEN);
 
-private:
-    std::string ExtractBody(std::string Message) {
-        std::size_t BodyStartPosition = Message.find(HEADER_END_TOKEN);
-
-        if (BodyStartPosition == std::string::npos)
-            return "";
-
-        std::regex Pattern("\r\n\\d+\r\n");
-        std::sregex_iterator Begin(Message.begin(), Message.end(), Pattern);
-        std::sregex_iterator End;
-
-        std::size_t LastPosition = std::string::npos;
-        for (auto It = Begin; It != End; ++It)
-            LastPosition = It->position();
-
-        if (LastPosition == std::string::npos)
-            return "";
-
-        return Message.substr(BodyStartPosition, LastPosition - BodyStartPosition);
-    };
-
-    std::string ExtractHeaders(std::string Message) {
-        return Message.substr(0, Message.find(HEADER_END_TOKEN));
+        // Returned pair = { Headers (string), Body (string) }.
+        return std::make_pair(Message.substr(0, EndOfHeaders), Message.substr(EndOfHeaders));
     };
 };

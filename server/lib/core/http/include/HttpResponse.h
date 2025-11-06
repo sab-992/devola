@@ -34,7 +34,9 @@ private:
     HttpResponse(std::string RawResponse) {
         std::pair<std::string, std::string> SeparatedResponse = HttpMessage_c<T>::Split(RawResponse);
         HttpMessage_c<T>::m_Headers = std::make_unique<HttpHeaders>(SeparatedResponse.first);
-        HttpMessage_c<T>::m_Body = std::make_unique<HttpBody<T>>(SeparatedResponse.second);
+
+        // TODO: Use parsed headers to determine if body is chunked.
+        HttpMessage_c<T>::m_Body = std::make_unique<HttpBody<T>>(SeparatedResponse.second, true /* IsChunked */);
 
         HttpMessage_c<T>::ValidateMemberVariables();
     };

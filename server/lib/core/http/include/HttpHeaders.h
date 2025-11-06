@@ -5,7 +5,6 @@
 #include <HttpSettings.h>
 #include <string>
 
-#include <Trace.h>
 
 class HttpHeaders {
 public:
@@ -42,5 +41,6 @@ private:
 
     void Parse(std::string RawHeaders) {
         m_RawHeaders = RawHeaders;
+        m_Headers = RawHeaders;
     };
 };

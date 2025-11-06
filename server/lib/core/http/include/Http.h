@@ -7,7 +7,6 @@
 #include <HttpSettings.h>
 #include <nlohmann/json.hpp>
 
-#include <Trace.h>
 
 template<typename T>
 class Http {
