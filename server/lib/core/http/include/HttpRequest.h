@@ -36,17 +36,15 @@ private:
     HttpRequest(std::string RawRequest) {
         std::pair<std::string, std::string> SeparatedRequest = HttpMessage_c<T>::Split(RawRequest);
         HttpMessage_c<T>::m_Headers = std::make_unique<HttpHeaders>(SeparatedRequest.first);
-        
-        // TODO: Use parsed headers to determine if body is chunked.
-        HttpMessage_c<T>::m_Body = std::make_unique<HttpBody<T>>(SeparatedRequest.second, false /* IsChunked */);
+        HttpMessage_c<T>::m_Body = std::make_unique<HttpBody<T>>(SeparatedRequest.second,
+                                                                 HttpMessage_c<T>::m_Headers->TransferEncoding() == Http_n::CHUNKED /* IsChunked */);
     };
 
     template<typename U = T>
     HttpRequest(std::string Method, std::string Path, const Http_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap, U&& Body = T{}) {
         HttpMessage_c<T>::m_Headers = std::make_unique<HttpHeaders>(Method, Path, Endpoint, HeadersMap);
-
-        // TODO: Use HeadersMap to determine if body is chunked.
-        HttpMessage_c<T>::m_Body = std::make_unique<HttpBody<T>>(std::forward<U>(Body), false /* IsChunked */);
+        HttpMessage_c<T>::m_Body = std::make_unique<HttpBody<T>>(std::forward<U>(Body),
+                                                                 HttpMessage_c<T>::m_Headers->TransferEncoding() == Http_n::CHUNKED /* IsChunked */);
 
         HttpMessage_c<T>::ValidateMemberVariables();
     }

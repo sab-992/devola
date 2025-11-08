@@ -56,7 +56,7 @@ public:
     };
 
     std::string Raw() const override {
-        return std::format("{}\r\n\r\n{}", m_Headers->Raw(), m_Body->Raw()); 
+        return std::format("{}{}", m_Headers->Raw(), m_Body->Raw()); 
     };
 protected:
     std::unique_ptr<HttpBody<T>> m_Body = nullptr;
@@ -74,6 +74,6 @@ protected:
         const size_t EndOfHeaders = Message.find(HEADER_END_TOKEN);
 
         // Returned pair = { Headers (string), Body (string) }.
-        return std::make_pair(Message.substr(0, EndOfHeaders), Message.substr(EndOfHeaders));
+        return std::make_pair(Message.substr(0, EndOfHeaders + HEADER_END_TOKEN.size()), Message.substr(EndOfHeaders  + HEADER_END_TOKEN.size()));
     };
 };
