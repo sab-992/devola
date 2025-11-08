@@ -31,11 +31,10 @@ public:
     static std::unique_ptr<HttpResponse_i<T>> Put() { return HttpResponse<T>::Create(T()); };
 
 private:
+    inline static asio::io_context m_IOCtx;
     static asio::ip::tcp::socket Send(const std::unique_ptr<HttpRequest_i<T>>& Request) {
-        asio::io_context IOCtx;
-        asio::ip::tcp::resolver Resolver(IOCtx);
-
-        asio::ip::tcp::socket Socket(IOCtx);
+        asio::ip::tcp::resolver Resolver(m_IOCtx);
+        asio::ip::tcp::socket Socket(m_IOCtx);
         asio::connect(Socket, Resolver.resolve(Request->Endpoint().Host, std::format("{}", Request->Endpoint().Port)));
 
         asio::write(Socket, asio::buffer(Request->AsString()));
