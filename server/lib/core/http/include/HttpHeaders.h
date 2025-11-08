@@ -20,7 +20,7 @@ public:
     std::string Method() { return m_Method; };
     std::string Path() { return m_Path; };
     Http_n::Status Status() { return m_Status; };
-    std::string Raw() { return m_RawHeaders; };
+    std::string Raw() { return m_Headers; };
     std::string TransferEncoding() { return m_HeadersMap.contains(Http_n::TRANSFER_ENCODING) ? m_HeadersMap[Http_n::TRANSFER_ENCODING] : ""; };
 private:
     Http_n::Endpoint m_Endpoint;
@@ -28,12 +28,15 @@ private:
     HeadersUMap_t m_HeadersMap;
     std::string m_Method;
     std::string m_Path;
-    std::string m_RawHeaders;
     Http_n::Status m_Status;
 
     void Build(std::string Method, std::string Path, const Http_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap) {
-        std::string Headers = std::format("{} {} {}\r\nHost: {}", Method, Path, Http_n::PROTOCOL, Endpoint.Host);
+        m_Endpoint = Endpoint;
+        m_HeadersMap = HeadersMap;
+        m_Method = Method;
+        m_Path = Path;
 
+        std::string Headers = std::format("{} {} {}\r\nHost: {}", Method, Path, Http_n::PROTOCOL, Endpoint.Host);
         for (auto& [NextHeader, Value] : HeadersMap)
             Headers = std::format("{}\r\n{}: {}\r\n", Headers, NextHeader, Value);
 
@@ -41,7 +44,6 @@ private:
     };
 
     void Parse(std::string RawHeaders) {
-        m_RawHeaders = RawHeaders;
         m_Headers = RawHeaders;
 
         const std::string ReturnToken = "\r\n";
