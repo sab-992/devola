@@ -3,6 +3,7 @@
 #include <format>
 #include <HttpCommon.h>
 #include <HttpSettings.h>
+#include <Split.h>
 #include <string>
 
 
@@ -43,12 +44,45 @@ private:
         m_Headers = Headers;
     };
 
+    bool ExtractRequestInfo(std::string RawRequestInfo) {
+        bool IsResponse = false;
+        std::vector<std::string> RequestInfoVector;
+        Split(RawRequestInfo, RequestInfoVector);
+
+        if (RequestInfoVector.size() != 3) // Never more than 3 on the first line
+            return false;
+
+        if (RequestInfoVector[0].find("HTTP") != std::string::npos)
+            return ExtractRequestInfoForResponse(RequestInfoVector);
+
+        return ExtractRequestInfoForRequest(RequestInfoVector);
+    }
+
+    bool ExtractRequestInfoForRequest(const std::vector<std::string>& RequestInfoVector) {
+        m_Method = RequestInfoVector[0];
+        m_Path = RequestInfoVector[1];
+        return true;
+    }
+
+    bool ExtractRequestInfoForResponse(const std::vector<std::string>& RequestInfoVector) {
+        m_Status = { std::stoi(RequestInfoVector[1]), RequestInfoVector[2] };
+        return true;
+    }
+
     void Parse(std::string RawHeaders) {
         m_Headers = RawHeaders;
+
+        if (RawHeaders.empty())
+            return;
 
         const std::string ReturnToken = "\r\n";
         std::string Headers = RawHeaders;
         size_t EndOfLine = Headers.find(ReturnToken);
+
+        ExtractRequestInfo(Headers.substr(0, EndOfLine));
+
+        Headers = LTrim(Headers).substr(EndOfLine);
+        EndOfLine = Headers.find(ReturnToken);
         while(EndOfLine != std::string::npos) {
             if (Trim(Headers).empty())
                 break;
