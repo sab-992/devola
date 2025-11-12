@@ -9,6 +9,7 @@
 
 template<typename T>
 class HttpResponse_i : public HttpMessage_i<T> {
+public:
     virtual Http_n::Status Status() const = 0;
 };
 
