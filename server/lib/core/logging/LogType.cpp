@@ -7,7 +7,7 @@ LogType::LogType(rang::fg Color) {
 }
 
 std::unique_ptr<DisplayColor_i> LogType::Debug() {
-    return std::move(std::make_unique<LogType>(rang::fg::magenta));
+    return std::move(std::make_unique<LogType>(rang::fg::black));
 }
 
 std::unique_ptr<DisplayColor_i> LogType::Error() {
@@ -16,6 +16,11 @@ std::unique_ptr<DisplayColor_i> LogType::Error() {
 
 std::unique_ptr<DisplayColor_i> LogType::Info() {
     return std::move(std::make_unique<LogType>(rang::fg::blue));
+}
+
+
+std::unique_ptr<DisplayColor_i> LogType::Special() {
+    return std::move(std::make_unique<LogType>(rang::fg::magenta));
 }
 
 std::unique_ptr<DisplayColor_i> LogType::Warning() {

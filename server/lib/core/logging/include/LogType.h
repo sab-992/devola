@@ -18,6 +18,7 @@ public:
     static std::unique_ptr<DisplayColor_i> Debug();
     static std::unique_ptr<DisplayColor_i> Error();
     static std::unique_ptr<DisplayColor_i> Info();
+    static std::unique_ptr<DisplayColor_i> Special();
     static std::unique_ptr<DisplayColor_i> Warning();
 
     rang::fg Color() override;
