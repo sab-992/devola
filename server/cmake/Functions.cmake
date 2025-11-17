@@ -1,5 +1,5 @@
-function(find_CXX_files RESULT SEARCH_PATH)
-  file(GLOB_RECURSE FILES "${SEARCH_PATH}/*.cpp")
+function(find_files RESULT SEARCH_PATH EXTENSION)
+  file(GLOB_RECURSE FILES "${SEARCH_PATH}/*.${EXTENSION}")
   set(FILTERED_FILES "")
   
   foreach(FILE ${FILES})
@@ -26,6 +26,19 @@ function(find_includes RESULT SEARCH_PATH)
   endforeach()
   list(REMOVE_DUPLICATES INCLUDES_DIR)
   set(${RESULT} ${INCLUDES_DIR} PARENT_SCOPE)
+endfunction()
+
+function(find_headers RESULT SEARCH_PATH)
+  file(GLOB_RECURSE FILES "${SEARCH_PATH}/*.h")
+  set(FILTERED_FILES "")
+  
+  foreach(FILE ${FILES})
+    get_filename_component(FILE_DIR ${FILE} DIRECTORY)
+    
+    list(APPEND HEADER_FILES ${FILE})
+  endforeach()
+  
+  set(${RESULT} ${HEADER_FILES} PARENT_SCOPE)
 endfunction()
 
 function(cmake_include_services)

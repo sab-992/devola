@@ -1,4 +1,4 @@
-find_CXX_files(CORE_SOURCES "${LIB_PATH}/core")
+find_files(CORE_SOURCES "${LIB_PATH}/core" "cpp")
 find_includes(CORE_INCLUDES "${LIB_PATH}/core")
 
 if(CORE_SOURCES)
@@ -15,14 +15,14 @@ else()
     message(WARNING "No source files found for CORE library")
 endif()
 
-find_CXX_files(DATABASE_SOURCES "${LIB_PATH}/database")
+find_files(DATABASE_SOURCES "${LIB_PATH}/database" "cpp")
 find_includes(DATABASE_INCLUDES "${LIB_PATH}/database")
 
 add_library(DATABASE SHARED ${DATABASE_SOURCES})
 target_include_directories(DATABASE PUBLIC ${DATABASE_INCLUDES})
 target_link_libraries(DATABASE PUBLIC CORE)
 
-find_CXX_files(SERVER_SOURCES "${LIB_PATH}/server")
+find_files(SERVER_SOURCES "${LIB_PATH}/server" "cpp")
 find_includes(SERVER_INCLUDES "${LIB_PATH}/server")
 
 add_library(SERVER SHARED ${SERVER_SOURCES})

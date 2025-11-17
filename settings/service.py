@@ -83,14 +83,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set({service_name.upper()}_PATH "${'{'}CMAKE_CURRENT_LIST_DIR{'}'}")
 
-add_executable ({service_name_lower} "${'{'}{service_name.upper()}_PATH{'}'}/main.cpp")
+find_files(${service_name.upper()}_SOURCES ${service_name.upper()}_PATH "cpp")
+add_executable ({service_name_lower} ${'{'}{service_name.upper()}_SOURCES{'}'})
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET {service_name_lower} PROPERTY CXX_STANDARD 20)
 endif()
 
 target_link_libraries({service_name_lower} PRIVATE CORE)
-target_include_directories({service_name_lower} PRIVATE ${'{'}CORE_INCLUDES{'}'})
+
+find_includes({service_name.upper()}_INCLUDES ${'{'}{service_name.upper()}_PATH{'}'})
+target_include_directories({service_name_lower} PRIVATE ${'{'}CORE_INCLUDES{'}'} ${'{'}{service_name.upper()}_INCLUDES{'}'})
 """
             with open(file_path, 'w') as f:
                 f.write(content)

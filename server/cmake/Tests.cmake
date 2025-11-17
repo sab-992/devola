@@ -4,7 +4,7 @@ cmake_policy(SET CMP0135 NEW)
 set(TEST_PATH "${PROJECT_SOURCE_DIR}/test")
 
 
-find_CXX_files(TEST_SOURCES "${TEST_PATH}")
+find_files(TEST_SOURCES "${TEST_PATH}" "cpp")
 message(STATUS "Found TEST_SOURCES:")
 foreach(source ${TEST_SOURCES})
     message(STATUS "  ${source}")
