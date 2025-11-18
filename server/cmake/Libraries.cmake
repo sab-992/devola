@@ -7,7 +7,8 @@ if(CORE_SOURCES)
     target_include_directories(CORE PUBLIC ${CORE_INCLUDES}
                                            ${asio_SOURCE_DIR}/asio/include)
     target_link_libraries(CORE PUBLIC libpqxx::pqxx
-                                      nlohmann_json::nlohmann_json)
+                                      nlohmann_json::nlohmann_json
+                                      ixwebsocket)
   else()
     message(WARNING "No includes files found for CORE library")
   endif()

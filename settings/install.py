@@ -24,7 +24,7 @@ class Install(Command):
                 else:
                     cmd = "choco install postgresql --yes"
             case "Linux":
-                cmd = "sudo apt update; sudo apt install libpq-dev"
+                cmd = "sudo apt update; sudo apt install libpq-dev zlib1g-dev"
             case _:
                 raise NotSupportedOperatingSystem()
         return cmd
