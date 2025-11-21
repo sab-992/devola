@@ -12,33 +12,28 @@
 
 #define CALLBACKS_PARAMS std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message
 
-class LogicServer : public WebSocketServer_c {
+class LogicServer: Server_i {
 public:
     template<typename T>
     LogicServer(T Address, int16_t Port=80) {
-        Initialize<T>(Address, Port);
+        m_WS = std::unique_ptr<WebSocketServer>(new WebSocketServer(Address, Port));
+        SetupEvents();
     };
 
     template<typename T>
     LogicServer(WS::TLSOptions TLSOptions, T Address, int16_t Port=443) {
-        m_TLSOptions = TLSOptions;
-        Initialize<T>(Address, Port);
+        m_WS = std::unique_ptr<WebSocketServer>(new WebSocketServer(TLSOptions, Address, Port));
+        
+        SetupEvents();
     };
 
-    ~LogicServer() override;
+    ~LogicServer();
+
+    void Run() override;
+    void Stop() override;
+    void ToggleTracing();
 private:
-    template<typename T>
-    void Initialize(T Address, int16_t Port) {
-        m_Address = Address;
-        m_Port = Port;
-        m_WSServer = std::unique_ptr<ix::WebSocketServer>(new ix::WebSocketServer(Port, Address));
-        m_Trace = false;
+    std::unique_ptr<WebSocketServer> m_WS;
 
-        SetMainCallback();
-    };
-
-    void OnClose(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) override;
-    void OnConnection(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) override;
-    void OnMessage(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) override;
-    void OnOpen(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) override;
+    void SetupEvents();
 };
