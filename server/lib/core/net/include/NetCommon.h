@@ -8,8 +8,12 @@
 using HeadersUMap_t = std::unordered_map<std::string, std::string>;
 using json = nlohmann::json;
 
-namespace Http_n {
-    struct Endpoint { std::string Host; int Port; };
+namespace Net_n {
+    struct Endpoint {
+        std::string Host;
+        int Port;
+        std::string ToString() { return std::format("{}:{}", Host, Port); };
+    };
 
     struct Status { 
         int Code; 

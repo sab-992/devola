@@ -1,7 +1,7 @@
 #pragma once
 
 #include <HttpBody.h>
-#include <HttpCommon.h>
+#include <NetCommon.h>
 #include <HttpHeaders.h>
 #include <HttpMessage.h>
 #include <memory>
@@ -19,12 +19,12 @@ public:
     }
 
     template<typename U = T>
-    static std::unique_ptr<HttpRequest_i<T>> Create(std::string Method, std::string Path, const Http_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap, U&& Body = T{}) {
+    static std::unique_ptr<HttpRequest_i<T>> Create(std::string Method, std::string Path, const Net_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap, U&& Body = T{}) {
         return std::move(std::unique_ptr<HttpRequest<T>>(new HttpRequest<T>(Method, Path, Endpoint, HeadersMap, Body)));
     }
 
-    std::string AsString() const override { return HttpMessage_c<T>::AsString(); };
-    Http_n::Endpoint Endpoint() const override { return HttpMessage_c<T>::Endpoint(); };
+    std::string ToString() const override { return HttpMessage_c<T>::ToString(); };
+    Net_n::Endpoint Endpoint() const override { return HttpMessage_c<T>::Endpoint(); };
     T Body() const override { return HttpMessage_c<T>::Body(); }; 
     std::string Headers() const override { return HttpMessage_c<T>::Headers(); };
     HeadersUMap_t HeadersMap() const override { return HttpMessage_c<T>::HeadersMap(); };
@@ -41,7 +41,7 @@ private:
     };
 
     template<typename U = T>
-    HttpRequest(std::string Method, std::string Path, const Http_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap, U&& Body = T{}) {
+    HttpRequest(std::string Method, std::string Path, const Net_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap, U&& Body = T{}) {
         HttpMessage_c<T>::m_Headers = std::make_unique<HttpHeaders>(Method, Path, Endpoint, HeadersMap);
         HttpMessage_c<T>::m_Body = std::make_unique<HttpBody<T>>(std::forward<U>(Body),
                                                                  HttpMessage_c<T>::m_Headers->TransferEncoding() == Http_n::CHUNKED /* IsChunked */);

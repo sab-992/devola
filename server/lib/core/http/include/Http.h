@@ -1,7 +1,7 @@
 #pragma once
 
 #include <asio.hpp>
-#include <HttpCommon.h>
+#include <NetCommon.h>
 #include <HttpRequest.h>
 #include <HttpResponse.h>
 #include <HttpSettings.h>
@@ -11,11 +11,11 @@
 template<typename T>
 class Http {
 public:
-    static std::unique_ptr<HttpResponse_i<std::string>> Delete(std::string Path, const Http_n::Endpoint& Endpoint) {
+    static std::unique_ptr<HttpResponse_i<std::string>> Delete(std::string Path, const Net_n::Endpoint& Endpoint) {
         return HttpResponse<std::string>::Create("");
     };
 
-    static std::unique_ptr<HttpResponse_i<T>> Get(std::string Path, const Http_n::Endpoint& Endpoint) {
+    static std::unique_ptr<HttpResponse_i<T>> Get(std::string Path, const Net_n::Endpoint& Endpoint) {
         HeadersUMap_t HeadersMap = { { "Accept",  Accept(T()) },
                                      { "User-Agent", Http_n::USER_AGENT },
                                      { "Connection", Http_n::CLOSE_CONNECTION } };
@@ -37,7 +37,7 @@ private:
         asio::ip::tcp::socket Socket(m_IOCtx);
         asio::connect(Socket, Resolver.resolve(Request->Endpoint().Host, std::format("{}", Request->Endpoint().Port)));
 
-        asio::write(Socket, asio::buffer(Request->AsString()));
+        asio::write(Socket, asio::buffer(Request->ToString()));
         return Socket;
     };
 

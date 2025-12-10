@@ -1,6 +1,6 @@
 #pragma once
 
-#include <HttpCommon.h>
+#include <NetCommon.h>
 #include <memory>
 #include <string>
 #include <stdexcept>
@@ -12,9 +12,9 @@ class HttpMessage_i {
 public:
     virtual ~HttpMessage_i() = default;
 
-    virtual std::string AsString() const = 0;
+    virtual std::string ToString() const = 0;
     virtual T Body() const = 0;
-    virtual Http_n::Endpoint Endpoint() const = 0;
+    virtual Net_n::Endpoint Endpoint() const = 0;
     virtual std::string Headers() const = 0;
     virtual HeadersUMap_t HeadersMap() const = 0;
     virtual std::string Method() const = 0;
@@ -27,20 +27,20 @@ class HttpMessage_c : HttpMessage_i<T> {
 public:
     virtual ~HttpMessage_c() = default;
 
-    std::string AsString() const override {
-        return std::format("{}\r\n\r\n{}", m_Headers->AsString(), m_Body->AsString());
+    std::string ToString() const override {
+        return std::format("{}\r\n\r\n{}", m_Headers->ToString(), m_Body->ToString());
     }
 
     T Body() const override { 
         return m_Body->Body(); 
     };
 
-    Http_n::Endpoint Endpoint() const override { 
+    Net_n::Endpoint Endpoint() const override { 
         return m_Headers->Endpoint();
     };
 
     std::string Headers() const override { 
-        return m_Headers->AsString(); 
+        return m_Headers->ToString(); 
     };
 
     HeadersUMap_t HeadersMap() const override {

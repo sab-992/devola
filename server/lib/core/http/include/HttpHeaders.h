@@ -1,37 +1,38 @@
 #pragma once
 
 #include <format>
-#include <HttpCommon.h>
+#include <NetCommon.h>
 #include <HttpSettings.h>
 #include <Split.h>
 #include <string>
 
+// TODO: Move function implementation to .cpp file
 
 class HttpHeaders {
 public:
     HttpHeaders(std::string RawHeaders) { Parse(RawHeaders); };
-    HttpHeaders(std::string Method, std::string Path, const Http_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap) 
+    HttpHeaders(std::string Method, std::string Path, const Net_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap) 
         : m_Endpoint(Endpoint), m_Method(Method), m_Path(Path), m_HeadersMap(HeadersMap) {
         Build(Method, Path, Endpoint, HeadersMap);
     };
     
-    std::string AsString() { return m_Headers; };
-    Http_n::Endpoint Endpoint() { return m_Endpoint; };
+    std::string ToString() { return m_Headers; };
+    Net_n::Endpoint Endpoint() { return m_Endpoint; };
     HeadersUMap_t Map() { return m_HeadersMap; };
     std::string Method() { return m_Method; };
     std::string Path() { return m_Path; };
-    Http_n::Status Status() { return m_Status; };
+    Net_n::Status Status() { return m_Status; };
     std::string Raw() { return m_Headers; };
     std::string TransferEncoding() { return m_HeadersMap.contains(Http_n::TRANSFER_ENCODING) ? m_HeadersMap[Http_n::TRANSFER_ENCODING] : ""; };
 private:
-    Http_n::Endpoint m_Endpoint;
+    Net_n::Endpoint m_Endpoint;
     std::string m_Headers;
     HeadersUMap_t m_HeadersMap;
     std::string m_Method;
     std::string m_Path;
-    Http_n::Status m_Status;
+    Net_n::Status m_Status;
 
-    void Build(std::string Method, std::string Path, const Http_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap) {
+    void Build(std::string Method, std::string Path, const Net_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap) {
         m_Endpoint = Endpoint;
         m_HeadersMap = HeadersMap;
         m_Method = Method;
@@ -53,18 +54,18 @@ private:
             return false;
 
         if (RequestInfoVector[0].find("HTTP") != std::string::npos)
-            return ExtractRequestInfoForResponse(RequestInfoVector);
+            return ExtractInfoForResponse(RequestInfoVector);
 
-        return ExtractRequestInfoForRequest(RequestInfoVector);
+        return ExtractInfoForRequest(RequestInfoVector);
     }
 
-    bool ExtractRequestInfoForRequest(const std::vector<std::string>& RequestInfoVector) {
+    bool ExtractInfoForRequest(const std::vector<std::string>& RequestInfoVector) {
         m_Method = RequestInfoVector[0];
         m_Path = RequestInfoVector[1];
         return true;
     }
 
-    bool ExtractRequestInfoForResponse(const std::vector<std::string>& RequestInfoVector) {
+    bool ExtractInfoForResponse(const std::vector<std::string>& RequestInfoVector) {
         m_Status = { std::stoi(RequestInfoVector[1]), RequestInfoVector[2] };
         return true;
     }

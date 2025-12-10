@@ -1,7 +1,7 @@
 #pragma once
 
 #include <format>
-#include <HttpCommon.h>
+#include <NetCommon.h>
 #include <nlohmann/json.hpp>
 #include <regex>
 #include <string>
@@ -16,7 +16,7 @@ public:
     template<typename U = T>
     HttpBody(U&& RawBody = T{}, bool IsChunked = false) { Parse(std::forward<U>(RawBody), IsChunked); };
 
-    std::string AsString() {
+    std::string ToString() {
         if constexpr (std::is_same_v<T, nlohmann::json>)
             return m_Body.dump(SPACES_FOR_INDENT);
         return m_Body;

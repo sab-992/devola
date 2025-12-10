@@ -1,7 +1,7 @@
 #pragma once
 
 #include <HttpBody.h>
-#include <HttpCommon.h>
+#include <NetCommon.h>
 #include <HttpHeaders.h>
 #include <HttpMessage.h>
 #include <memory>
@@ -10,7 +10,7 @@
 template<typename T>
 class HttpResponse_i : public HttpMessage_i<T> {
 public:
-    virtual Http_n::Status Status() const = 0;
+    virtual Net_n::Status Status() const = 0;
 };
 
 template<typename T>
@@ -20,16 +20,16 @@ public:
         return std::unique_ptr<HttpResponse<T>>(new HttpResponse<T>(RawResponse));
     }
 
-    std::string AsString() const override { return HttpMessage_c<T>::AsString(); };
+    std::string ToString() const override { return HttpMessage_c<T>::ToString(); };
     T Body() const override { return HttpMessage_c<T>::Body(); };
-    Http_n::Endpoint Endpoint() const override { return HttpMessage_c<T>::Endpoint(); };
+    Net_n::Endpoint Endpoint() const override { return HttpMessage_c<T>::Endpoint(); };
     std::string Headers() const override { return HttpMessage_c<T>::Headers(); };
     HeadersUMap_t HeadersMap() const override { return HttpMessage_c<T>::HeadersMap(); };
     std::string Method() const override { return HttpMessage_c<T>::Method(); };
     std::string Path() const override { return HttpMessage_c<T>::Path(); };
     std::string Raw() const override { return HttpMessage_c<T>::Raw(); };
 
-    Http_n::Status Status() const override { return HttpMessage_c<T>::m_Headers->Status(); };
+    Net_n::Status Status() const override { return HttpMessage_c<T>::m_Headers->Status(); };
 
 private:
     HttpResponse(std::string RawResponse) {
