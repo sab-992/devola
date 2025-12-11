@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 
+
 template<typename T>
 class HttpResponse_i : public HttpMessage_i<T> {
 public:

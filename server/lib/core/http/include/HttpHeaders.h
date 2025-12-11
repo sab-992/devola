@@ -1,40 +1,35 @@
 #pragma once
 
 #include <format>
+#include <Headers.h>
 #include <NetCommon.h>
 #include <HttpSettings.h>
 #include <Split.h>
 #include <string>
 
-// TODO: Move function implementation to .cpp file
 
-class HttpHeaders {
+// TODO: Move function implementation to .cpp file
+class HttpHeaders: public Headers_c {
 public:
     HttpHeaders(std::string RawHeaders) { Parse(RawHeaders); };
     HttpHeaders(std::string Method, std::string Path, const Net_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap) 
-        : m_Endpoint(Endpoint), m_Method(Method), m_Path(Path), m_HeadersMap(HeadersMap) {
+        : m_Method(Method), m_Path(Path) {
+        Headers_c::m_Endpoint = Endpoint;
+        Headers_c::m_HeadersMap = HeadersMap;
         Build(Method, Path, Endpoint, HeadersMap);
     };
     
-    std::string ToString() { return m_Headers; };
-    Net_n::Endpoint Endpoint() { return m_Endpoint; };
-    HeadersUMap_t Map() { return m_HeadersMap; };
     std::string Method() { return m_Method; };
     std::string Path() { return m_Path; };
-    Net_n::Status Status() { return m_Status; };
-    std::string Raw() { return m_Headers; };
-    std::string TransferEncoding() { return m_HeadersMap.contains(Http_n::TRANSFER_ENCODING) ? m_HeadersMap[Http_n::TRANSFER_ENCODING] : ""; };
+    // TODO change to GetHeader;
+    std::string TransferEncoding() { return Headers_c::Headers_c::m_HeadersMap.contains(Http_n::TRANSFER_ENCODING) ? Headers_c::Headers_c::m_HeadersMap[Http_n::TRANSFER_ENCODING] : ""; };
 private:
-    Net_n::Endpoint m_Endpoint;
-    std::string m_Headers;
-    HeadersUMap_t m_HeadersMap;
     std::string m_Method;
     std::string m_Path;
-    Net_n::Status m_Status;
 
     void Build(std::string Method, std::string Path, const Net_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap) {
-        m_Endpoint = Endpoint;
-        m_HeadersMap = HeadersMap;
+        Headers_c::m_Endpoint = Endpoint;
+        Headers_c::Headers_c::m_HeadersMap = HeadersMap;
         m_Method = Method;
         m_Path = Path;
 
@@ -42,7 +37,7 @@ private:
         for (auto& [NextHeader, Value] : HeadersMap)
             Headers = std::format("{}\r\n{}: {}\r\n", Headers, NextHeader, Value);
 
-        m_Headers = Headers;
+        Headers_c::m_Headers = Headers;
     };
 
     bool ExtractRequestInfo(std::string RawRequestInfo) {
@@ -50,7 +45,7 @@ private:
         std::vector<std::string> RequestInfoVector;
         Split(RawRequestInfo, RequestInfoVector);
 
-        if (RequestInfoVector.size() != 3) // Never more than 3 on the first line
+        if (RequestInfoVector.size() != 3) // Never more/less than 3 words on the first line
             return false;
 
         if (RequestInfoVector[0].find("HTTP") != std::string::npos)
@@ -66,12 +61,12 @@ private:
     }
 
     bool ExtractInfoForResponse(const std::vector<std::string>& RequestInfoVector) {
-        m_Status = { std::stoi(RequestInfoVector[1]), RequestInfoVector[2] };
+        Headers_c::m_Status = { std::stoi(RequestInfoVector[1]), RequestInfoVector[2] };
         return true;
     }
 
     void Parse(std::string RawHeaders) {
-        m_Headers = RawHeaders;
+        Headers_c::m_Headers = RawHeaders;
 
         if (RawHeaders.empty())
             return;
@@ -103,7 +98,7 @@ private:
             const std::string Header = Line.substr(0, ValueStartPosition);
             const std::string Value = Line.substr(ValueStartPosition + 1);
 
-            m_HeadersMap[Trim(Header)] = Trim(Value);
+            Headers_c::Headers_c::m_HeadersMap[Trim(Header)] = Trim(Value);
         }
     };
 };

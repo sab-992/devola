@@ -16,6 +16,7 @@ public:
     };
 
     static std::unique_ptr<HttpResponse_i<T>> Get(std::string Path, const Net_n::Endpoint& Endpoint) {
+        // TODO change Accept(T()) to somehting else so no need to create T().
         HeadersUMap_t HeadersMap = { { "Accept",  Accept(T()) },
                                      { "User-Agent", Http_n::USER_AGENT },
                                      { "Connection", Http_n::CLOSE_CONNECTION } };

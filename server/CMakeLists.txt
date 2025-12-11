@@ -1,3 +1,5 @@
+# TODO: Change how the includes work, in order to have range for each .h
+
 cmake_minimum_required(VERSION 3.16)
 project(devola VERSION 1.0)
 

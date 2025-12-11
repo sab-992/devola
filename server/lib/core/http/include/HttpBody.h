@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Body.h>
 #include <format>
 #include <NetCommon.h>
 #include <nlohmann/json.hpp>
@@ -7,29 +8,18 @@
 #include <string>
 #include <Trim.h>
 
-const unsigned int SPACES_FOR_INDENT = 4;
 
 template<typename T>
-class HttpBody {
+class HttpBody : public Body_c<T> {
 public:
     HttpBody(json Body) { Build(Body); };
+
     template<typename U = T>
     HttpBody(U&& RawBody = T{}, bool IsChunked = false) { Parse(std::forward<U>(RawBody), IsChunked); };
 
-    std::string ToString() {
-        if constexpr (std::is_same_v<T, nlohmann::json>)
-            return m_Body.dump(SPACES_FOR_INDENT);
-        return m_Body;
-    };
-
-    T Body() { return m_Body; };
-    std::string Raw() { return m_RawBody; };
 private:
-    T m_Body;
-    std::string m_RawBody;
-
     void Parse(std::string RawBody, bool IsChunked) {
-        m_RawBody = RawBody;
+        Body_c<T>::m_RawBody = RawBody;
 
         std::string Body = RawBody;
         if (IsChunked)
@@ -37,13 +27,13 @@ private:
         Body = Trim(Body);
 
         if constexpr (std::is_same_v<T, nlohmann::json>)
-            m_Body = json::parse(Body);
+            Body_c<T>::m_Body = json::parse(Body);
 
-        else m_Body = Body;
+        else Body_c<T>::m_Body = Body;
     };
 
     void Build(json Body) {
-        m_Body = Body;
+        Body_c<T>::m_Body = Body;
     };
 
     std::string ExtractChunkedContent(std::string Message) const {
