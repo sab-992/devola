@@ -12,6 +12,8 @@
 
 #define CALLBACKS_PARAMS std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message
 
+// TODO: Change WebSocketServer to interface WebSocketServer_i
+
 class LogicServer: Server_i {
 public:
     template<typename T>

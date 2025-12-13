@@ -38,6 +38,8 @@ protected:
     virtual void SetMainCallback() = 0;
 };
 
+// TODO: Find better ways to override Callbacks.
+
 class WebSocketServer : public WebSocketServer_i {
 public:
     template<typename T>
