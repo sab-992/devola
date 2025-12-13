@@ -1,6 +1,7 @@
 /* 
 ------------------------------------------------------------------------------------------------------------------------------------------
 -                                                                                                                                        -
+- The code contained in this file is not my intellectual property.                                                                       -
 - This code is part of the rang library available at: https://github.com/agauniyal/rang/blob/master/include/rang.hpp                     -
 -                                                                                                                                        -
 ------------------------------------------------------------------------------------------------------------------------------------------
