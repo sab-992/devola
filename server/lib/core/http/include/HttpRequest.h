@@ -1,51 +1,52 @@
 #pragma once
 
 #include <HttpBody.h>
-#include <NetCommon.h>
 #include <HttpHeaders.h>
 #include <HttpMessage.h>
 #include <memory>
+#include <Net.h>
 #include <string>
 
+namespace Http_n
+{
+    template<typename T>
+    class Request_i : public Net_n::Message_i<T> {}; 
 
-template<typename T>
-class HttpRequest_i : public HttpMessage_i<T> {};
+    template<typename T>
+    class Request : public Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>, public Http_n::Request_i<T> {
+    public:
+        static std::unique_ptr<Http_n::Request_i<T>> Create(std::string RawRequest) {
+            return std::unique_ptr<Http_n::Request<T>>(new Http_n::Request<T>(RawRequest));
+        }
 
-template<typename T>
-class HttpRequest : public HttpRequest_i<T>, public HttpMessage_c<T> {
-public:
-    static std::unique_ptr<HttpRequest_i<T>> Create(std::string RawRequest) {
-        return std::move(std::unique_ptr<HttpRequest<T>>(new HttpRequest<T>(RawRequest)));
-    }
+        template<typename U = T>
+        static std::unique_ptr<Http_n::Request_i<T>> Create(std::string Method, std::string APIEndpoint, const Net_n::NetworkEndpoint& NetworkEndpoint, HeadersUMap_t HeadersMap, U&& Body = T{}) {
+            return std::unique_ptr<Http_n::Request<T>>(new Http_n::Request<T>(Method, APIEndpoint, NetworkEndpoint, HeadersMap, std::forward<U>(Body)));
+        }
 
-    template<typename U = T>
-    static std::unique_ptr<HttpRequest_i<T>> Create(std::string Method, std::string Path, const Net_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap, U&& Body = T{}) {
-        return std::move(std::unique_ptr<HttpRequest<T>>(new HttpRequest<T>(Method, Path, Endpoint, HeadersMap, Body)));
-    }
+        std::string APIEndpoint() const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::APIEndpoint(); }
 
-    std::string ToString() const override { return HttpMessage_c<T>::ToString(); };
-    Net_n::Endpoint Endpoint() const override { return HttpMessage_c<T>::Endpoint(); };
-    T Body() const override { return HttpMessage_c<T>::Body(); }; 
-    std::string Headers() const override { return HttpMessage_c<T>::Headers(); };
-    HeadersUMap_t HeadersMap() const override { return HttpMessage_c<T>::HeadersMap(); };
-    std::string Method() const override { return HttpMessage_c<T>::Method(); };
-    std::string Path() const override { return HttpMessage_c<T>::Path(); };
-    std::string Raw() const override { return HttpMessage_c<T>::Raw(); };
+        T Body() const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::Body(); }
 
-private:
-    HttpRequest(std::string RawRequest) {
-        std::pair<std::string, std::string> SeparatedRequest = HttpMessage_c<T>::Split(RawRequest);
-        HttpMessage_c<T>::m_Headers = std::make_unique<HttpHeaders>(SeparatedRequest.first);
-        HttpMessage_c<T>::m_Body = std::make_unique<HttpBody<T>>(SeparatedRequest.second,
-                                                                 HttpMessage_c<T>::m_Headers->TransferEncoding() == Http_n::CHUNKED /* IsChunked */);
+        std::string GetHeader(std::string Header) const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::GetHeader(Header); }
+
+        std::string Headers() const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::Headers(); }
+
+        HeadersUMap_t HeadersMap() const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::HeadersMap(); }
+
+        std::string Method() const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::Method(); }
+
+        Net_n::NetworkEndpoint NetworkEndpoint() const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::NetworkEndpoint(); }
+
+        std::string ToString() const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::ToString(); }
+
+        Net_n::Status Status() const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::Status(); }
+
+    private:
+        Request(std::string Request)
+        : Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>(Request) {}
+
+        Request(std::string Method, std::string APIEndpoint, const Net_n::NetworkEndpoint& NetworkEndpoint, HeadersUMap_t HeadersMap, T Body)
+        : Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>(Method, APIEndpoint, NetworkEndpoint, HeadersMap, Body) {}
     };
-
-    template<typename U = T>
-    HttpRequest(std::string Method, std::string Path, const Net_n::Endpoint& Endpoint, HeadersUMap_t HeadersMap, U&& Body = T{}) {
-        HttpMessage_c<T>::m_Headers = std::make_unique<HttpHeaders>(Method, Path, Endpoint, HeadersMap);
-        HttpMessage_c<T>::m_Body = std::make_unique<HttpBody<T>>(std::forward<U>(Body),
-                                                                 HttpMessage_c<T>::m_Headers->TransferEncoding() == Http_n::CHUNKED /* IsChunked */);
-
-        HttpMessage_c<T>::ValidateMemberVariables();
-    }
-};
+}
