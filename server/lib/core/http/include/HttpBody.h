@@ -12,16 +12,18 @@
 namespace Http_n 
 {
     template<typename T>
-    class Body : public Body_c<T> {
+    class Body : public Net_n::Body_c<T> {
     public:
-        Body(T Body) { Build(Body); }
+        Body() {}
 
-        template<typename U = T>
-        Body(U&& RawBody = T{}, std::string TransferEncoding = "") { Parse(std::forward<U>(RawBody), TransferEncoding); }
+        Body(T Body, bool ChunkMessage) { Build(Body); }
+
+        template <typename U>
+        Body(U RawBody, std::string TransferEncoding = "") { Parse(std::string(RawBody), TransferEncoding); }
 
     private:
         void Parse(std::string RawBody, std::string TransferEncoding) {
-            Body_c<T>::m_RawBody = RawBody;
+            Net_n::Body_c<T>::m_RawBody = RawBody;
 
             if (RawBody.empty())
                 return;
@@ -32,12 +34,12 @@ namespace Http_n
             Body = Trim(Body);
 
             if constexpr (std::is_same_v<T, nlohmann::json>)
-                Body_c<T>::m_Body = json::parse(Body);
-            else Body_c<T>::m_Body = Body;
+                Net_n::Body_c<T>::m_Body = json::parse(Body);
+            else Net_n::Body_c<T>::m_Body = Body;
         }
 
         void Build(json Body) {
-            Body_c<T>::m_Body = Body;
+            Net_n::Body_c<T>::m_Body = Body;
         }
 
         std::string ExtractChunkedContent(std::string Message) const {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <memory>
+#include <concepts>
 #include <Net.h>
 #include <string>
 
@@ -12,7 +12,7 @@ namespace Net_n
     public:
         ~Message_c() override {}
 
-        std::string APIEndpoint() const override { return Net_n::Message_c<T, U, V>::m_Headers.APIEndpoint(); }
+        std::string APIEndpoint() const override { return m_Headers.APIEndpoint(); }
 
         T Body() const override { return m_Body.Get(); }
 
@@ -22,7 +22,7 @@ namespace Net_n
 
         HeadersUMap_t HeadersMap() const override { return m_Headers.Map(); }
 
-        std::string Method() const override {  return Net_n::Message_c<T, U, V>::m_Headers.Method(); }
+        std::string Method() const override {  return m_Headers.Method(); }
 
         Net_n::NetworkEndpoint NetworkEndpoint() const override { return m_Headers.NetworkEndpoint(); }
         
@@ -34,20 +34,9 @@ namespace Net_n
         V m_Body;
         U m_Headers;
 
-        Message_c(std::string Message) requires (Net_n::IsHeader_cpt<U> && Net_n::IsBody_cpt<V, T>) {
-            std::pair<std::string, std::string> SplitMessage = Net_n::Message_c<T, U, V>::Split(Message);
-            m_Headers = U(SplitMessage.first);
-            m_Body = V(SplitMessage.second, m_Headers.GetHeader(Http_n::TRANSFER_ENCODING));
-        }
-
-        Message_c(std::string Method, std::string APIEndpoint, const Net_n::NetworkEndpoint& NetworkEndpoint, HeadersUMap_t HeadersMap, T Body) requires (Net_n::IsHeader_cpt<U> && Net_n::IsBody_cpt<V, T>) {
-            m_Headers = U(Method, APIEndpoint, NetworkEndpoint, HeadersMap);
-            m_Body = V(Body, m_Headers.GetHeader(Http_n::TRANSFER_ENCODING));
-        }
-    
-        Message_c(Net_n::Code StatusCode, HeadersUMap_t HeadersMap, T Body) requires (Net_n::IsHeader_cpt<U> && Net_n::IsBody_cpt<V, T>) {
-            m_Headers = U(StatusCode, HeadersMap);
-            m_Body = V(Body, m_Headers.GetHeader(Http_n::TRANSFER_ENCODING));
+        void Initialize(U Headers, V Body) requires (Net_n::IsHeader_cpt<U> && Net_n::IsBody_cpt<V, T>) {
+            m_Headers = Headers;
+            m_Body = Body;
         }
 
         std::pair<std::string, std::string> Split(std::string Message) {
