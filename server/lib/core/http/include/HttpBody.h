@@ -58,21 +58,27 @@ namespace Http_n
             return FusedChunks.substr(0, FusedChunks.find("0\r\n\r\n"));
         }
 
-        std::string FuseChunks(std::string Message) const {
-            std::regex Pattern("^[0-9A-Fa-f]+\r\n", std::regex::multiline);
+        std::string FuseChunks(const std::string& Message) const {
+            std::regex Pattern("(?:^|\r\n)([0-9A-Fa-f]{1,8})\r\n", std::regex::multiline);
+            
+            std::string Result;
             std::sregex_iterator Begin(Message.begin(), Message.end(), Pattern);
             std::sregex_iterator End;
-
-            std::size_t StartOfLastChunk = 0;
-            std::string FusedChunks;
-
+            
+            std::size_t LastEnd = 0;
+            
             for (auto It = Begin; It != End; ++It) {
-                // Add current chunk to the result message.
-                FusedChunks.append(Message.substr(StartOfLastChunk, It->position()));
-                StartOfLastChunk = It->position() +  It->str().size();
+                const auto& Match = *It;
+                std::string HexPart = Match[1].str();
+                
+                Result.append(Message.substr(LastEnd, Match.position() - LastEnd));
+                
+                LastEnd = Match.position() + Match.length();
             }
-
-            return FusedChunks;
+            
+            Result.append(Message.substr(LastEnd));
+            
+            return Result;
         }
     };
 }
