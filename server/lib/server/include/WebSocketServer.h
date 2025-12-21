@@ -38,6 +38,7 @@ protected:
     virtual void AddEvent(std::string EventName, WS::CallbackFunction_t Callback) = 0;
 };
 
+// TODO: Move Websockets into namespace and rename classes.
 // TODO: Find better ways to override Callbacks.
 // TODO: make the server parallelized using thread pool.
 
