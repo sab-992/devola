@@ -62,7 +62,7 @@ namespace Net_n
         { Net_n::Code::GATEWAY_TIMEOUT,         "Gateway Timeout"}
     };
 
-    struct NetworkEndpoint : public StringConvertible_i {
+    struct NetworkEndpoint : public StringFormattable_i {
     public:
         NetworkEndpoint() {}
         NetworkEndpoint(std::string Host, uint16_t Port)
@@ -80,7 +80,7 @@ namespace Net_n
         uint16_t m_Port;
     };
 
-    class Status : public StringConvertible_i {
+    class Status : public StringFormattable_i {
     public:
         Status() {}
 
@@ -101,14 +101,14 @@ namespace Net_n
     };
 
     template<typename T>
-    class Body_i : public StringConvertible_i {
+    class Body_i : public StringFormattable_i {
     public:
         virtual ~Body_i() = default;
 
         virtual T Get() const = 0;
     };
 
-    class Headers_i : public StringConvertible_i {
+    class Headers_i : public StringFormattable_i {
     public:
         virtual ~Headers_i() = default;
 
@@ -122,7 +122,7 @@ namespace Net_n
     };
 
     template <typename T>
-    class Message_i : public StringConvertible_i {
+    class Message_i : public StringFormattable_i {
     public:
         virtual ~Message_i() = default;
 

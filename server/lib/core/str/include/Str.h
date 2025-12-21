@@ -2,9 +2,9 @@
 
 #include <string>
     
-class StringConvertible_i {
+class StringFormattable_i {
 public:
-    virtual ~StringConvertible_i() = default;
+    virtual ~StringFormattable_i() = default;
 
     virtual std::string ToString() const = 0;
 };
