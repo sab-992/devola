@@ -1,9 +1,9 @@
 #pragma once
 
-#include <iostream>
+#include <converter.h>
 #include <functional>
+#include <iostream>
 #include <memory>
-#include <sstream>
 #include <string>
 
 #include <LogType.h>
@@ -12,9 +12,7 @@
 
 template<typename T, typename... Args>
 void Trace(std::function<std::unique_ptr<DisplayColor_i>()> DisplayColorFunction, T FirstArg, Args... OtherArgs) {
-    std::ostringstream Oss;
-    Oss << FirstArg;
-    std::string CurrentWord = Oss.str();
+    std::string CurrentWord = Converter<T>::ToString(FirstArg);
     if (Trim(CurrentWord).empty()) {
         std::cout << rang::style::reset << std::endl;
         return ;
