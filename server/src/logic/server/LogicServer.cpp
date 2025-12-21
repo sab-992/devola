@@ -8,7 +8,7 @@ void LogicServer::Run() {
 
 void LogicServer::SetupEvents() {
     // TODO: Add Events
-    m_WS->AddEvent("Test", [](CALLBACKS_PARAMS) {
+    m_WS->AddEvent("Test", [](WS_CALLBACKS_PARAMS) {
         Trace(LogType::Special, "Received:", Message->str);
         WebSocket.send(Message->str, Message->binary);
     });

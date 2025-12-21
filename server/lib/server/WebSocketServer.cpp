@@ -1,39 +1,63 @@
 #include <WebSocketServer.h>
 
+
 WebSocketServer::~WebSocketServer() {}
 
-void WebSocketServer::AddEvent(std::string EventName, WS::CallbackFunction_t Callback) {
-    if (m_OnMessageCallbacks.contains(EventName))
-        throw std::logic_error(std::format("Event: {} already exists !", EventName));
+void WebSocketServer::AddEvent(std::string Event, WS::CallbackFunction_t Callback) {
+    if (m_EventCallbacks.contains(Event))
+        throw std::logic_error(std::format("Event: {} already exists !", Event));
 
-    m_OnMessageCallbacks[EventName] = Callback;
+    m_EventCallbacks[Event] = Callback;
 }
 
-void WebSocketServer::OnClose(CALLBACKS_PARAMS) {
-    m_OnCloseCallback(ConnectionState, WebSocket, Message);
-}
+void WebSocketServer::ExecuteEvent(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) {
+    // TODO: Parse WS Message.
+    // TODO: Verify Event exists and has callback.
+    // TODO: Verify other elements (authorization maybe ?)
 
-void WebSocketServer::OnConnection(CALLBACKS_PARAMS) {
-    m_OnConnectionCallback(ConnectionState, WebSocket, Message);
-}
-
-void WebSocketServer::OnMessage(CALLBACKS_PARAMS) {
-    // TODO: Find a way to send an EventName with the message (maybe manipulate the headers ?).
-    std::string EventName = "Test"; 
-
-    if (not m_OnMessageCallbacks.contains(EventName))
-        // TODO: Change this for error handling. Maybe add WebSocket to custom error to be able to send response to it later in the catch block. 
-        return; 
+    // TODO: Change placeholder event.
+    std::string Event = "Test";
     
-    m_OnMessageCallbacks[EventName](ConnectionState, WebSocket, Message);
+    if (not m_EventCallbacks.contains(Event))
+        // TODO: Change this for error handling. Maybe add WebSocket to custom error to be able to send response to it later in the catch block.
+        return;
+
+    m_EventCallbacks[Event](ConnectionState, WebSocket, Message);
 }
 
-void WebSocketServer::OnOpen(CALLBACKS_PARAMS) {
-    m_OnOpenCallback(ConnectionState, WebSocket, Message);
+void WebSocketServer::GetLifeCycleCallback(WS::LifeCycleMsg_en Index, std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) {
+    m_LifeCycleCallbacks[static_cast<size_t>(Index)](ConnectionState, WebSocket, Message);
+}
+
+void WebSocketServer::HandleMessage(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) {
+    if (m_Trace) Trace(LogType::Info, "Remote IP:", ConnectionState->getRemoteIp());
+    
+    GetLifeCycleCallback(WS::LifeCycleMsg_en::ON_COMMUNICATION, ConnectionState, WebSocket, Message);
+    switch (Message->type) {
+        case ix::WebSocketMessageType::Message:
+            ExecuteEvent(ConnectionState, WebSocket, Message);
+            break;
+        case ix::WebSocketMessageType::Open:
+            GetLifeCycleCallback(WS::LifeCycleMsg_en::ON_OPENED, ConnectionState, WebSocket, Message);
+            break;
+        case ix::WebSocketMessageType::Close:
+            GetLifeCycleCallback(WS::LifeCycleMsg_en::ON_CLOSED, ConnectionState, WebSocket, Message);
+            break;
+        default:
+            throw std::invalid_argument("WS: Message type not supported.");
+            break;
+    };
 }
 
 void WebSocketServer::Run() {
     try {
+        if (m_WSServer == nullptr)
+            throw std::logic_error("WS: Server pointer is nullptr.");
+
+        m_WSServer->setOnClientMessageCallback(std::bind(&WebSocketServer::HandleMessage, this, std::placeholders::_1,
+                                                                                                std::placeholders::_2,
+                                                                                                std::placeholders::_3));
+
         m_WSServer->listen();
 
         m_WSServer->disablePerMessageDeflate();
@@ -45,44 +69,15 @@ void WebSocketServer::Run() {
     } catch(...) { /* TODO: Add Custom error class (Code + message) and Error handling */ }
 }
 
-void WebSocketServer::SetMainCallback() {
-    if (m_WSServer == nullptr)
-        throw std::logic_error("WS: Server pointer is nullptr.");
+void WebSocketServer::SetLifeCycleCallback(WS::LifeCycleMsg_en Type, WS::CallbackFunction_t Callback) {
+    m_LifeCycleCallbacks[static_cast<size_t>(Type)] = Callback;
+};
 
-    m_WSServer->setOnClientMessageCallback([this](std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) {
-        if (m_Trace) Trace(LogType::Info, "Remote IP:", ConnectionState->getRemoteIp());
-        
-        OnConnection(ConnectionState, WebSocket, Message);
-        switch (Message->type) {
-            case ix::WebSocketMessageType::Close:
-                OnClose(ConnectionState, WebSocket, Message);
-                break;
-            case ix::WebSocketMessageType::Message:
-                OnMessage(ConnectionState, WebSocket, Message);
-                break;
-            case ix::WebSocketMessageType::Open:
-                OnOpen(ConnectionState, WebSocket, Message);
-                break;
-            default:
-                throw std::invalid_argument("WS: Message type not supported.");
-                break;
-        };
-    });
+
+void WebSocketServer::Stop() {
+    // TODO: Find a way to stop server.
+    m_EventCallbacks.clear();
 }
-
-void WebSocketServer::SetOnCloseCallback(WS::CallbackFunction_t Callback) {
-    m_OnCloseCallback = Callback;
-}
-
-void WebSocketServer::SetOnConnectionCallback(WS::CallbackFunction_t Callback) {
-    m_OnConnectionCallback = Callback;
-}
-
-void WebSocketServer::SetOnOpenCallback(WS::CallbackFunction_t Callback) {
-    m_OnOpenCallback = Callback;
-}
-
-void WebSocketServer::Stop() {}
 
 void WebSocketServer::ToggleTracing() {
     m_Trace = !m_Trace;

@@ -3,14 +3,12 @@
 #include <format>
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <Server.h>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <Trace.h>
 #include <WebSocketServer.h>
 
 
-#define CALLBACKS_PARAMS std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message
 
 // TODO: Change WebSocketServer to interface WebSocketServer_i
 
@@ -33,7 +31,7 @@ public:
 
     void Run() override;
     void Stop() override;
-    void ToggleTracing();
+    void ToggleTracing() override;
 private:
     std::unique_ptr<WebSocketServer> m_WS;
 

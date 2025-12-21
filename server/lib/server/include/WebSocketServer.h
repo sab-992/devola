@@ -1,5 +1,6 @@
 #pragma once
 
+#include <converter.h>
 #include <format>
 #include <functional>
 #include <ixwebsocket/IXWebSocketServer.h>
@@ -7,38 +8,38 @@
 #include <Server.h>
 #include <stdexcept>
 #include <string>
-#include <sstream>
 #include <Trace.h>
 #include <unordered_map>
 
-#define CALLBACKS_PARAMS std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message
+#define WS_CALLBACKS_PARAMS std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message
 
 
-namespace WS {
+namespace WS
+{
     using CallbackFunction_t = std::function<void(std::shared_ptr<ix::ConnectionState>, ix::WebSocket&, const ix::WebSocketMessagePtr&)>;
     using CallbackMap_t = std::unordered_map<std::string, CallbackFunction_t>;
 
     struct TLSOptions {};
+
+    enum class LifeCycleMsg_en : size_t {
+        ON_OPENED,
+        ON_COMMUNICATION,
+        ON_CLOSED,
+        SIZE // NEEDS TO BE LAST.
+    };
 }
 
 class WebSocketServer_i : public Server_i {
 public:
     virtual ~WebSocketServer_i() = default;
+    virtual void SetLifeCycleCallback(WS::LifeCycleMsg_en Type, WS::CallbackFunction_t Callback) = 0;
 
-    virtual void SetOnCloseCallback(WS::CallbackFunction_t Callback) = 0;
-    virtual void SetOnConnectionCallback(WS::CallbackFunction_t Callback) = 0;
-    virtual void SetOnOpenCallback(WS::CallbackFunction_t Callback) = 0;
-    virtual void ToggleTracing() = 0;
 protected:
     virtual void AddEvent(std::string EventName, WS::CallbackFunction_t Callback) = 0;
-    virtual void OnClose(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) = 0;
-    virtual void OnConnection(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) = 0;
-    virtual void OnMessage(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) = 0;
-    virtual void OnOpen(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) = 0;
-    virtual void SetMainCallback() = 0;
 };
 
 // TODO: Find better ways to override Callbacks.
+// TODO: make the server parallelized using thread pool.
 
 class WebSocketServer : public WebSocketServer_i {
 public:
@@ -55,43 +56,32 @@ public:
 
     ~WebSocketServer() override;
 
-    void AddEvent(std::string EventName, WS::CallbackFunction_t Callback) override;
+    void AddEvent(std::string Event, WS::CallbackFunction_t Callback) override;
     void Run() override;
-    void SetOnCloseCallback(WS::CallbackFunction_t Callback) override;
-    void SetOnConnectionCallback(WS::CallbackFunction_t Callback) override;
-    void SetOnOpenCallback(WS::CallbackFunction_t Callback) override;
+    void SetLifeCycleCallback(WS::LifeCycleMsg_en Type, WS::CallbackFunction_t Callback) override;
     void Stop() override;
     void ToggleTracing() override;
 protected:
     std::string m_Address;
+    std::array<WS::CallbackFunction_t, static_cast<size_t>(WS::LifeCycleMsg_en::SIZE)> m_LifeCycleCallbacks;
     int16_t m_Port;
-    WS::CallbackFunction_t m_OnCloseCallback;
-    WS::CallbackFunction_t m_OnConnectionCallback;
-    WS::CallbackMap_t m_OnMessageCallbacks;
-    WS::CallbackFunction_t m_OnOpenCallback;
+    WS::CallbackMap_t m_EventCallbacks;
     WS::TLSOptions m_TLSOptions;
     bool m_Trace;
     std::unique_ptr<ix::WebSocketServer> m_WSServer;
 
+    void ExecuteEvent(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message);
+    void GetLifeCycleCallback(WS::LifeCycleMsg_en Index, std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message);
+    void HandleMessage(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message);
+
     template<typename T>
     void Initialize(T Address, int16_t Port) {
-        std::ostringstream Oss;
-        Oss << Address;
-        m_Address = Oss.str();
+        m_Address = Converter<T>::ToString(Address);
         m_Port = Port;
         m_WSServer = std::unique_ptr<ix::WebSocketServer>(new ix::WebSocketServer(Port, Address));
         m_Trace = false;
 
-        m_OnCloseCallback = [](CALLBACKS_PARAMS){};
-        m_OnConnectionCallback = [](CALLBACKS_PARAMS){};
-        m_OnOpenCallback = [](CALLBACKS_PARAMS){};
-
-        SetMainCallback();
+        for (size_t i = 0; i < static_cast<size_t>(WS::LifeCycleMsg_en::SIZE); ++i)
+            m_LifeCycleCallbacks[i] = [](WS_CALLBACKS_PARAMS){};
     };
-
-    void OnClose(CALLBACKS_PARAMS) override;
-    void OnConnection(CALLBACKS_PARAMS) override;
-    void OnMessage(CALLBACKS_PARAMS) override;
-    void OnOpen(CALLBACKS_PARAMS) override;
-    void SetMainCallback() override;
 };
