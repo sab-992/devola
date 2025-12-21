@@ -3,7 +3,7 @@
 
 WebSocketServer::~WebSocketServer() {}
 
-void WebSocketServer::AddEvent(std::string Event, WS::CallbackFunction_t Callback) {
+void WebSocketServer::AddEvent(std::string Event, WS_n::CallbackFunction_t Callback) {
     if (m_EventCallbacks.contains(Event))
         throw std::logic_error(std::format("Event: {} already exists !", Event));
 
@@ -25,23 +25,23 @@ void WebSocketServer::ExecuteEvent(std::shared_ptr<ix::ConnectionState> Connecti
     m_EventCallbacks[Event](ConnectionState, WebSocket, Message);
 }
 
-void WebSocketServer::GetLifeCycleCallback(WS::LifeCycleMsg_en Index, std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) {
+void WebSocketServer::GetLifeCycleCallback(WS_n::LifeCycleMsg_en Index, std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) {
     m_LifeCycleCallbacks[static_cast<size_t>(Index)](ConnectionState, WebSocket, Message);
 }
 
 void WebSocketServer::HandleMessage(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) {
     if (m_Trace) Trace(LogType::Info, "Remote IP:", ConnectionState->getRemoteIp());
     
-    GetLifeCycleCallback(WS::LifeCycleMsg_en::ON_COMMUNICATION, ConnectionState, WebSocket, Message);
+    GetLifeCycleCallback(WS_n::LifeCycleMsg_en::ON_COMMUNICATION, ConnectionState, WebSocket, Message);
     switch (Message->type) {
         case ix::WebSocketMessageType::Message:
             ExecuteEvent(ConnectionState, WebSocket, Message);
             break;
         case ix::WebSocketMessageType::Open:
-            GetLifeCycleCallback(WS::LifeCycleMsg_en::ON_OPENED, ConnectionState, WebSocket, Message);
+            GetLifeCycleCallback(WS_n::LifeCycleMsg_en::ON_OPENED, ConnectionState, WebSocket, Message);
             break;
         case ix::WebSocketMessageType::Close:
-            GetLifeCycleCallback(WS::LifeCycleMsg_en::ON_CLOSED, ConnectionState, WebSocket, Message);
+            GetLifeCycleCallback(WS_n::LifeCycleMsg_en::ON_CLOSED, ConnectionState, WebSocket, Message);
             break;
         default:
             throw std::invalid_argument("WS: Message type not supported.");
@@ -69,7 +69,7 @@ void WebSocketServer::Run() {
     } catch(...) { /* TODO: Add Custom error class (Code + message) and Error handling */ }
 }
 
-void WebSocketServer::SetLifeCycleCallback(WS::LifeCycleMsg_en Type, WS::CallbackFunction_t Callback) {
+void WebSocketServer::SetLifeCycleCallback(WS_n::LifeCycleMsg_en Type, WS_n::CallbackFunction_t Callback) {
     m_LifeCycleCallbacks[static_cast<size_t>(Type)] = Callback;
 };
 
