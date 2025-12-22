@@ -21,7 +21,7 @@ public:
     };
 
     template<typename T>
-    LogicServer(WS::TLSOptions TLSOptions, T Address, int16_t Port=443) {
+    LogicServer(WS_n::TLSOptions TLSOptions, T Address, int16_t Port=443) {
         m_WS = std::unique_ptr<WebSocketServer>(new WebSocketServer(TLSOptions, Address, Port));
         
         SetupEvents();
