@@ -39,7 +39,7 @@ protected:
 };
 
 // TODO: Move Websockets into namespace and rename classes.
-// TODO: Find better ways to override Callbacks.
+// TODO: Move to protected section to private.
 // TODO: make the server parallelized using thread pool.
 
 class WebSocketServer : public WebSocketServer_i {
