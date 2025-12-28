@@ -33,43 +33,33 @@ namespace Http_n
             Net_n::Headers_c::m_Headers = Headers;
         }
 
-        bool ExtractRequestInfo(std::string RawRequestInfo) {
-            bool IsResponse = false;
+        std::string ExtractMessageInformation(std::string Headers) override {
+            size_t EndOfLine = Headers.find("\r\n");
+            std::string Information = Headers.substr(0, EndOfLine);
             std::vector<std::string> RequestInfoVector;
-            Split(RawRequestInfo, RequestInfoVector);
+            Split(Information, RequestInfoVector);
 
             if (RequestInfoVector.size() != 3) // Never more/less than 3 words on the first line
-                return false;
+                return ""; // TODO: Replace this with a throw error
 
-            if (RequestInfoVector[0].find("HTTP") != std::string::npos)
-                return ExtractInfoForResponse(RequestInfoVector);
+            if (RequestInfoVector[0].find("HTTP") == std::string::npos) {
+                m_Method = RequestInfoVector[0];
+                m_APIEndpoint = RequestInfoVector[1];
+            }
+            else
+                Net_n::Headers_c::m_Status = { static_cast<Net_n::Code>(std::stoi(RequestInfoVector[1])) };
 
-            return ExtractInfoForRequest(RequestInfoVector);
-        }
-
-        bool ExtractInfoForRequest(const std::vector<std::string>& RequestInfoVector) {
-            m_Method = RequestInfoVector[0];
-            m_APIEndpoint = RequestInfoVector[1];
-            return true;
-        }
-
-        bool ExtractInfoForResponse(const std::vector<std::string>& RequestInfoVector) {
-            Net_n::Headers_c::m_Status = { static_cast<Net_n::Code>(std::stoi(RequestInfoVector[1])) };
-            return true;
+            return LTrim(Headers).substr(EndOfLine);
         }
 
         void Parse(std::string RawHeaders) {
             if (RawHeaders.empty())
                 return;
 
+            std::string Headers = ExtractMessageInformation(RawHeaders);
             const std::string ReturnToken = "\r\n";
-            std::string Headers = RawHeaders;
             size_t EndOfLine = Headers.find(ReturnToken);
 
-            ExtractRequestInfo(Headers.substr(0, EndOfLine));
-
-            Headers = LTrim(Headers).substr(EndOfLine);
-            EndOfLine = Headers.find(ReturnToken);
             while(EndOfLine != std::string::npos) {
                 if (Trim(Headers).empty())
                     break;

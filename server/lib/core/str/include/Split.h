@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-
+// TODO: Add interval start/finish to specify on what to apply the split
 template<typename T>
 void Split(T Element, std::vector<std::string>& ResultVector, char SplittingToken = ' ') {
     if(not std::is_convertible_v<T, std::string>)

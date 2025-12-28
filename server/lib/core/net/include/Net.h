@@ -119,6 +119,8 @@ namespace Net_n
         virtual std::string Method() const = 0;
         virtual Net_n::NetworkEndpoint NetworkEndpoint() const = 0;
         virtual Net_n::Status Status() const = 0;
+    protected:
+        virtual std::string ExtractMessageInformation(std::string RawHeader) = 0;
     };
 
     template <typename T>
