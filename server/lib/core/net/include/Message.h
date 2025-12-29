@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <Converter.h>
 #include <Net.h>
 #include <string>
 
@@ -28,8 +29,6 @@ namespace Net_n
         
         Net_n::Status Status() const override { return m_Headers.Status(); }
 
-        std::string ToString() const override { return std::format("{}\r\n\r\n{}", m_Headers.ToString(), m_Body.ToString()); }
-
     protected:
         V m_Body;
         U m_Headers;
@@ -49,5 +48,7 @@ namespace Net_n
             // Returned pair = { Headers (string), Body (string) }.
             return std::make_pair(Message.substr(0, END_OF_HEADERS + HEADER_END_TOKEN.size()), Message.substr(END_OF_HEADERS  + HEADER_END_TOKEN.size()));
         }
+
+        std::string ToString() const override { return std::format("{}\r\n\r\n{}", Converter<U>::ToString(m_Headers), Converter<V>::ToString(m_Body)); }
     };
 }

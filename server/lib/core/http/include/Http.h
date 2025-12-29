@@ -1,6 +1,7 @@
 #pragma once
 
 #include <asio.hpp>
+#include <Converter.h>
 #include <Net.h>
 #include <HttpRequest.h>
 #include <HttpResponse.h>
@@ -39,7 +40,7 @@ private:
         asio::ip::tcp::socket Socket(m_IOCtx);
         asio::connect(Socket, Resolver.resolve(Request->NetworkEndpoint().Host(), std::format("{}", Request->NetworkEndpoint().Port())));
 
-        asio::write(Socket, asio::buffer(Request->ToString()));
+        asio::write(Socket, asio::buffer(Converter<Http_n::Request_i<T>>::ToString(*Request)));
         return Socket;
     }
 

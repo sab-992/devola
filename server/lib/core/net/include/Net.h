@@ -74,7 +74,9 @@ namespace Net_n
         void SetHost(std::string Host) { m_Host = Host; }
         void SetPort(uint16_t Port) { m_Port = Port; }
 
+    protected:
         std::string ToString() const override { return std::format("{}:{}", m_Host, m_Port); }
+
     private:
         std::string m_Host;
         uint16_t m_Port;
@@ -91,9 +93,10 @@ namespace Net_n
 
         std::string Reason() { return m_Reason; }
 
-        std::string ToString() const override { return std::format("{} {}", m_Code, m_Reason); }
-
         void UpdateStatus(Net_n::Code Code) { m_Code = static_cast<uint16_t>(Code); m_Reason = STATUS_REASONS.at(Code); }
+    
+    protected:
+        std::string ToString() const override { return std::format("{} {}", m_Code, m_Reason); }
 
     private:
         uint16_t m_Code;

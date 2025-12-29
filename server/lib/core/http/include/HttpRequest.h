@@ -38,6 +38,7 @@ namespace Http_n
 
         Net_n::Status Status() const override { return Http_n::Message_c<T>::Status(); }
 
+    protected:
         std::string ToString() const override { return Http_n::Message_c<T>::ToString(); }
 
     private:

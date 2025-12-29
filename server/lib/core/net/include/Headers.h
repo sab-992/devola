@@ -26,8 +26,6 @@ namespace Net_n
 
         Net_n::Status Status() const override { return m_Status; }
 
-        std::string ToString() const override { return m_Headers; }
-
     protected:
         std::string m_APIEndpoint;
         std::string m_Headers;
@@ -79,5 +77,7 @@ namespace Net_n
                 Net_n::Headers_c::m_HeadersMap[Trim(Header)] = Trim(Value);
             }
         }
+
+        std::string ToString() const override { return m_Headers; }
     };
 }

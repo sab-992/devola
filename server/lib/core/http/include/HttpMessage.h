@@ -30,7 +30,6 @@ namespace Http_n
 
         Net_n::Status Status() const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::Status(); }
 
-        std::string ToString() const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::ToString(); }
 
     protected:
         Message_c(std::string Message) {
@@ -50,5 +49,7 @@ namespace Http_n
         Message_c(Net_n::Code StatusCode, HeadersUMap_t HeadersMap, T Body, bool ChunkMessage) {
             Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::Initialize(Http_n::Headers(StatusCode, HeadersMap), Http_n::Body<T>(Body, ChunkMessage));
         }
+
+        std::string ToString() const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::ToString(); }
     };
 }

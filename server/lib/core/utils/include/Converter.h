@@ -6,7 +6,7 @@
 template <typename T>
 class Converter {
 public:
-    static std::string ToString(T Param) {
+    static std::string ToString(const T& Param) {
         try {
             std::ostringstream Oss;
             Oss << Param;
