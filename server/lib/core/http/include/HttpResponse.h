@@ -3,6 +3,7 @@
 #include <HttpMessage.h>
 #include <memory>
 #include <Net.h>
+#include <NotImplemented.h>
 #include <string>
 
 namespace Http_n
@@ -22,7 +23,7 @@ namespace Http_n
             return std::unique_ptr<Http_n::Response<T>>(new Http_n::Response<T>(StatusCode, HeadersMap, Body, ChunkMessage));
         }
 
-        std::string APIEndpoint() const override { return Http_n::Message_c<T>::APIEndpoint(); }
+        std::string APIEndpoint() const override { throw Except_n::NotImplemented(); }
 
         T Body() const override { return Http_n::Message_c<T>::Body(); }
 
@@ -32,9 +33,9 @@ namespace Http_n
 
         HeadersUMap_t HeadersMap() const override { return Http_n::Message_c<T>::HeadersMap(); }
 
-        std::string Method() const override { return Http_n::Message_c<T>::Method(); }
+        std::string Method() const override { throw Except_n::NotImplemented(); }
 
-        Net_n::NetworkEndpoint NetworkEndpoint() const override { return Http_n::Message_c<T>::NetworkEndpoint(); }
+        Net_n::NetworkEndpoint NetworkEndpoint() const override { throw Except_n::NotImplemented(); }
 
         Net_n::Status Status() const override { return Http_n::Message_c<T>::Status(); }
 

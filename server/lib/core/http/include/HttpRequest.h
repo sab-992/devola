@@ -3,7 +3,9 @@
 #include <HttpMessage.h>
 #include <memory>
 #include <Net.h>
+#include <NotImplemented.h>
 #include <string>
+
 
 namespace Http_n
 {
@@ -36,7 +38,7 @@ namespace Http_n
 
         Net_n::NetworkEndpoint NetworkEndpoint() const override { return Http_n::Message_c<T>::NetworkEndpoint(); }
 
-        Net_n::Status Status() const override { return Http_n::Message_c<T>::Status(); }
+        Net_n::Status Status() const override { throw Except_n::NotImplemented(); }
 
     protected:
         std::string ToString() const override { return Http_n::Message_c<T>::ToString(); }
