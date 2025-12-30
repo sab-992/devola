@@ -62,6 +62,7 @@ namespace Net_n
         { Net_n::Code::GATEWAY_TIMEOUT,         "Gateway Timeout"}
     };
 
+    // TODO: Overload operator==.
     struct NetworkEndpoint : public StringFormattable_i {
     public:
         NetworkEndpoint() {}
@@ -82,6 +83,7 @@ namespace Net_n
         uint16_t m_Port;
     };
 
+    // TODO: Overload operator==, for int and for Net_n::Code.
     class Status : public StringFormattable_i {
     public:
         Status() {}
