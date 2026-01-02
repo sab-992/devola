@@ -12,7 +12,7 @@ namespace Http_n
     template<typename T>
     class Message_c : public Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>> {
     public:
-        ~Message_c() override {};
+        ~Message_c() override {}
 
         std::string APIEndpoint() const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::APIEndpoint(); }
 
