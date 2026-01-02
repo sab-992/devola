@@ -18,7 +18,7 @@ void Trace(std::function<std::unique_ptr<DisplayColor_i>()> DisplayColorFunction
         return ;
     }
 
-    std::cout << DisplayColorFunction()->Color() << CurrentWord << ' ';
+    std::cout << DisplayColorFunction()->Color() << CurrentWord;
     if constexpr (sizeof...(Args) > 0)
         Trace<Args...>(DisplayColorFunction, OtherArgs...);
     else 
