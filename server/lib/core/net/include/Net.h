@@ -63,7 +63,7 @@ namespace Net_n
     };
 
     // TODO: Overload operator==.
-    struct NetworkEndpoint : public StringFormattable_i {
+    struct NetworkEndpoint : virtual public StringFormattable_i {
     public:
         NetworkEndpoint() {}
         NetworkEndpoint(std::string Host, uint16_t Port)
@@ -84,7 +84,7 @@ namespace Net_n
     };
 
     // TODO: Overload operator==, for int and for Net_n::Code.
-    class Status : public StringFormattable_i {
+    class Status : virtual public StringFormattable_i {
     public:
         Status() {}
 
@@ -106,14 +106,14 @@ namespace Net_n
     };
 
     template<typename T>
-    class Body_i : public StringFormattable_i {
+    class Body_i : virtual public StringFormattable_i {
     public:
         virtual ~Body_i() = default;
 
         virtual T Get() const = 0;
     };
 
-    class Headers_i : public StringFormattable_i {
+    class Headers_i : virtual public StringFormattable_i {
     public:
         virtual ~Headers_i() = default;
 
@@ -129,7 +129,7 @@ namespace Net_n
     };
 
     template <typename T>
-    class Message_i : public StringFormattable_i {
+    class Message_i : virtual public StringFormattable_i {
     public:
         virtual ~Message_i() = default;
 
