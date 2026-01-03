@@ -16,17 +16,9 @@ namespace Http_n
     public:
         Body() {}
 
-        Body(T Body, bool ChunkMessage) { Build(Body); }
-
-        template <typename U>
-        Body(U RawBody, std::string TransferEncoding = "") { Parse(std::string(RawBody), TransferEncoding); }
-
-    private:
-        void Parse(std::string RawBody, std::string TransferEncoding) {
-            Net_n::Body_c<T>::m_RawBody = RawBody;
-
+        static Http_n::Body<T> Parse(std::string RawBody, std::string TransferEncoding = "") {
             if (RawBody.empty())
-                return;
+                return Http_n::Body<T>();
 
             std::string Body = RawBody;
             if (TransferEncoding == Http_n::CHUNKED)
@@ -34,15 +26,22 @@ namespace Http_n
             Body = Trim(Body);
 
             if constexpr (std::is_same_v<T, nlohmann::json>)
-                Net_n::Body_c<T>::m_Body = json::parse(Body);
-            else Net_n::Body_c<T>::m_Body = Body;
+                return Http_n::Body<T>(json::parse(Body));
+
+            return Http_n::Body<T>(Body);
         }
 
-        void Build(json Body) {
-            Net_n::Body_c<T>::m_Body = Body;
+        static Http_n::Body<T> Build(T MessageBody, bool ChunkMessage = false) {
+            // TODO: Divide Message into chunks.
+            return Http_n::Body<T>(MessageBody);
+        }
+    
+    private:
+        Body(T MessageBody) {
+            Net_n::Body_c<T>::m_Body = MessageBody;
         }
 
-        std::string ExtractChunkedContent(std::string Message) const {
+        static std::string ExtractChunkedContent(std::string Message) {
             if (Message.empty())
                 return "";
 
@@ -58,7 +57,7 @@ namespace Http_n
             return FusedChunks.substr(0, FusedChunks.find("0\r\n\r\n"));
         }
 
-        std::string FuseChunks(const std::string& Message) const {
+        static std::string FuseChunks(const std::string& Message) {
             std::regex Pattern("(?:^|\r\n)([0-9A-Fa-f]{1,8})\r\n", std::regex::multiline);
             
             std::string Result;

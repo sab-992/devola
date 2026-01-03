@@ -17,10 +17,8 @@ namespace Net_n
 
     protected:
         T m_Body;
-        std::string m_RawBody;
 
-        Body_c()
-        : m_Body(T{}), m_RawBody("") {}
+        Body_c() : m_Body(T{}) {}
 
         std::string ToString() const override {
             if constexpr (std::is_same_v<T, nlohmann::json>)
