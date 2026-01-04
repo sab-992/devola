@@ -2,10 +2,11 @@
 
 #include <asio.hpp>
 #include <Converter.h>
-#include <Net.h>
+#include <format>
 #include <HttpRequest.h>
 #include <HttpResponse.h>
 #include <HttpSettings.h>
+#include <Net.h>
 #include <nlohmann/json.hpp>
 
 
@@ -18,7 +19,7 @@ public:
 
     static std::unique_ptr<Http_n::Response_i<T>> Get(std::string APIEndpoint, const Net_n::NetworkEndpoint& NetworkEndpoint) {
         // TODO change Accept(T()) to somehting else so no need to create T().
-        HeadersUMap_t HeadersMap = { { "Accept",  Accept(T()) },
+        HeadersUMap_t HeadersMap = { { "Accept",     Accept(T()) },
                                      { "User-Agent", Http_n::USER_AGENT },
                                      { "Connection", Http_n::CLOSE_CONNECTION } };
         asio::ip::tcp::socket Socket(Send(Http_n::Request<T>::Create("GET", APIEndpoint, NetworkEndpoint, HeadersMap)));
