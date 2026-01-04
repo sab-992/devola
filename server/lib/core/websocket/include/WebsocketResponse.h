@@ -2,19 +2,24 @@
 
 #include <memory>
 #include <Net.h>
-#include <NotImplemented.h>
 #include <string>
-#include <WebsocketMessage.h>
+#include <WebsocketBody.h>
+#include <WebsocketHeaders.h>
 
 
 namespace WS_n
 {
     template<typename T>
-    class Response_i : public Net_n::Message_i<T> {};
+    class Response_i : public Net_n::Response_i, public Net_n::Message_i<T> {
+    public:
+        virtual std::string APIEndpoint() const = 0;
+    };
 
     template<typename T>
-    class Response : public WS_n::Message_c<T>, public WS_n::Response_i<T> {
+    class Response : public Net_n::Message_c<T, WS_n::Headers, WS_n::Body<T>>, public WS_n::Response_i<T> {
     public:
+        ~Response() {}
+
         static std::unique_ptr<WS_n::Response_i<T>> Create(std::string RawResponse) {
             return std::unique_ptr<WS_n::Response<T>>(new WS_n::Response<T>(RawResponse));
         }
@@ -24,30 +29,29 @@ namespace WS_n
             return std::unique_ptr<WS_n::Response<T>>(new WS_n::Response<T>(StatusCode, HeadersMap, Body));
         }
 
-        std::string APIEndpoint() const override { return Net_n::Message_c<T, WS_n::Headers, WS_n::Body<T>>::APIEndpoint(); }
+        std::string APIEndpoint() const override { return this->m_Headers.APIEndpoint(); }
 
-        T Body() const override { return WS_n::Message_c<T>::Body(); }
+        T Body() const override { return Net_n::Message_c<T, WS_n::Headers, WS_n::Body<T>>::Body(); }
 
-        std::string GetHeader(std::string Header) const override { return WS_n::Message_c<T>::GetHeader(Header); }
+        std::string GetHeader(std::string Header) const override { return Net_n::Message_c<T, WS_n::Headers, WS_n::Body<T>>::GetHeader(Header); }
 
-        std::string Headers() const override { return WS_n::Message_c<T>::Headers(); }
+        std::string Headers() const override { return Net_n::Message_c<T, WS_n::Headers, WS_n::Body<T>>::Headers(); }
 
-        HeadersUMap_t HeadersMap() const override { return WS_n::Message_c<T>::HeadersMap(); }
+        HeadersUMap_t HeadersMap() const override { return Net_n::Message_c<T, WS_n::Headers, WS_n::Body<T>>::HeadersMap(); }
 
-        std::string Method() const override { throw Except_n::NotImplemented(); }
-
-        Net_n::NetworkEndpoint NetworkEndpoint() const override { throw Except_n::NotImplemented(); }
-
-        Net_n::Status Status() const override { return WS_n::Message_c<T>::Status(); }
+        Net_n::Status Status() const override { return this->m_Headers.Status(); }
 
     protected:
-        std::string ToString() const override { return WS_n::Message_c<T>::ToString(); }
+        std::string ToString() const override { return Net_n::Message_c<T, WS_n::Headers, WS_n::Body<T>>::ToString(); }
 
     private:
-        Response(std::string Response)
-        : WS_n::Message_c<T>(Response) {}
+        Response(std::string Response) {
+            std::pair<std::string, std::string> SplitMessage = this->Split(Response);
+            this->Initialize(WS_n::Headers(SplitMessage.first), WS_n::Body<T>::Parse(SplitMessage.second));
+        }
 
-        Response(Net_n::Code StatusCode, HeadersUMap_t HeadersMap, T Body)
-        : WS_n::Message_c<T>::Message_c(StatusCode, HeadersMap, Body) {}
+        Response(Net_n::Code StatusCode, HeadersUMap_t HeadersMap, T Body) {
+            this->Initialize(WS_n::Headers(StatusCode, HeadersMap), WS_n::Body<T>::Build(Body));
+        }
     };
 }

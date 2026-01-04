@@ -133,13 +133,23 @@ namespace Net_n
     public:
         virtual ~Message_i() = default;
 
-        virtual std::string APIEndpoint() const = 0;
         virtual T Body() const = 0;
         virtual std::string GetHeader(std::string Header) const = 0;
         virtual std::string Headers() const = 0;
         virtual HeadersUMap_t HeadersMap() const = 0;
-        virtual std::string Method() const = 0;
-        virtual Net_n::NetworkEndpoint NetworkEndpoint() const = 0;
+    };
+
+    class Request_i {
+    public:
+        virtual ~Request_i() = default;
+
+        virtual std::string APIEndpoint() const = 0;
+    };
+
+    class Response_i {
+    public:
+        virtual ~Response_i() = default;
+
         virtual Net_n::Status Status() const = 0;
     };
 

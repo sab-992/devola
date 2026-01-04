@@ -11,8 +11,8 @@ namespace WS_n
     public:
         Headers() {}
 
-        Headers(std::string APIEndpoint, const Net_n::NetworkEndpoint& NetworkEndpoint, HeadersUMap_t HeadersMap)
-        : Net_n::Headers_c("", APIEndpoint, NetworkEndpoint, HeadersMap) { Build(); };
+        Headers(std::string APIEndpoint, HeadersUMap_t HeadersMap)
+        : Net_n::Headers_c("", APIEndpoint, {}, HeadersMap) { Build(); };
 
         Headers(std::string Headers)
         : Net_n::Headers_c(Headers) { Headers_c::Parse(Headers); }

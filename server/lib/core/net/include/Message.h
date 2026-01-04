@@ -13,8 +13,6 @@ namespace Net_n
     public:
         ~Message_c() override {}
 
-        std::string APIEndpoint() const override { return m_Headers.APIEndpoint(); }
-
         T Body() const override { return m_Body.Get(); }
 
         std::string GetHeader(std::string Header) const override { return m_Headers.GetHeader(Header); }
@@ -22,12 +20,6 @@ namespace Net_n
         std::string Headers() const override { return m_Headers.Get(); }
 
         HeadersUMap_t HeadersMap() const override { return m_Headers.Map(); }
-
-        std::string Method() const override {  return m_Headers.Method(); }
-
-        Net_n::NetworkEndpoint NetworkEndpoint() const override { return m_Headers.NetworkEndpoint(); }
-        
-        Net_n::Status Status() const override { return m_Headers.Status(); }
 
     protected:
         V m_Body;
