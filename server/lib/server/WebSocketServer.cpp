@@ -1,16 +1,16 @@
 #include <WebSocketServer.h>
 
 
-WebSocketServer::~WebSocketServer() {}
+Server_n::WS_n::Server::~Server() {}
 
-void WebSocketServer::AddEvent(std::string Event, WS_n::CallbackFunction_t Callback) {
+void Server_n::WS_n::Server::AddEvent(std::string Event, Server_n::WS_n::CallbackFunction_t Callback) {
     if (m_EventCallbacks.contains(Event))
         throw std::logic_error(std::format("Event: {} already exists !", Event));
 
     m_EventCallbacks[Event] = Callback;
 }
 
-void WebSocketServer::ExecuteEvent(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) {
+void Server_n::WS_n::Server::ExecuteEvent(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) {
     // TODO: Parse WS Message.
     // TODO: Verify Event exists and has callback.
     // TODO: Verify other elements (authorization maybe ?)
@@ -25,11 +25,11 @@ void WebSocketServer::ExecuteEvent(std::shared_ptr<ix::ConnectionState> Connecti
     m_EventCallbacks[Event](ConnectionState, WebSocket, Message);
 }
 
-void WebSocketServer::GetLifeCycleCallback(WS_n::LifeCycleMsg_en Index, std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) {
+void Server_n::WS_n::Server::GetLifeCycleCallback(WS_n::LifeCycleMsg_en Index, std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) {
     m_LifeCycleCallbacks[static_cast<size_t>(Index)](ConnectionState, WebSocket, Message);
 }
 
-void WebSocketServer::HandleMessage(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) {
+void Server_n::WS_n::Server::HandleMessage(std::shared_ptr<ix::ConnectionState> ConnectionState, ix::WebSocket& WebSocket, const ix::WebSocketMessagePtr& Message) {
     if (m_Trace) Trace(LogType::Info, "Remote IP:", ConnectionState->getRemoteIp());
     
     GetLifeCycleCallback(WS_n::LifeCycleMsg_en::ON_COMMUNICATION, ConnectionState, WebSocket, Message);
@@ -49,12 +49,12 @@ void WebSocketServer::HandleMessage(std::shared_ptr<ix::ConnectionState> Connect
     };
 }
 
-void WebSocketServer::Run() {
+void Server_n::WS_n::Server::Run() {
     try {
         if (m_WSServer == nullptr)
             throw std::logic_error("WS: Server pointer is nullptr.");
 
-        m_WSServer->setOnClientMessageCallback(std::bind(&WebSocketServer::HandleMessage, this, std::placeholders::_1,
+        m_WSServer->setOnClientMessageCallback(std::bind(&Server_n::WS_n::Server::HandleMessage, this, std::placeholders::_1,
                                                                                                 std::placeholders::_2,
                                                                                                 std::placeholders::_3));
 
@@ -69,16 +69,16 @@ void WebSocketServer::Run() {
     } catch(...) { /* TODO: Add Custom error class (Code + message) and Error handling */ }
 }
 
-void WebSocketServer::SetLifeCycleCallback(WS_n::LifeCycleMsg_en Type, WS_n::CallbackFunction_t Callback) {
+void Server_n::WS_n::Server::SetLifeCycleCallback(WS_n::LifeCycleMsg_en Type, Server_n::WS_n::CallbackFunction_t Callback) {
     m_LifeCycleCallbacks[static_cast<size_t>(Type)] = Callback;
 };
 
 
-void WebSocketServer::Stop() {
+void Server_n::WS_n::Server::Stop() {
     // TODO: Find a way to stop server.
     m_EventCallbacks.clear();
 }
 
-void WebSocketServer::ToggleTracing() {
+void Server_n::WS_n::Server::ToggleTracing() {
     m_Trace = !m_Trace;
 }

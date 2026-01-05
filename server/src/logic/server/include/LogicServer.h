@@ -12,18 +12,17 @@
 
 // TODO: Change WebSocketServer to interface WebSocketServer_i
 
-class LogicServer: Server_i {
+class LogicServer: Server_n::Server_i {
 public:
     template<typename T>
     LogicServer(T Address, int16_t Port=80) {
-        m_WS = std::unique_ptr<WebSocketServer>(new WebSocketServer(Address, Port));
+        m_WS = std::unique_ptr<Server_n::WS_n::Server>(new Server_n::WS_n::Server(Address, Port));
         SetupEvents();
     };
 
     template<typename T>
-    LogicServer(WS_n::TLSOptions TLSOptions, T Address, int16_t Port=443) {
-        m_WS = std::unique_ptr<WebSocketServer>(new WebSocketServer(TLSOptions, Address, Port));
-        
+    LogicServer(Server_n::WS_n::TLSOptions TLSOptions, T Address, int16_t Port=443) {
+        m_WS = std::unique_ptr<Server_n::WS_n::Server>(new Server_n::WS_n::Server(TLSOptions, Address, Port));
         SetupEvents();
     };
 
@@ -33,7 +32,7 @@ public:
     void Stop() override;
     void ToggleTracing() override;
 private:
-    std::unique_ptr<WebSocketServer> m_WS;
+    std::unique_ptr<Server_n::WS_n::Server> m_WS;
 
     void SetupEvents();
 };
