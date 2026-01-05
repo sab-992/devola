@@ -7,6 +7,8 @@ from settings.helper.log import log, Color
 from settings import compile, debug, deploy, install, service, shutdown, test
 from settings.helper.options import OptionsType
 
+# TODO: Update commands for new project structure
+
 COMMANDS: dict[str, Command] = { "cmake"       : compile.CMake(), 
                                  "make"        : compile.Make(),
                                  "makeall"     : compile.MakeAll(),
