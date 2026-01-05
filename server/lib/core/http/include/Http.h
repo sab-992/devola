@@ -22,7 +22,7 @@ public:
         HeadersUMap_t HeadersMap = { { "Accept",     Accept(T()) },
                                      { "User-Agent", Http_n::USER_AGENT },
                                      { "Connection", Http_n::CLOSE_CONNECTION } };
-        asio::ip::tcp::socket Socket(Send(Http_n::Request<T>::Create("GET", APIEndpoint, NetworkEndpoint, HeadersMap)));
+        asio::ip::tcp::socket Socket(Send(Http_n::Request<T>::Create("GET", APIEndpoint, NetworkEndpoint, HeadersMap), NetworkEndpoint));
         
         return Http_n::Response<T>::Create(Receive(Socket));
     }
@@ -36,10 +36,10 @@ public:
 private:
     inline static asio::io_context m_IOCtx;
 
-    static asio::ip::tcp::socket Send(const std::unique_ptr<Http_n::Request_i<T>>& Request) {
+    static asio::ip::tcp::socket Send(const std::unique_ptr<Http_n::Request_i<T>>& Request, const Net_n::NetworkEndpoint& NetworkEndpoint) {
         asio::ip::tcp::resolver Resolver(m_IOCtx);
         asio::ip::tcp::socket Socket(m_IOCtx);
-        asio::connect(Socket, Resolver.resolve(Request->NetworkEndpoint().Host(), std::format("{}", Request->NetworkEndpoint().Port())));
+        asio::connect(Socket, Resolver.resolve(NetworkEndpoint.Host(), std::format("{}", NetworkEndpoint.Port())));
 
         asio::write(Socket, asio::buffer(Converter<Http_n::Request_i<T>>::ToString(*Request)));
         return Socket;

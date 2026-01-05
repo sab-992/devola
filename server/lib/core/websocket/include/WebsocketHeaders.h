@@ -7,17 +7,19 @@
 
 namespace WS_n
 {
-    class Headers : public Net_n::Headers_c {
+    class ExtraHeaders_i {};
+
+    class Headers : public Net_n::Headers_c, public WS_n::ExtraHeaders_i {
     public:
         Headers() {}
 
-        Headers(std::string APIEndpoint, HeadersUMap_t HeadersMap)
-        : Net_n::Headers_c("", APIEndpoint, {}, HeadersMap) { Build(); };
+        Headers(std::string APIEndpoint, const HeadersUMap_t& HeadersMap)
+        : Net_n::Headers_c(APIEndpoint, HeadersMap) { Build(); };
 
         Headers(std::string Headers)
-        : Net_n::Headers_c(Headers) { Headers_c::Parse(Headers); }
+        : Net_n::Headers_c(Headers) { this->Parse(Headers); }
 
-        Headers(Net_n::Code StatusCode, HeadersUMap_t HeadersMap)
+        Headers(Net_n::Code StatusCode, const HeadersUMap_t& HeadersMap)
         : Net_n::Headers_c(StatusCode, HeadersMap) {};
 
         void Build() {
@@ -25,7 +27,7 @@ namespace WS_n
             for (auto& [NextHeader, Value] : m_HeadersMap)
                 Headers = std::format("{}\r\n{}: {}\r\n", Headers, NextHeader, Value);
 
-            Net_n::Headers_c::m_Headers = Headers;
+            this->m_Headers = Headers;
         }
 
         std::string ExtractMessageInformation(std::string RawHeaders) override { return RawHeaders; }

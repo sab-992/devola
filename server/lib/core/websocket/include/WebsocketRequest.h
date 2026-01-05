@@ -22,7 +22,7 @@ namespace WS_n
         }
 
         template<typename U = T>
-        static std::unique_ptr<WS_n::Request_i<T>> Create(std::string APIEndpoint, HeadersUMap_t HeadersMap, U&& Body = T{}) {
+        static std::unique_ptr<WS_n::Request_i<T>> Create(std::string APIEndpoint, const HeadersUMap_t& HeadersMap, U&& Body = T{}) {
             return std::unique_ptr<WS_n::Request<T>>(new WS_n::Request<T>(APIEndpoint, HeadersMap, std::forward<U>(Body)));
         }
 
@@ -45,7 +45,7 @@ namespace WS_n
             this->Initialize(WS_n::Headers(SplitMessage.first), WS_n::Body<T>::Parse(SplitMessage.second));
         }
 
-        Request(std::string APIEndpoint, HeadersUMap_t HeadersMap, T Body) {
+        Request(std::string APIEndpoint, const HeadersUMap_t& HeadersMap, T Body) {
             this->Initialize(WS_n::Headers(APIEndpoint, HeadersMap), WS_n::Body<T>::Build(Body));
         }
     };

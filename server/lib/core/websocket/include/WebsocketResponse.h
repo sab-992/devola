@@ -25,7 +25,7 @@ namespace WS_n
         }
 
         template<typename U = T>
-        static std::unique_ptr<WS_n::Response_i<T>> Create(Net_n::Code StatusCode, HeadersUMap_t HeadersMap, U&& Body = T{}) {
+        static std::unique_ptr<WS_n::Response_i<T>> Create(Net_n::Code StatusCode, const HeadersUMap_t& HeadersMap, U&& Body = T{}) {
             return std::unique_ptr<WS_n::Response<T>>(new WS_n::Response<T>(StatusCode, HeadersMap, Body));
         }
 
@@ -50,7 +50,7 @@ namespace WS_n
             this->Initialize(WS_n::Headers(SplitMessage.first), WS_n::Body<T>::Parse(SplitMessage.second));
         }
 
-        Response(Net_n::Code StatusCode, HeadersUMap_t HeadersMap, T Body) {
+        Response(Net_n::Code StatusCode, const HeadersUMap_t& HeadersMap, T Body) {
             this->Initialize(WS_n::Headers(StatusCode, HeadersMap), WS_n::Body<T>::Build(Body));
         }
     };

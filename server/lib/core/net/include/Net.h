@@ -121,8 +121,6 @@ namespace Net_n
         virtual std::string Get() const = 0;
         virtual std::string GetHeader(std::string Header) const = 0;
         virtual HeadersUMap_t Map() const = 0;
-        virtual std::string Method() const = 0;
-        virtual Net_n::NetworkEndpoint NetworkEndpoint() const = 0;
         virtual Net_n::Status Status() const = 0;
     protected:
         virtual std::string ExtractMessageInformation(std::string RawHeader) = 0;

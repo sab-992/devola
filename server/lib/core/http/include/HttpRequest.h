@@ -14,7 +14,6 @@ namespace Http_n
     class Request_i : public Net_n::Request_i, public Net_n::Message_i<T> {
     public:
         virtual std::string Method() const = 0;
-        virtual Net_n::NetworkEndpoint NetworkEndpoint() const = 0;
     }; 
 
     template<typename T>
@@ -27,7 +26,7 @@ namespace Http_n
         }
 
         template<typename U = T>
-        static std::unique_ptr<Http_n::Request_i<T>> Create(std::string Method, std::string APIEndpoint, const Net_n::NetworkEndpoint& NetworkEndpoint, HeadersUMap_t HeadersMap, U&& Body = T{}, bool ChunkMessage = false) {
+        static std::unique_ptr<Http_n::Request_i<T>> Create(std::string Method, std::string APIEndpoint, const Net_n::NetworkEndpoint& NetworkEndpoint, const HeadersUMap_t& HeadersMap, U&& Body = T{}, bool ChunkMessage = false) {
             return std::unique_ptr<Http_n::Request<T>>(new Http_n::Request<T>(Method, APIEndpoint, NetworkEndpoint, HeadersMap, std::forward<U>(Body), ChunkMessage));
         }
 
@@ -43,8 +42,6 @@ namespace Http_n
 
         std::string Method() const override { return this->m_Headers.Method(); }
 
-        Net_n::NetworkEndpoint NetworkEndpoint() const override { return this->m_Headers.NetworkEndpoint(); }
-
     protected:
         std::string ToString() const override { return Net_n::Message_c<T, Http_n::Headers, Http_n::Body<T>>::ToString(); }
 
@@ -55,7 +52,7 @@ namespace Http_n
             this->Initialize(Headers, Http_n::Body<T>::Parse(SplitMessage.second, Headers.GetHeader(Http_n::TRANSFER_ENCODING)));
         }
 
-        Request(std::string Method, std::string APIEndpoint, const Net_n::NetworkEndpoint& NetworkEndpoint, HeadersUMap_t HeadersMap, T Body, bool ChunkMessage) {
+        Request(std::string Method, std::string APIEndpoint, const Net_n::NetworkEndpoint& NetworkEndpoint, const HeadersUMap_t& HeadersMap, T Body, bool ChunkMessage) {
             this->Initialize(Http_n::Headers(Method, APIEndpoint, NetworkEndpoint, HeadersMap), Http_n::Body<T>::Build(Body, ChunkMessage));
         }
     };

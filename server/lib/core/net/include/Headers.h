@@ -20,31 +20,21 @@ namespace Net_n
 
         HeadersUMap_t Map() const override { return m_HeadersMap; }
 
-        std::string Method() const override { return m_Method; }
-
-        Net_n::NetworkEndpoint NetworkEndpoint() const override { return m_NetworkEndpoint; }
-
         Net_n::Status Status() const override { return m_Status; }
 
     protected:
         std::string m_APIEndpoint;
         std::string m_Headers;
         HeadersUMap_t m_HeadersMap;
-        std::string m_Method;
-        Net_n::NetworkEndpoint m_NetworkEndpoint;
         Net_n::Status m_Status;
 
-        Headers_c()
-        : m_Method(""), m_APIEndpoint("") {}
+        Headers_c() {}
 
-        Headers_c(std::string Headers)
-        : m_Headers(Headers) {}
+        Headers_c(std::string Headers) : m_Headers(Headers) {}
 
-        Headers_c(std::string Method, std::string APIEndpoint, const Net_n::NetworkEndpoint& NetworkEndpoint, HeadersUMap_t HeadersMap)
-        : m_Method(Method), m_APIEndpoint(APIEndpoint), m_NetworkEndpoint(NetworkEndpoint), m_HeadersMap(HeadersMap) {}
+        Headers_c(std::string APIEndpoint, const HeadersUMap_t& HeadersMap) : m_APIEndpoint(APIEndpoint), m_HeadersMap(HeadersMap) {}
 
-        Headers_c(Net_n::Code StatusCode, HeadersUMap_t HeadersMap)
-        : m_Status(Net_n::Status(StatusCode)), m_HeadersMap(HeadersMap) {}
+        Headers_c(Net_n::Code StatusCode, const HeadersUMap_t& HeadersMap) : m_Status(Net_n::Status(StatusCode)), m_HeadersMap(HeadersMap) {}
     
         void Parse(std::string RawHeaders) {
             if (RawHeaders.empty())
@@ -74,7 +64,7 @@ namespace Net_n
                 const std::string Header = Line.substr(0, ValueStartPosition);
                 const std::string Value = Line.substr(ValueStartPosition + 1);
 
-                Net_n::Headers_c::m_HeadersMap[Trim(Header)] = Trim(Value);
+                m_HeadersMap[Trim(Header)] = Trim(Value);
             }
         }
 

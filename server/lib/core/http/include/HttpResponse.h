@@ -22,7 +22,7 @@ namespace Http_n
         }
 
         template<typename U = T>
-        static std::unique_ptr<Http_n::Response_i<T>> Create(Net_n::Code StatusCode, HeadersUMap_t HeadersMap, U&& Body = T{}, bool ChunkMessage = false) {
+        static std::unique_ptr<Http_n::Response_i<T>> Create(Net_n::Code StatusCode, const HeadersUMap_t& HeadersMap, U&& Body = T{}, bool ChunkMessage = false) {
             return std::unique_ptr<Http_n::Response<T>>(new Http_n::Response<T>(StatusCode, HeadersMap, Body, ChunkMessage));
         }
 
@@ -46,7 +46,7 @@ namespace Http_n
             this->Initialize(Headers, Http_n::Body<T>::Parse(SplitMessage.second, Headers.GetHeader(Http_n::TRANSFER_ENCODING)));
         }
 
-        Response(Net_n::Code StatusCode, HeadersUMap_t HeadersMap, T Body, bool ChunkMessage) {
+        Response(Net_n::Code StatusCode, const HeadersUMap_t& HeadersMap, T Body, bool ChunkMessage) {
             this->Initialize(Http_n::Headers(StatusCode, HeadersMap), Http_n::Body<T>::Build(Body, ChunkMessage));
         }
     };
