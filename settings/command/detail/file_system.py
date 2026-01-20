@@ -10,10 +10,11 @@ class FileSystem():
         pass
 
     def cmake(self, service_name: str, libraries: set[str]) -> str:
+        libraries_sorted = sorted(libraries)
         service_name_lower = service_name.lower()
 
         librairies_str = "core_lib"
-        for lib in libraries:
+        for lib in libraries_sorted:
             librairies_str += f" {lib.lower() + "_lib"}"
         return f"""\
 cmake_minimum_required(VERSION 3.16)
@@ -56,7 +57,8 @@ int main() {'{'}
         path_to_server = "../../.."
         path_to_root_folder = f"{path_to_server}/.."
         lib_volumes: str = ""
-        for lib in libraries:
+        libraries_sorted = sorted(libraries)
+        for lib in libraries_sorted:
             lib_volumes += f"      - {path_to_root_folder}/lib/{lib}:/app/lib/{lib}\n"
         return f"""\
 services:
@@ -153,7 +155,8 @@ f"""\
 """
     def packages(self, libraries: set[str]) -> str:
         find_packages = "find_package(core_lib REQUIRED)"
-        for lib in libraries:
+        libraries_sorted = sorted(libraries)
+        for lib in libraries_sorted:
             find_packages += f"\nfind_package({lib.lower()}_lib REQUIRED)"
         return find_packages
 

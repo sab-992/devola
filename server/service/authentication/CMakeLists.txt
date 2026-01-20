@@ -20,4 +20,4 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
 endif()
 
 target_include_directories(authentication PRIVATE "${authentication_path}/include")
-target_link_libraries(authentication PRIVATE core_lib server_lib database_lib)
+target_link_libraries(authentication PRIVATE core_lib database_lib server_lib)

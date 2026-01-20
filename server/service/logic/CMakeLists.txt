@@ -20,4 +20,4 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
 endif()
 
 target_include_directories(logic PRIVATE "${logic_path}/include")
-target_link_libraries(logic PRIVATE core_lib server_lib database_lib)
+target_link_libraries(logic PRIVATE core_lib database_lib server_lib)
