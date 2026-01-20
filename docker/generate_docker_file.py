@@ -88,8 +88,6 @@ def main():
             
             del all_services[service_name]
     generate_docker_compose(all_services, networks_config, volumes_config, f"{current_directory}/docker-compose.yml")
-    print(f"{GREEN}All operations completed successfully!\n{NC}")
-
 
 if __name__ == "__main__":
     main()

@@ -5,7 +5,7 @@
   },
   "container_name": "database",
   "env_file": [
-    "../.env"
+    "../settings/database.env"
   ],
   "volumes": [
     "postgre:/var/lib/postgresql/data"

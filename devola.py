@@ -1,13 +1,8 @@
-import os
-import platform
-import subprocess
 import argparse
-from settings.helper.command import Command
-from settings.helper.log import log, Color
-from settings import compile, debug, deploy, install, service, shutdown, test
-from settings.helper.options import OptionsType
 
-# TODO: Update commands for new project structure
+from settings.command import compile, debug, deploy, install, service, shutdown, test
+from settings.command.detail.command import Command
+from settings.command.detail.options import OptionsType
 
 COMMANDS: dict[str, Command] = { "cmake"       : compile.CMake(), 
                                  "make"        : compile.Make(),
