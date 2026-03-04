@@ -7,7 +7,7 @@ DATABASE_LIB_NAME = "database"
 # Paths (always from the root .../devola/)
 DEBUG_EXECUTABLE_PATH_FROM_BUILD_DIR = "server/dev_server"
 SERVICES_PATH = "server/service"
-ROOT_FOLDER_NAME = "devola"
+ROOT_FOLDER_NAME = "devola-unrefactored"
 
 # Docker containers names
 DATABASE_DOCKER_SERVICE_NAME  = "database"
