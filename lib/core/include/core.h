@@ -7,4 +7,3 @@
 #include <core/str.h>
 #include <core/time.h>
 #include <core/utils.h>
-#include <core/websocket.h>
