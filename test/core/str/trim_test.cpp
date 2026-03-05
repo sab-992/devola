@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <trim.h>
+#include <core/str/trim.h>
 #include <string>
 
 class TrimTest : public ::testing::TestWithParam<std::pair<std::string, std::string>> {};

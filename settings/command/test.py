@@ -19,7 +19,7 @@ class Test(Command, Directory, ServiceUpdater):
         return "test"
 
     def command_explicit(self, args: Namespace) -> str:
-        return f"cmake -DCMAKE_BUILD_TYPE=test .. && cmake --build . {f"--target run_all_tests" if not args.regex else ""} && {f"./tests/tests --gtest_filter=\"{args.regex}\" && " if args.regex else ""}"
+        return f"cmake -DCMAKE_BUILD_TYPE=test ..  && cmake --build . {f"--target run_all_tests" if not args.regex else ""}{f"&& ./tests/tests --gtest_filter=\"{args.regex}\"" if args.regex else ""}"
     
     def details(self) -> str:
         return "Launches automated tests."
