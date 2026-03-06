@@ -7,7 +7,9 @@ class Directory():
         pass
 
     def build_directory(self) -> str:
-        return f"{FileSystem().find_root_folder()}/build"
+        build_directory_path = f"{FileSystem().find_root_folder()}/build"
+        os.makedirs(build_directory_path, exist_ok=True)
+        return build_directory_path
 
     def root_directory(self) -> str:
         return FileSystem().find_root_folder()

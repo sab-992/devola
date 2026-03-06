@@ -7,6 +7,7 @@ set(cmake_modules_path "${CMAKE_CURRENT_LIST_DIR}/../cmake")
 
 include("${cmake_modules_path}/FindCppFiles.cmake")
 include("${cmake_modules_path}/LinkAllLibraries.cmake")
+include("${cmake_modules_path}/DatabaseLibrary.cmake")
 
 include(FetchContent)
 FetchContent_Declare(googletest URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip)
@@ -14,8 +15,6 @@ FetchContent_Declare(googletest URL https://github.com/google/googletest/archive
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 enable_testing()
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests) 
 
 find_cpp_files("${CMAKE_CURRENT_LIST_DIR}" test_sources)
 add_executable(tests ${test_sources})
@@ -25,7 +24,7 @@ link_all_libraries(tests "${CMAKE_CURRENT_LIST_DIR}/../lib")
 
 if(WIN32)
     # Windows might need additional libraries
-    target_link_libraries(tests ws2_32)
+    target_link_libraries(tests PRIVATE ws2_32)
 endif()
 
 include(GoogleTest)
