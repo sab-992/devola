@@ -1,5 +1,8 @@
 cmake_policy(SET CMP0135 NEW)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(cmake_modules_path "${CMAKE_CURRENT_LIST_DIR}/../cmake")
 
 include("${cmake_modules_path}/FindCppFiles.cmake")
