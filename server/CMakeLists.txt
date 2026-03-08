@@ -13,6 +13,7 @@ else()
     # This block will be run once. All services will be launched on the current device.
     include("${cmake_modules_path}/IncludeServices.cmake")
     include("${cmake_modules_path}/LinkAllLibraries.cmake")
+    include("${cmake_modules_path}/DatabaseLibrary.cmake")
 
     add_executable (dev_server "${CMAKE_CURRENT_LIST_DIR}/main.cpp")
 
