@@ -59,7 +59,7 @@ namespace http_n
         }
 
         static std::string fusedChunks(const std::string& message) {
-            std::regex pattern("(?:^|\r\n)([0-9A-Fa-f]{1,8})\r\n", std::regex::multiline);
+            std::regex pattern("(?:^|\r\n)([0-9A-Fa-f]{1,8})\r\n");
 
             std::string result;
             std::sregex_iterator begin(message.begin(), message.end(), pattern);
