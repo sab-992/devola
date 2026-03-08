@@ -39,7 +39,7 @@ namespace http_n
 
         void build(std::string headers) {
             for (auto& [nextHeader, value] : m_headersMap)
-                headers = headers + std::format("\r\n{}: {}\r\n", nextHeader, value);
+                headers = headers + std::format("{}: {}\r\n", nextHeader, value);
 
             this->m_headers = headers;
         }
