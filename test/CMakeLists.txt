@@ -19,6 +19,7 @@ enable_testing()
 find_cpp_files("${CMAKE_CURRENT_LIST_DIR}" test_sources)
 add_executable(tests ${test_sources})
 
+target_include_directories(tests PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
 target_link_libraries(tests PRIVATE gtest_main gtest)
 link_all_libraries(tests "${CMAKE_CURRENT_LIST_DIR}/../lib")
 
