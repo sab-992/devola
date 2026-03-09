@@ -1,6 +1,7 @@
 #include <asio.hpp>
 #include <memory>
 #include <thread>
+#include <format>
 
 
 class HttpFakeServer {
@@ -65,25 +66,29 @@ private:
             size_t headersBytesRead = asio::read_until(socket, asio::dynamic_buffer(headers), "\r\n\r\n");
 
             // TO REMOVE
-            std::cout << "Received: " << headersBytesRead << " bytes, headers: " << headers << std::endl << "_____________________________________________________________________________" << std::endl;
+            std::cout << "Received headers (" << headersBytesRead << " bytes):\n" << headers << std::endl << "_____________________________________________________________________________" << std::endl;
 
 
-            std::string response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello, World!";
+            std::string response = "HTTP/1.1 200 OK\r\n";
 
             // TO REMOVE
-            // if (contentLengthValue != -1) {
-            //     std::string body;
+            size_t contentLength = getContentLength(headers);
 
+            if (contentLength > 0) {
+                std::string body = headers.substr(headers.find("\r\n\r\n") + 4);
+                body.resize(contentLength);
+                size_t bodyBytesRead = asio::read(socket, asio::dynamic_buffer(body), asio::transfer_exactly(contentLength - body.size()));
+                std::cout << "Received Body (size: " << contentLength << "):\n" << body << std::endl << "_____________________________________________________________________________" << std::endl;
 
-
-            //     response += body;
-            // }
+                response += std::format("Content-Length: {}\r\n\r\n{}", contentLength, body);
+            } else
+                response += "\r\nHello world!";
 
             asio::write(socket, asio::buffer(response));
         }
     }
 
-    int getContentLength(std::string headers) {
+    size_t getContentLength(std::string headers) {
         int contentLengthValue = -1;
         std::string contentLengthKey = "Content-Length: ";
         size_t contentLengthIndex = headers.find(contentLengthKey);
@@ -93,7 +98,7 @@ private:
 
         size_t valueStart = contentLengthIndex + contentLengthKey.size();
         size_t lineEnd = headers.find("\r\n", valueStart);
-        contentLengthValue = stoi(headers.substr(valueStart, lineEnd - valueStart));
+        contentLengthValue = std::stoull(headers.substr(valueStart, lineEnd - valueStart));
 
         return contentLengthValue;
     }
