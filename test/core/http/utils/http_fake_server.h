@@ -2,6 +2,7 @@
 #include <memory>
 #include <thread>
 #include <format>
+#include <mutex>
 
 
 class HttpFakeServer {
@@ -10,10 +11,14 @@ public:
     void operator=(const HttpFakeServer&) = delete;
 
     static std::shared_ptr<HttpFakeServer> getInstance() {
-        if (m_instance.load() == nullptr)
-            m_instance.store(std::shared_ptr<HttpFakeServer>(new HttpFakeServer())); 
+        if (!m_instance)
+            std::call_once(m_instanceCreated, [](){ m_instance = std::shared_ptr<HttpFakeServer>(new HttpFakeServer()); });
 
-        return m_instance.load();
+        return m_instance;
+    }
+
+    std::string getDefaultBody() {
+        return "Hello world!";
     }
 
     uint16_t port() { return m_port; }
@@ -28,25 +33,25 @@ public:
     void stop() {
         m_stopped = true;
         if (!m_acceptor)
-            return
+            return;
 
         m_acceptor->close();
         m_acceptor = nullptr;
 
-        m_thread->request_stop();
-        m_thread->join();
+        m_thread.reset();
     }
 
 protected:
     HttpFakeServer() {}
 
 private:
-    static inline std::unique_ptr<asio::io_context> m_ioCtx = nullptr;
-    static inline std::unique_ptr<asio::ip::tcp::acceptor> m_acceptor = nullptr;
-    static inline std::atomic<std::shared_ptr<HttpFakeServer>> m_instance = nullptr;
-    static inline uint16_t m_port = 4000;
-    static inline bool m_stopped = false;
-    static inline std::unique_ptr<std::jthread> m_thread = nullptr;
+    std::unique_ptr<asio::ip::tcp::acceptor> m_acceptor = nullptr;
+    static inline std::shared_ptr<HttpFakeServer> m_instance = nullptr;
+    static inline std::once_flag m_instanceCreated;
+    std::unique_ptr<asio::io_context> m_ioCtx = nullptr;
+    uint16_t m_port = 4000;
+    bool m_stopped = false;
+    std::unique_ptr<std::jthread> m_thread = nullptr;
 
     size_t getContentLength(std::string headers) {
         int contentLengthValue = -1;
@@ -99,7 +104,7 @@ private:
             if (contentLength > 0)
                 body = readBody(socket, headers, contentLength);
             else
-                body = "Hello world!"; // Default body
+                body = getDefaultBody(); // Default body
 
             asio::write(socket, asio::buffer(std::format("HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}", body.size(), body)));
         }
