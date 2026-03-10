@@ -11,9 +11,9 @@
 namespace network_n
 {
     template <typename T, typename U, typename V>
-    class Message_c : virtual public network_n::Message_i<T> {
+    class Message : virtual public network_n::Message_i<T> {
     public:
-        ~Message_c() override {}
+        ~Message() override {}
 
         T body() const override { return m_body.get(); }
 
@@ -27,7 +27,7 @@ namespace network_n
         V m_body;
         U m_headers;
 
-        void initialize(U headers, V body) requires (network_n::IsHeader_cpt<U> && network_n::IsBody_cpt<V, T>) {
+        void initialize(U headers, V body) requires (network_n::IsHeader_cpt<U> && network_n::IsBodypt<V, T>) {
             m_headers = headers;
             m_body = body;
         }

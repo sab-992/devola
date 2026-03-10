@@ -13,7 +13,7 @@
 namespace http_n 
 {
     template<typename T>
-    class Body : public network_n::Body_c<T> {
+    class Body : public network_n::Body<T> {
     public:
         Body() {}
 
@@ -39,7 +39,7 @@ namespace http_n
     
     private:
         Body(T messageBody) {
-            network_n::Body_c<T>::m_body = messageBody;
+            network_n::Body<T>::m_body = messageBody;
         }
 
         static std::string extractChunkedContent(std::string message) {

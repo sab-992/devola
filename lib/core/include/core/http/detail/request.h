@@ -13,7 +13,7 @@
 namespace http_n
 {
     template<typename T>
-    class Request : public network_n::Message_c<T, http_n::Headers, http_n::Body<T>>, public http_n::Request_i<T> {
+    class Request : public network_n::Message<T, http_n::Headers, http_n::Body<T>>, public http_n::Request_i<T> {
     public:
         ~Request() {}
 
@@ -31,7 +31,7 @@ namespace http_n
         std::string method() const override { return this->m_headers.method(); }
 
     protected:
-        std::string toString() const override { return network_n::Message_c<T, http_n::Headers, http_n::Body<T>>::toString(); }
+        std::string toString() const override { return network_n::Message<T, http_n::Headers, http_n::Body<T>>::toString(); }
 
     private:
         Request(std::string request) {

@@ -9,9 +9,9 @@
 
 namespace network_n
 {
-    class Headers_c : public network_n::Headers_i {
+    class Headers : public network_n::Headers_i {
     public:
-        ~Headers_c() = default;
+        ~Headers() = default;
 
         std::string apiEndpoint() const override { return m_apiEndpoint; }
 
@@ -29,13 +29,13 @@ namespace network_n
         HeadersUMap_t m_headersMap;
         network_n::Status m_status;
 
-        Headers_c() {}
+        Headers() {}
 
-        Headers_c(std::string headers) : m_headers(headers) {}
+        Headers(std::string headers) : m_headers(headers) {}
 
-        Headers_c(std::string apiEndpoint, const HeadersUMap_t& headersMap) : m_apiEndpoint(apiEndpoint), m_headersMap(headersMap) {}
+        Headers(std::string apiEndpoint, const HeadersUMap_t& headersMap) : m_apiEndpoint(apiEndpoint), m_headersMap(headersMap) {}
 
-        Headers_c(network_n::Code statusCode, const HeadersUMap_t& headersMap) : m_status(network_n::Status(statusCode)), m_headersMap(headersMap) {}
+        Headers(network_n::Code statusCode, const HeadersUMap_t& headersMap) : m_status(network_n::Status(statusCode)), m_headersMap(headersMap) {}
     
         void parse(std::string rawHeaders) {
             if (rawHeaders.empty())

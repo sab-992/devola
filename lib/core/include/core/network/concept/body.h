@@ -7,5 +7,5 @@
 namespace network_n
 {
     template<typename U, typename T>
-    concept IsBody_cpt = std::derived_from<U, network_n::Body_i<T>>;
+    concept IsBodypt = std::derived_from<U, network_n::Body_i<T>>;
 }

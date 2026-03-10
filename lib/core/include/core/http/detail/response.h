@@ -12,7 +12,7 @@
 namespace http_n
 {
     template<typename T>
-    class Response : public network_n::Message_c<T, http_n::Headers, http_n::Body<T>>, public http_n::Response_i<T> {
+    class Response : public network_n::Message<T, http_n::Headers, http_n::Body<T>>, public http_n::Response_i<T> {
     public:
         ~Response() {};
 
@@ -28,7 +28,7 @@ namespace http_n
         network_n::Status status() const override { return this->m_headers.status(); }
 
     protected:
-        std::string toString() const override { return network_n::Message_c<T, http_n::Headers, http_n::Body<T>>::toString(); }
+        std::string toString() const override { return network_n::Message<T, http_n::Headers, http_n::Body<T>>::toString(); }
 
     private:
         Response(std::string response) {

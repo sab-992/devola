@@ -16,21 +16,21 @@ namespace http_n
         virtual std::string method() const = 0;
     };
 
-    class Headers: public network_n::Headers_c, public http_n::ExtraHeaders_i {
+    class Headers: public network_n::Headers, public http_n::ExtraHeaders_i {
     public:
         Headers() {}
 
         Headers(std::string headers)
-        : network_n::Headers_c(headers) { this->parse(headers); }
+        : network_n::Headers(headers) { this->parse(headers); }
 
         Headers(std::string method, std::string apiEndpoint, const network_n::Endpoint& networkEndpoint, const HeadersUMap_t& headersMap) 
-        : network_n::Headers_c(apiEndpoint, headersMap), m_method(method) {
+        : network_n::Headers(apiEndpoint, headersMap), m_method(method) {
             this->m_headersMap["Host"] = std::format("{}:{}", networkEndpoint.host(), networkEndpoint.port());
             build(std::format("{} {} {}", m_method, m_apiEndpoint, http_n::PROTOCOL));
         }
 
         Headers(network_n::Code statusCode, const HeadersUMap_t& headersMap)
-        : network_n::Headers_c(statusCode, headersMap) { /* TODO: Add a way to build response headers */ }
+        : network_n::Headers(statusCode, headersMap) { /* TODO: Add a way to build response headers */ }
 
         std::string method() const override { return m_method; }
 
