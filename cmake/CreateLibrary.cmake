@@ -26,7 +26,7 @@ function(create_library lib_path lib_type link_core)
     
     add_library(${target_name} ${lib_type} ${cpp_sources})
 
-    target_include_directories(${target_name} PUBLIC $<BUILD_INTERFACE:${include_dir}> $<INSTALL_INTERFACE:include>)
+    target_include_directories(${target_name} PUBLIC ${include_dir})
     
     set_target_properties(${target_name} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON POSITION_INDEPENDENT_CODE ON)
 
