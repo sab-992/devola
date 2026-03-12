@@ -1,29 +1,28 @@
 #pragma once
 
-#include <core/network/interface/body.h>
+#include <core/conversion/string_convertible.h>
+#include <core/str/interface/serializer.h>
+#include <core/str/serializer_factory.h>
+#include <memory>
 #include <string>
 
-
-const unsigned int SPACES_FOR_INDENT = 4;
 
 namespace network_n
 {
     template<typename T>
-    class Body : public network_n::Body_i<T> {
+    class Body : public StringConvertible {
     public:
-        ~Body() = default;
+        Body() {}
+        Body(std::string stringBody) : m_stringBody(stringBody) {}
 
-        T get() const override { return m_body; }
+        T convert() const { return m_serializer->deserialize(m_stringBody); }
 
-    protected:
-        T m_body;
+        void set(const T& body) { m_stringBody = m_serializer->serialize(body); }
 
-        Body() : m_body(T{}) {}
+        std::string toString() const override { return m_stringBody; }
 
-        std::string toString() const override {
-            if constexpr (std::is_same_v<T, nlohmann::json>)
-                return m_body.dump(SPACES_FOR_INDENT);
-            return m_body;
-        }
+    private:
+        std::unique_ptr<serializer_n::Serializer_i<T>> m_serializer = serializer_n::Factory<T>::get();
+        std::string m_stringBody;
     };
 }

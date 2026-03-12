@@ -1,0 +1,25 @@
+#pragma once
+
+#include <core/str/detail/serializer/json.h>
+#include <core/str/detail/serializer/xml.h>
+#include <core/str/interface/serializer.h>
+#include <memory>
+#include <nlohmann/json.hpp>
+#include <pugixml.hpp>
+#include <string>
+
+
+namespace serializer_n
+{
+    template<typename T>
+    class Factory {
+    public:
+        static std::unique_ptr<Serializer_i<T>> get() { throw std::exception("Not implemented"); } // TODO: Change for new error type;
+    };
+
+    template <>
+    std::unique_ptr<Serializer_i<nlohmann::json>> Factory<nlohmann::json>::get() { return std::make_unique<JSON>(); }
+
+    template <>
+    std::unique_ptr<Serializer_i<pugi::xml_document>> Factory<pugi::xml_document>::get() { return std::make_unique<XML>(); }
+}

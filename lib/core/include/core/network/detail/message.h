@@ -1,48 +1,48 @@
 #pragma once
 
-#include <core/network/concept/body.h>
-#include <core/network/concept/headers.h>
-#include <core/network/interface/message.h>
+#include <core/conversion/string_convertible.h>
+#include <core/network/detail/body.h>
+#include <core/network/detail/headers.h>
 #include <core/network/network.h>
-#include <core/utils/converter.h>
-#include <string>
+#include <core/network/protocol_factory.h>
+#include <core/utils/interface/builder.h>
 
 
 namespace network_n
 {
-    template <typename T, typename U, typename V>
-    class Message : virtual public network_n::Message_i<T> {
+    template <typename Derived, typename T>
+    class Message : public StringConvertible, public Builder_i<Derived> {
     public:
-        ~Message() override {}
+        Message() {}
 
-        T body() const override { return m_body.get(); }
+        T getBody() const { return m_body.convert(); }
 
-        std::string getHeader(std::string header) const override { return m_headers.getHeader(header); }
+        std::string getHeader(std::string name) const { return m_headers.getHeader(); }
 
-        std::string headers() const override { return m_headers.get(); }
+        headersUMap_t getHeadersAsMap() const { return m_headers.toMap(); }
 
-        HeadersUMap_t headersMap() const override { return m_headers.map(); }
+        Derived& setBody(const T& body) {
+            m_body.set(body);
+            return static_cast<Derived&>(*this);
+        }
+
+        Derived& setHeader(std::string name, std::string value) {
+            m_headers.setHeader(name, value);
+            return static_cast<Derived&>(*this);
+        }
+
+        Derived& setProtocol(Protocol protocol) {
+            m_protocol = protocol_n::Factory::get<T>(protocol);
+            return static_cast<Derived&>(*this);
+        }
+
+        std::string toString() const override { return m_protocol->build(m_headers, m_body); }
 
     protected:
-        V m_body;
-        U m_headers;
+        Body<T> m_body;
+        Headers m_headers;
+        std::unique_ptr<network_n::protocol_n::Protocol_i<T>> m_protocol = protocol_n::Factory::get<T>(DEFAULT_PROTOCOL);
 
-        void initialize(U headers, V body) requires (network_n::IsHeader_cpt<U> && network_n::IsBodypt<V, T>) {
-            m_headers = headers;
-            m_body = body;
-        }
-
-        std::pair<std::string, std::string> split(std::string message) {
-            const std::string HEADER_END_TOKEN = "\r\n\r\n";
-            const size_t END_OF_HEADERS = message.find(HEADER_END_TOKEN);
-
-            if (END_OF_HEADERS == std::string::npos)
-                return { "", "" };
-
-            // Returned pair = { Headers (string), Body (string) }.
-            return std::make_pair(message.substr(0, END_OF_HEADERS + HEADER_END_TOKEN.size()), message.substr(END_OF_HEADERS  + HEADER_END_TOKEN.size()));
-        }
-
-        std::string toString() const override { return std::format("{}\r\n\r\n{}", Converter<U>::toString(m_headers), Converter<V>::toString(m_body)); }
+        void setStartLine(std::string startLine) { m_headers.setStartLine(startLine); }
     };
 }
