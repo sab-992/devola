@@ -13,7 +13,7 @@ namespace network_n
     template <typename Derived, typename T>
     class Message : public StringConvertible, public Builder_i<Derived> {
     public:
-        Message() {}
+        virtual ~Message() = default;
 
         T getBody() const { return m_body.convert(); }
 
@@ -39,6 +39,8 @@ namespace network_n
         std::string toString() const override { return m_protocol->build(m_headers, m_body); }
 
     protected:
+        Message() {}
+
         Body<T> m_body;
         Headers m_headers;
         std::unique_ptr<network_n::protocol_n::Protocol_i<T>> m_protocol = protocol_n::Factory::get<T>(DEFAULT_PROTOCOL);
