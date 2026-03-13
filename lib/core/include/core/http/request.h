@@ -46,7 +46,7 @@ namespace http_n {
         uint16_t m_port;
         std::string m_URL;
 
-        void validateMembers() {
+        void validateMembers() const {
             if (m_APIEndpoint.empty())  throw std::invalid_argument("Request API endpoint cannot be empty");
             if (m_method.empty())       throw std::invalid_argument("Request HTTP method cannot be empty");
             if (m_URL.empty())          throw std::invalid_argument("Request host URL cannot be empty");

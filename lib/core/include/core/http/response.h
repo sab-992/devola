@@ -28,7 +28,7 @@ namespace http_n {
     private:
         network_n::Status_s m_status;
 
-        void validateMembers() {
+        void validateMembers() const {
             if (m_status.code() == network_n::Code::NONE)  throw std::invalid_argument("Response status cannot be empty");
         }
     };
