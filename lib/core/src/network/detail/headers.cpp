@@ -3,6 +3,23 @@
 
 network_n::Headers::Headers() {}
 
+network_n::Headers::Headers(const Headers& other)  {
+    m_headersMap = other.m_headersMap;
+    m_startLine = other.m_startLine;
+}
+
+network_n::Headers::Headers(Headers&& other) {
+    m_headersMap = std::move(other.m_headersMap);
+    m_startLine = std::move(other.m_startLine);
+}
+
+network_n::Headers::~Headers() {}
+
+network_n::Headers& network_n::Headers::operator=(Headers other) {
+    swap(*this, other);
+    return *this;
+}
+
 std::string network_n::Headers::getHeader(std::string name) const {
     return m_headersMap.contains(name) ? m_headersMap.at(name) : "";
 }
