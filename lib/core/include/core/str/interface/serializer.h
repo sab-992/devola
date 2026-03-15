@@ -5,6 +5,7 @@
 
 namespace serializer_n
 {
+    // Any class implementing this interface NEED to be stateless.
     template<typename T>
     class Serializer_i {
     public:

@@ -14,15 +14,26 @@ namespace network_n
     public:
         Body() {}
         Body(std::string stringBody) : m_stringBody(stringBody) {}
+        Body(const Body<T>& other) { m_stringBody = other.m_stringBody; }
+        Body(Body<T>&& other) { m_stringBody = std::move(other.m_stringBody); }
 
-        T convert() const { return m_serializer->deserialize(m_stringBody); }
+        Body<T>& operator=(Body<T> other) {
+            swap(*this, other);
+            return *this;
+        }
 
-        void set(const T& body) { m_stringBody = m_serializer->serialize(body); }
+        friend void swap(Body<T>& receiver, Body<T>& other) { std::swap(receiver.m_stringBody, other.m_stringBody); }
+
+        T convert() const { return serializer()->deserialize(m_stringBody); }
+        void set(const T& body) { m_stringBody = serializer()->serialize(body); }
 
         std::string toString() const override { return m_stringBody; }
 
     private:
-        std::unique_ptr<serializer_n::Serializer_i<T>> m_serializer = serializer_n::Factory<T>::get();
         std::string m_stringBody;
+
+        std::unique_ptr<serializer_n::Serializer_i<T>> serializer() const {
+            return serializer_n::Factory<T>::get();
+        }
     };
 }
