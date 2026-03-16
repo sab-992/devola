@@ -9,11 +9,13 @@
 
 namespace network_n
 {
-    enum class Protocol {
-        HTTP1_1
-    };
-
-    constexpr Protocol DEFAULT_PROTOCOL = Protocol::HTTP1_1;
+    namespace protocol_n
+    {
+        enum class Protocol {
+            HTTP1_1,
+            NONE // For error handling
+        };
+    }
 
     enum class Code : uint16_t {
         OK           = 200,
@@ -27,7 +29,7 @@ namespace network_n
 
         SERVER_ERROR = 500,
 
-        NONE = 0 /* for validation purposes */
+        NONE = 0 // For error handling
     };
 
     const std::unordered_map<Code, std::string> STATUS_REASONS = {

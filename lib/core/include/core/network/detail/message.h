@@ -16,9 +16,7 @@ namespace network_n
         virtual ~Message() = default;
 
         T getBody() const { return m_body.convert(); }
-
         std::string getHeader(std::string name) const { return m_headers.getHeader(); }
-
         headersUMap_t getHeadersAsMap() const { return m_headers.toMap(); }
 
         Derived& setBody(const T& body) {
@@ -31,19 +29,26 @@ namespace network_n
             return static_cast<Derived&>(*this);
         }
 
-        Derived& setProtocol(Protocol protocol) {
-            m_protocol = protocol_n::Factory::get<T>(protocol);
+        Derived& setProtocol(protocol_n::Protocol protocol) {
+            m_protocol = protocol;
             return static_cast<Derived&>(*this);
         }
 
-        std::string toString() const override { return m_protocol->build(m_headers, m_body); }
+        std::string toString() const override { return protocol()->build(m_headers, m_body); }
 
     protected:
-        Message() {}
+        Message() = default;
+        Message(const Message&) = default;
+        Message& operator=(const Message<Derived, T>&) = default;
+        Message(Message&&) = default;
 
         Body<T> m_body;
         Headers m_headers;
-        std::unique_ptr<network_n::protocol_n::Protocol_i<T>> m_protocol = protocol_n::Factory::get<T>(DEFAULT_PROTOCOL);
+        protocol_n::Protocol m_protocol = protocol_n::Protocol::NONE;
+
+        std::unique_ptr<protocol_n::Protocol_i<T>> protocol() const {
+            return protocol_n::Factory::get<T>(m_protocol);
+        }
 
         void setStartLine(std::string startLine) { m_headers.setStartLine(startLine); }
     };
