@@ -17,6 +17,8 @@ namespace network_n
         Body(const Body<T>& other) { m_stringBody = other.m_stringBody; }
         Body(Body<T>&& other) { m_stringBody = std::move(other.m_stringBody); }
 
+        ~Body() {}
+
         Body<T>& operator=(Body<T> other) {
             swap(*this, other);
             return *this;

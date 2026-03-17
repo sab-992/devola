@@ -26,6 +26,8 @@ namespace http_n {
             m_URL = std::move(other.m_URL);
         }
 
+        ~Request() {}
+
         Request<T>& operator=(Request<T> other) {
             swap(*this, other);
             return *this;
