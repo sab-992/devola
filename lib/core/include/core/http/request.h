@@ -33,17 +33,6 @@ namespace http_n {
             return *this;
         }
 
-        friend void swap(Request<T>& lhs, Request<T>& rhs) {
-            using std::swap;
-
-            swap(static_cast<network_n::Message<Request<T>, T>&>(lhs), static_cast<network_n::Message<Request<T>, T>&>(rhs));
-
-            swap(lhs.m_APIEndpoint, rhs.m_APIEndpoint);
-            swap(lhs.m_method, rhs.m_method);
-            swap(lhs.m_port, rhs.m_port);
-            swap(lhs.m_URL, rhs.m_URL);
-        }
-
         std::string APIEndpoint() { return m_APIEndpoint; }
 
         Request<T> build() override {
@@ -73,6 +62,17 @@ namespace http_n {
         Request<T>& setURL(std::string url) {
             m_URL = url;
             return *this;
+        }
+
+        friend void swap(Request<T>& lhs, Request<T>& rhs) {
+            using std::swap;
+
+            swap(static_cast<network_n::Message<Request<T>, T>&>(lhs), static_cast<network_n::Message<Request<T>, T>&>(rhs));
+
+            swap(lhs.m_APIEndpoint, rhs.m_APIEndpoint);
+            swap(lhs.m_method, rhs.m_method);
+            swap(lhs.m_port, rhs.m_port);
+            swap(lhs.m_URL, rhs.m_URL);
         }
 
     private:

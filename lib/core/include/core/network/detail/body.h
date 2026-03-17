@@ -24,10 +24,10 @@ namespace network_n
             return *this;
         }
 
-        friend void swap(Body<T>& lhs, Body<T>& rhs) { std::swap(lhs.m_stringBody, rhs.m_stringBody); }
-
         T convert() const { return serializer()->deserialize(m_stringBody); }
         void set(const T& body) { m_stringBody = serializer()->serialize(body); }
+
+        friend void swap(Body<T>& lhs, Body<T>& rhs) { std::swap(lhs.m_stringBody, rhs.m_stringBody); }
 
         std::string toString() const override { return m_stringBody; }
 
