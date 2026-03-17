@@ -21,12 +21,10 @@ namespace network_n
         OK           = 200,
         CREATED      = 201,
         NO_CONTENT   = 204,
-
         BAD_REQUEST  = 400,
         UNAUTHORIZED = 401,
         FORBIDDEN    = 403,
         NOT_FOUND    = 404,
-
         SERVER_ERROR = 500,
 
         NONE = 0 // For error handling
@@ -36,19 +34,19 @@ namespace network_n
         { Code::OK,             "OK" },
         { Code::CREATED,        "Created" },
         { Code::NO_CONTENT,     "No Content" },
-
         { Code::BAD_REQUEST,    "Bad Request" },
         { Code::UNAUTHORIZED,   "Unauthorized" },
         { Code::FORBIDDEN,      "Forbidden" },
         { Code::NOT_FOUND,      "Not Found" },
-
         { Code::SERVER_ERROR,   "Internal Server Error" },
+
+        { Code::NONE,           "N/A" },
     };
 
     // TODO: Overload operator==, for int and for Code.
     struct Status_s : public StringConvertible {
     public:
-        Status_s(Code code) : m_code(code), m_reason(STATUS_REASONS.at(code)) {}
+        Status_s(Code code = Code::NONE) : m_code(code), m_reason(STATUS_REASONS.at(code)) {}
 
         Code code() const { return m_code; }
         std::string reason() const { return m_reason; }
