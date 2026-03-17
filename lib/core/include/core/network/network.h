@@ -48,8 +48,33 @@ namespace network_n
     public:
         Status_s(Code code = Code::NONE) : m_code(code), m_reason(STATUS_REASONS.at(code)) {}
 
+        Status_s(const Status_s& other) {
+            m_code = other.m_code;
+            m_reason = other.m_reason;
+        }
+
+        Status_s(Status_s&& other) {
+            m_code = std::move(other.m_code);
+            m_reason = std::move(other.m_reason);
+        }
+
+        ~Status_s() {}
+
+        Status_s& operator=(Status_s other) {
+            swap(*this, other);
+            return *this;
+        }
+
         Code code() const { return m_code; }
         std::string reason() const { return m_reason; }
+
+        friend void swap(Status_s& lhs, Status_s& rhs) {
+            using std::swap;
+
+            swap(lhs.m_code, rhs.m_code);
+            swap(lhs.m_reason, rhs.m_reason);
+        }
+
         std::string toString() const override { return std::format("{} {}", static_cast<uint16_t>(m_code), m_reason); }
 
     private:
