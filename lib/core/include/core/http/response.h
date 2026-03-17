@@ -8,11 +8,20 @@ namespace http_n {
     template <typename T>
     class Response : public network_n::Message<Response<T>, T> {
     public:
-        Response() {}
+        Response() { this->m_protocol = http_n::DEFAULT_PROTOCOL; }
+        Response(const Response<T>& other) : network_n::Message<Response<T>, T>(other) { m_status = other.m_status; }
+        Response(Response<T>&& other) : network_n::Message<Response<T>, T>(std::move(other)) { m_status = std::move(other.m_status); }
 
-        Response<T>& build() override {
+        ~Response() {}
+
+        Response<T>& operator=(Response<T> other) {
+            swap(*this, other);
+            return *this;
+        }
+
+        Response<T> build() override {
             validateMembers();
-            this->setStartLine(std::format("{} {} {}", this->m_protocol->toString(), m_status.code(), m_status.reason()));
+            this->setStartLine(std::format("{} {}", this->protocol()->toString(), m_status.toString()));
             return *this;
         }
         
@@ -23,6 +32,14 @@ namespace http_n {
 
         network_n::Status_s status() const {
             return m_status;
+        }
+
+        friend void swap(Response<T>& lhs, Response<T>& rhs) {
+            using std::swap;
+
+            swap(static_cast<network_n::Message<Response<T>, T>&>(lhs), static_cast<network_n::Message<Response<T>, T>&>(rhs));
+
+            swap(lhs.m_status, rhs.m_status);
         }
 
     private:
