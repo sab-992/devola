@@ -12,14 +12,14 @@ namespace http_n {
             m_port = this->protocol()->defaultPort();
         }
 
-        Request(const Request<T>& other) {
+        Request(const Request<T>& other) : network_n::Message<Request<T>, T>(other) {
             m_APIEndpoint = other.m_APIEndpoint;
             m_method = other.m_method;
             m_port = other.m_port;
             m_URL = other.m_URL;
         }
 
-        Request(Request<T>&& other) {
+        Request(Request<T>&& other) : network_n::Message<Request<T>, T>(std::move(other)) {
             m_APIEndpoint = std::move(other.m_APIEndpoint);
             m_method = std::move(other.m_method);
             m_port = std::move(other.m_port);
@@ -36,6 +36,8 @@ namespace http_n {
         friend void swap(Request<T>& lhs, Request<T>& rhs) {
             using std::swap;
 
+            swap(static_cast<network_n::Message<Request<T>, T>&>(lhs), static_cast<network_n::Message<Request<T>, T>&>(rhs));
+
             swap(lhs.m_APIEndpoint, rhs.m_APIEndpoint);
             swap(lhs.m_method, rhs.m_method);
             swap(lhs.m_port, rhs.m_port);
@@ -44,7 +46,7 @@ namespace http_n {
 
         std::string APIEndpoint() { return m_APIEndpoint; }
 
-        Request<T>& build() override {
+        Request<T> build() override {
             validateMembers();
             this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->protocol()->toString()));
             this->m_headers.setHeader("Host", std::format("{}:{}", m_URL, m_port));
