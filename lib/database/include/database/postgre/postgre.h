@@ -10,7 +10,7 @@ class PostgreSQL : public Database_i {
 public:
     ~PostgreSQL() override;
 
-    static std::shared_ptr<Database_i> create();
+    static std::shared_ptr<Database_i> get();
 
     bool connect() override;
 protected:

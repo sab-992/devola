@@ -47,7 +47,7 @@ namespace network_n
         protocol_n::Protocol m_protocol = protocol_n::Protocol::NONE;
 
         std::unique_ptr<protocol_n::Protocol_i<T>> protocol() const {
-            return protocol_n::Factory::get<T>(m_protocol);
+            return protocol_n::Factory::create<T>(m_protocol);
         }
 
         void setStartLine(std::string startLine) { m_headers.setStartLine(startLine); }

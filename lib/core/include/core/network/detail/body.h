@@ -35,7 +35,7 @@ namespace network_n
         std::string m_stringBody;
 
         std::unique_ptr<serializer_n::Serializer_i<T>> serializer() const {
-            return serializer_n::Factory<T>::get();
+            return serializer_n::Factory<T>::create();
         }
     };
 }

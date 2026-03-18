@@ -14,12 +14,12 @@ namespace serializer_n
     template<typename T>
     class Factory {
     public:
-        static std::unique_ptr<Serializer_i<T>> get() { throw std::exception("Not implemented"); } // TODO: Change for new error type;
+        static std::unique_ptr<Serializer_i<T>> create() { throw std::exception("Not implemented"); } // TODO: Change for new error type;
     };
 
     template <>
-    std::unique_ptr<Serializer_i<nlohmann::json>> Factory<nlohmann::json>::get() { return std::make_unique<JSON>(); }
+    std::unique_ptr<Serializer_i<nlohmann::json>> Factory<nlohmann::json>::create() { return std::make_unique<JSON>(); }
 
     template <>
-    std::unique_ptr<Serializer_i<pugi::xml_document>> Factory<pugi::xml_document>::get() { return std::make_unique<XML>(); }
+    std::unique_ptr<Serializer_i<pugi::xml_document>> Factory<pugi::xml_document>::create() { return std::make_unique<XML>(); }
 }
