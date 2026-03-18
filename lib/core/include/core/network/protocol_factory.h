@@ -14,7 +14,7 @@ namespace network_n
         class Factory {
         public:
             template <typename T>
-            static std::unique_ptr<Protocol_i<T>> get(Protocol protocol) {
+            static std::unique_ptr<Protocol_i<T>> create(Protocol protocol) {
                 switch (protocol)
                 {
                 case Protocol::HTTP1_1:
