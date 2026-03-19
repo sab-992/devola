@@ -22,7 +22,7 @@ namespace http_n {
         Response<T> build() override {
             validateMembers();
             this->setStartLine(std::format("{} {}", this->protocol()->toString(), m_status.toString()));
-            return *this;
+            return std::move(*this);
         }
         
         Response<T>& setStatus(network_n::Code code) {
