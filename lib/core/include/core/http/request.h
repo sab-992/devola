@@ -7,10 +7,7 @@ namespace http_n {
     template <typename T>
     class Request : public network_n::Message<Request<T>, T> {
     public:
-        Request() {
-            this->m_protocol = http_n::DEFAULT_PROTOCOL;
-            m_port = this->protocol()->defaultPort();
-        }
+        Request() { this->m_protocol = http_n::DEFAULT_PROTOCOL; }
 
         Request(const Request<T>& other) : network_n::Message<Request<T>, T>(other) {
             m_APIEndpoint = other.m_APIEndpoint;
@@ -33,16 +30,18 @@ namespace http_n {
             return *this;
         }
 
-        std::string APIEndpoint() { return m_APIEndpoint; }
+        std::string APIEndpoint() const { return m_APIEndpoint; }
 
         Request<T> build() override {
+            m_port = m_port == 0 ? this->protocol()->defaultPort() :  m_port;
             validateMembers();
             this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->protocol()->toString()));
             this->m_headers.setHeader("Host", std::format("{}:{}", m_URL, m_port));
-            return *this;
+            return std::move(*this);
         }
 
-        std::string method() { return m_method; }
+        std::string method() const { return m_method; }
+        uint16_t port() const { return m_port; }
 
         Request<T>& setAPIEndpoint(std::string endpoint) {
             m_APIEndpoint = endpoint;
@@ -75,10 +74,12 @@ namespace http_n {
             swap(lhs.m_URL, rhs.m_URL);
         }
 
+        std::string url() const { return m_URL; }
+
     private:
         std::string m_APIEndpoint;
         std::string m_method;
-        uint16_t m_port;
+        uint16_t m_port = 0;
         std::string m_URL;
 
         void validateMembers() const {
