@@ -1,70 +1,125 @@
-// #pragma once
+#pragma once
 
-// #include <asio.hpp>
-// #include <core/http/detail/request.h>
-// #include <core/http/detail/response.h>
-// #include <core/http/detail/settings.h>
-// #include <core/network/network.h>
-// #include <core/utils/converter.h>
-// #include <format>
-// #include <nlohmann/json.hpp>
+#include <asio.hpp>
+#include <core/http/request.h>
+#include <core/http/response.h>
+#include <memory>
+#include <mutex>
+#include <nlohmann/json.hpp>
+#include <string>
+#include <utility>
 
 
-// // TODO: Make it singleton
-// // TODO: Incorporate in http_n
-// // TODO: Change name to client and file name to http-client
-// // TODO: Mess around with asio's async feature
-// template<typename T>
-// class Http {
-// public:
-//     static std::unique_ptr<http_n::Response_i<std::string>> del(std::string apiEndpoint, const network_n::Endpoint& networkEndpoint) {
-//         return http_n::Response<std::string>::create("");
-//     }
+namespace http_n
+{
+    template<typename T>
+    class Http {
+    public:
+        Http(const Http&) = delete;
+        Http& operator=(const Http&) = delete;
 
-//     static std::unique_ptr<http_n::Response_i<T>> get(std::string apiEndpoint, const network_n::Endpoint& networkEndpoint) {
-//         // TODO change Accept(T()) to somehting else so no need to create T().
-//         HeadersUMap_t headersMap = { { "Accept",     accept(T()) },
-//                                      { "User-Agent", http_n::USER_AGENT },
-//                                      { "Connection", http_n::CLOSE_CONNECTION } };
-//         asio::ip::tcp::socket socket(send(http_n::Request<T>::create("GET", apiEndpoint, networkEndpoint, headersMap), networkEndpoint));
-        
-//         return http_n::Response<T>::create(receive(socket));
-//     }
+        Http(Http&&) = delete;
+        Http& operator=(Http&&) = delete;
 
-//     static std::unique_ptr<http_n::Response_i<std::string>> head() { return http_n::Response<std::string>::create(""); }
-//     static std::unique_ptr<http_n::Response_i<std::string>> options() { return http_n::Response<std::string>::create(""); }
-//     static std::unique_ptr<http_n::Response_i<T>> patch() { return http_n::Response<T>::create(T()); }
-//     static std::unique_ptr<http_n::Response_i<T>> post() { return http_n::Response<T>::create(T()); }
-//     static std::unique_ptr<http_n::Response_i<T>> put() { return http_n::Response<T>::create(T()); }
+        ~Http() {}
 
-// private:
-//     inline static asio::io_context m_ioContext;
+        class Asynchronous;
+        class Synchronous;
 
-//     static asio::ip::tcp::socket send(const std::unique_ptr<http_n::Request_i<T>>& request, const network_n::Endpoint& networkEndpoint) {
-//         asio::ip::tcp::resolver resolver(m_ioContext);
-//         asio::ip::tcp::socket socket(m_ioContext);
-//         asio::connect(socket, resolver.resolve(networkEndpoint.host(), std::format("{}", networkEndpoint.port())));
+        // Function names are capitalized because 'delete' is a C++ reserved keyword.
+        class RequestPresets {
+        public:
+            RequestPresets() = delete;
+            ~RequestPresets() = default;
 
-//         asio::write(socket, asio::buffer(Converter<http_n::Request_i<T>>::toString(*request)));
-//         return socket;
-//     }
+            static Request<T> Delete() { /* TODO */ return std::move(create()); }
 
-//     static std::string receive(asio::ip::tcp::socket& socket) {
-//         std::string message;
-//         std::array<char, http_n::TCP_WINDOW_SIZE> buffer;
-//         std::error_code error;
-//         while (size_t bytesRead = socket.read_some(asio::buffer(buffer), error)) {
-//             if (error == asio::error::eof)
-//                 break;
-//             else if (error)
-//                 throw std::system_error(error);
+            static Request<T> Get() {
+                return std::move(create().setMethod("GET")
+                                         .setHeader("Accept", Http<T>::accept())
+                                         .setHeader("User-Agent", USER_AGENT)
+                                         .setHeader("Connection", CLOSE_CONNECTION));
+            }
 
-//             message.append(buffer.data(), bytesRead);
-//         }
-//         return message;
-//     }
+            static Request<T> Head() { /* TODO */ return std::move(create()); }
 
-//     static std::string accept(json) { return "application/json"; }
-//     static std::string accept(std::string) { return "text/html"; }
-// };
+            static Request<T> Options() { /* TODO */ return std::move(create()); }
 
+            static Request<T> Patch() { /* TODO */ return std::move(create()); }
+
+            static Request<T> Post() { /* TODO */ return std::move(create()); }
+
+            static Request<T> Put() { /* TODO */ return std::move(create()); }
+
+        private:
+            inline static const std::string CLOSE_CONNECTION = "close";
+            inline static const std::string USER_AGENT = "Devola/1.0";
+
+            static Request<T> create() { return std::move(Request<T>().setProtocol(network_n::protocol_n::Protocol::HTTP1_1)); }
+        };
+
+        std::unique_ptr<Http<T>::Asynchronous> async = std::make_unique<Http<T>::Asynchronous>();
+        std::unique_ptr<Http<T>::Synchronous> sync = std::make_unique<Http<T>::Synchronous>();
+
+        static std::shared_ptr<Http<T>> instance() {
+            std::call_once(m_httpInitFlag, &Http::createInstance);
+            return m_instance;
+        }
+
+    private:
+        Http() {}
+
+        class Asynchronous {
+        public:
+            Asynchronous() = default;
+
+            friend std::unique_ptr<Asynchronous> std::make_unique<Asynchronous>();
+
+            asio::ip::tcp::socket send(const Request<T>& request) const { /* TODO */ asio::ip::tcp::socket socket(m_ioContext); return std::move(socket); }
+            Response<T> receive(asio::ip::tcp::socket& socket) const {  /* TODO */ return std::move(Response<T>()); }
+        };
+
+        class Synchronous {
+        public:
+            Synchronous() = default;
+
+            friend std::unique_ptr<Synchronous> std::make_unique<Synchronous>();
+
+            asio::ip::tcp::socket send(const Request<T>& request) const {
+                asio::ip::tcp::resolver resolver(m_ioContext);
+                asio::ip::tcp::socket socket(m_ioContext);
+                asio::connect(socket, resolver.resolve(request.url(), std::to_string(request.port())));
+                asio::write(socket, asio::buffer(request.toString()));
+                return std::move(socket);
+            }
+
+            Response<T> receive(asio::ip::tcp::socket& socket) const {
+                using namespace asio;
+
+                std::string message;
+                error_code ec;
+                read(socket,  dynamic_buffer(message), transfer_all(), ec);
+
+                if (ec and ec != error::eof)
+                    throw std::runtime_error("Error while reading response: " + ec.message());
+
+                return std::move(Response<T>()); // TODO: pass the message to build response.
+            }
+
+            Response<T> receive(asio::ip::tcp::socket&& socket) const { return std::move(receive(socket)); }
+        };
+
+        inline static std::once_flag m_httpInitFlag;
+        inline static std::shared_ptr<Http<T>> m_instance;
+        inline static asio::io_context m_ioContext;
+
+        static std::string accept() { throw std::runtime_error("Not implemented"); }
+        static void createInstance() { m_instance = std::shared_ptr<Http<T>>(new Http<T>()); }
+    };
+
+    template<>
+    std::string Http<nlohmann::json>::accept() { return "application/json"; }
+
+    template<>
+    std::string Http<std::string>::accept() { return "text/html"; }
+}
