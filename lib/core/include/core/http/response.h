@@ -19,9 +19,13 @@ namespace http_n {
             return *this;
         }
 
-        Response<T> build() override {
-            validateMembers();
-            this->setStartLine(std::format("{} {}", this->protocol()->toString(), m_status.toString()));
+        Response<T>& build() & override {
+            finalize();
+            return *this;
+        }
+
+        Response<T> build() && override {
+            finalize();
             return std::move(*this);
         }
         
@@ -47,6 +51,11 @@ namespace http_n {
 
         void validateMembers() const {
             if (m_status.code() == network_n::Code::NONE)  throw std::invalid_argument("Response status cannot be empty");
+        }
+
+        void finalize() {
+            validateMembers();
+            this->setStartLine(std::format("{} {}", this->protocol()->toString(), m_status.toString()));
         }
     };
 }

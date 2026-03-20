@@ -32,11 +32,13 @@ namespace http_n {
 
         std::string APIEndpoint() const { return m_APIEndpoint; }
 
-        Request<T> build() override {
-            m_port = m_port == 0 ? this->protocol()->defaultPort() :  m_port;
-            validateMembers();
-            this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->protocol()->toString()));
-            this->m_headers.setHeader("Host", std::format("{}:{}", m_URL, m_port));
+        Request<T>& build() & override {
+            finalize();
+            return *this;
+        }
+
+        Request<T> build() && override {
+            finalize();
             return std::move(*this);
         }
 
@@ -89,6 +91,13 @@ namespace http_n {
             if (m_method.empty()) throw std::invalid_argument("Request HTTP method cannot be empty");
             if (m_URL.empty()) throw std::invalid_argument("Request host URL cannot be empty");
             if (this->m_protocol == Protocol::NONE) throw std::invalid_argument("Protocol cannot be NONE");
+        }
+
+        void finalize() {
+            m_port = m_port == 0 ? this->protocol()->defaultPort() :  m_port;
+            validateMembers();
+            this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->protocol()->toString()));
+            this->m_headers.setHeader("Host", std::format("{}:{}", m_URL, m_port));
         }
     };
 }
