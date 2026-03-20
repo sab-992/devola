@@ -12,7 +12,6 @@
 
 namespace http_n
 {
-    template<typename T>
     class Http {
     public:
         Http(const Http&) = delete;
@@ -27,6 +26,7 @@ namespace http_n
         class Synchronous;
 
         // Function names are capitalized because 'delete' is a C++ reserved keyword.
+        template<typename T>
         class RequestPresets {
         public:
             RequestPresets() = delete;
@@ -36,7 +36,7 @@ namespace http_n
 
             static Request<T> Get() {
                 return std::move(create().setMethod("GET")
-                                         .setHeader("Accept", Http<T>::accept())
+                                         .setHeader("Accept", RequestPresets<T>::accept())
                                          .setHeader("User-Agent", USER_AGENT)
                                          .setHeader("Connection", CLOSE_CONNECTION));
             }
@@ -55,13 +55,14 @@ namespace http_n
             inline static const std::string CLOSE_CONNECTION = "close";
             inline static const std::string USER_AGENT = "Devola/1.0";
 
+            static std::string accept() { throw std::runtime_error("Not implemented"); }
             static Request<T> create() { return std::move(Request<T>().setProtocol(network_n::protocol_n::Protocol::HTTP1_1)); }
         };
 
-        std::unique_ptr<Http<T>::Asynchronous> async = std::make_unique<Http<T>::Asynchronous>();
-        std::unique_ptr<Http<T>::Synchronous> sync = std::make_unique<Http<T>::Synchronous>();
+        std::unique_ptr<Http::Asynchronous> async = std::make_unique<Http::Asynchronous>();
+        std::unique_ptr<Http::Synchronous> sync = std::make_unique<Http::Synchronous>();
 
-        static std::shared_ptr<Http<T>> instance() {
+        static std::shared_ptr<Http> instance() {
             std::call_once(m_httpInitFlag, &Http::createInstance);
             return m_instance;
         }
@@ -75,8 +76,14 @@ namespace http_n
 
             friend std::unique_ptr<Asynchronous> std::make_unique<Asynchronous>();
 
+            template<typename T>
             asio::ip::tcp::socket send(const Request<T>& request) const { /* TODO */ asio::ip::tcp::socket socket(m_ioContext); return std::move(socket); }
+
+            template<typename T>
             Response<T> receive(asio::ip::tcp::socket& socket) const {  /* TODO */ return std::move(Response<T>()); }
+
+            template<typename T>
+            Response<T> receive(asio::ip::tcp::socket&& socket) const { return std::move(receive<T>(socket)); }
         };
 
         class Synchronous {
@@ -85,6 +92,7 @@ namespace http_n
 
             friend std::unique_ptr<Synchronous> std::make_unique<Synchronous>();
 
+            template<typename T>
             asio::ip::tcp::socket send(const Request<T>& request) const {
                 asio::ip::tcp::resolver resolver(m_ioContext);
                 asio::ip::tcp::socket socket(m_ioContext);
@@ -93,6 +101,7 @@ namespace http_n
                 return std::move(socket);
             }
 
+            template<typename T>
             Response<T> receive(asio::ip::tcp::socket& socket) const {
                 using namespace asio;
 
@@ -106,20 +115,20 @@ namespace http_n
                 return std::move(Response<T>()); // TODO: pass the message to build response.
             }
 
-            Response<T> receive(asio::ip::tcp::socket&& socket) const { return std::move(receive(socket)); }
+            template<typename T>
+            Response<T> receive(asio::ip::tcp::socket&& socket) const { return std::move(receive<T>(socket)); }
         };
 
         inline static std::once_flag m_httpInitFlag;
-        inline static std::shared_ptr<Http<T>> m_instance;
+        inline static std::shared_ptr<Http> m_instance;
         inline static asio::io_context m_ioContext;
 
-        static std::string accept() { throw std::runtime_error("Not implemented"); }
-        static void createInstance() { m_instance = std::shared_ptr<Http<T>>(new Http<T>()); }
+        static void createInstance() { m_instance = std::shared_ptr<Http>(new Http()); }
     };
 
     template<>
-    std::string Http<nlohmann::json>::accept() { return "application/json"; }
+    std::string Http::RequestPresets<nlohmann::json>::accept() { return "application/json"; }
 
     template<>
-    std::string Http<std::string>::accept() { return "text/html"; }
+    std::string Http::RequestPresets<std::string>::accept() { return "text/html"; }
 }
