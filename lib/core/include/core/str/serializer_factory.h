@@ -15,7 +15,7 @@ namespace serializer_n
     template<typename T>
     class Factory {
     public:
-        static std::unique_ptr<Serializer_i<T>> create() { throw std::exception("Not implemented"); } // TODO: Change for new error type;
+        static std::unique_ptr<Serializer_i<T>> create() { throw std::exception("Not implemented"); }
     };
 
     template <>
