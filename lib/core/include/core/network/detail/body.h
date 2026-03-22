@@ -12,8 +12,7 @@ namespace network_n
     template<typename T>
     class Body : public StringConvertible {
     public:
-        Body() {}
-        Body(std::string stringBody) : m_stringBody(stringBody) {}
+        Body(const std::string& stringBody="") : m_stringBody(stringBody) {}
         Body(const Body<T>& other) { m_stringBody = other.m_stringBody; }
         Body(Body<T>&& other) { m_stringBody = std::move(other.m_stringBody); }
 

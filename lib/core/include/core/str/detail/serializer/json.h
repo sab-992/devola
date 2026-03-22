@@ -18,4 +18,3 @@ namespace serializer_n
         std::string serialize(const nlohmann::json& object) const override { return object.dump(); }
     };
 }
-

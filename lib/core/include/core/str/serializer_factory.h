@@ -2,6 +2,7 @@
 
 #include <core/str/detail/serializer/json.h>
 #include <core/str/detail/serializer/xml.h>
+#include <core/str/detail/serializer/string.h>
 #include <core/str/interface/serializer.h>
 #include <memory>
 #include <nlohmann/json.hpp>
@@ -22,4 +23,7 @@ namespace serializer_n
 
     template <>
     std::unique_ptr<Serializer_i<pugi::xml_document>> Factory<pugi::xml_document>::create() { return std::make_unique<XML>(); }
+
+    template <>
+    std::unique_ptr<Serializer_i<std::string>> Factory<std::string>::create() { return std::make_unique<String>(); }
 }

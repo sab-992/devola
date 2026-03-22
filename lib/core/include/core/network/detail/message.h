@@ -15,9 +15,9 @@ namespace network_n
     public:
         virtual ~Message() = default;
 
-        T getBody() const { return m_body.convert(); }
-        std::string getHeader(std::string name) const { return m_headers.getHeader(); }
-        headersUMap_t getHeadersAsMap() const { return m_headers.toMap(); }
+        T body() const { return m_body.convert(); }
+        std::string header(std::string name) const { return m_headers.get(name); }
+        headersUMap_t headersMap() const { return m_headers.toMap(); }
 
         Derived& setBody(const T& body) {
             m_body.set(body);

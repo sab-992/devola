@@ -4,6 +4,7 @@
 #include <core/str/trim.h>
 #include <format>
 #include <string>
+#include <sstream>
 #include <unordered_map>
 
 
@@ -13,7 +14,7 @@ namespace network_n
 {
     class Headers : public StringConvertible {
     public:
-        Headers();
+        Headers(const std::string& stringHeaders="");
         Headers(const Headers& other);
         Headers(Headers&& other);
 
@@ -21,11 +22,12 @@ namespace network_n
 
         Headers& operator=(Headers other);
 
-        std::string getHeader(std::string name) const;
-        std::string getStartLine() const;
+        std::string get(std::string name) const;
 
         void setHeader(std::string name, std::string value);
         void setStartLine(std::string startLine);
+
+        std::string startLine() const;
 
         friend void swap(Headers& lhs, Headers& rhs) {
             using std::swap;
@@ -40,5 +42,7 @@ namespace network_n
     private:
         headersUMap_t m_headersMap;
         std::string m_startLine;
+
+        void parse(const std::string& stringHeaders);
     };
 }

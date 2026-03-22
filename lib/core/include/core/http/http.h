@@ -112,7 +112,7 @@ namespace http_n
                 if (ec and ec != error::eof)
                     throw std::runtime_error("Error while reading response: " + ec.message());
 
-                return std::move(Response<T>()); // TODO: pass the message to build response.
+                return std::move(Response<T>().set(message).build()); // TODO: pass the message to build response.
             }
 
             template<typename T>

@@ -28,6 +28,11 @@ namespace http_n {
             finalize();
             return std::move(*this);
         }
+
+        Response<T>& set(std::string raw) {
+            parseFrom(raw);
+            return *this;
+        }
         
         Response<T>& setStatus(network_n::Code code) {
             m_status = code;
@@ -56,6 +61,17 @@ namespace http_n {
         void finalize() {
             validateMembers();
             this->setStartLine(std::format("{} {}", this->protocol()->toString(), m_status.toString()));
+        }
+
+        void parseFrom(const std::string& raw) {
+            // TODO: Add protocol detection and change it accordingly
+            auto [headers, body] = this->protocol()->parse(raw);
+
+            this->m_headers = headers;
+            this->m_body = body;
+
+            std::string statusCode = this->protocol()->parseStartLine(this->m_headers.startLine())["code"];
+            m_status = network_n::Status_s(static_cast<network_n::Code>(std::stoi(statusCode)));
         }
     };
 }
