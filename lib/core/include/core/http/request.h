@@ -42,8 +42,17 @@ namespace http_n {
             return std::move(*this);
         }
 
+        std::string get() {
+            return this->protocol()->build(this->m_headers, this->m_body);
+        }
+
         std::string method() const { return m_method; }
         uint16_t port() const { return m_port; }
+
+        Request<T>& set(const std::string& stringRequest) {
+            // TODO: parse from request
+            return *this;
+        }
 
         Request<T>& setAPIEndpoint(std::string endpoint) {
             m_APIEndpoint = endpoint;
@@ -96,7 +105,7 @@ namespace http_n {
         void finalize() {
             m_port = m_port == 0 ? this->protocol()->defaultPort() :  m_port;
             validateMembers();
-            this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->protocol()->toString()));
+            this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->protocol()->name()));
             this->m_headers.setHeader("Host", std::format("{}:{}", m_URL, m_port));
         }
     };

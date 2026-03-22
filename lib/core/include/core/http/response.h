@@ -29,8 +29,12 @@ namespace http_n {
             return std::move(*this);
         }
 
-        Response<T>& set(std::string raw) {
-            parseFrom(raw);
+        std::string get() {
+            return this->protocol()->build(this->m_headers, this->m_body);
+        }
+
+        Response<T>& set(const std::string& stringResponse) {
+            parseFrom(stringResponse);
             return *this;
         }
         
@@ -60,7 +64,7 @@ namespace http_n {
 
         void finalize() {
             validateMembers();
-            this->setStartLine(std::format("{} {}", this->protocol()->toString(), m_status.toString()));
+            this->setStartLine(std::format("{} {}", this->protocol()->name(), m_status.toString()));
         }
 
         void parseFrom(const std::string& raw) {

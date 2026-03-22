@@ -34,7 +34,7 @@ namespace network_n
             return static_cast<Derived&>(*this);
         }
 
-        std::string toString() const override { return protocol()->build(m_headers, m_body); }
+        std::string toString() const override { return protocol()->serializeMessage(m_headers, m_body); }
 
     protected:
         Message() = default;
