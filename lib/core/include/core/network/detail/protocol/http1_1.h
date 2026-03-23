@@ -41,7 +41,7 @@ namespace network_n
                 split(startLine, messageInformation);
 
                 if (messageInformation.size() < 3)
-                    throw std::invalid_argument("HTTP message is ill-formed");
+                    throw std::invalid_argument("HTTP message startline is ill-formed");
 
                 if (isRequest(messageInformation))
                     return requestInformationMap(messageInformation);
@@ -117,7 +117,7 @@ namespace network_n
                 }
             };
 
-            std::pair<std::string, std::string> splitMessage(std::string message) const {
+            std::pair<std::string, std::string> splitMessage(const std::string& message) const {
                 const std::string HEADER_END_TOKEN = "\r\n\r\n";
                 const size_t END_OF_HEADERS = message.find(HEADER_END_TOKEN);
 
