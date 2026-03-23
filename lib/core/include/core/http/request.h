@@ -50,7 +50,7 @@ namespace http_n {
         uint16_t port() const { return m_port; }
 
         Request<T>& set(const std::string& stringRequest) {
-            // TODO: parse from request
+            parseFrom(stringRequest);
             return *this;
         }
 
@@ -107,6 +107,37 @@ namespace http_n {
             validateMembers();
             this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->protocol()->name()));
             this->m_headers.setHeader("Host", std::format("{}:{}", m_URL, m_port));
+        }
+
+        void parseFrom(const std::string& stringRequest) {
+            // TODO: Add protocol detection and change it accordingly
+            auto [headers, body] = this->protocol()->parse(stringRequest);
+
+            this->m_headers = headers;
+            this->m_body = body;
+
+            const std::unordered_map<std::string, std::string> requestInfo = this->protocol()->parseStartLine(this->m_headers.startLine());
+
+            m_APIEndpoint = requestInfo.at("APIEndpoint");
+            m_method = requestInfo.at("method");
+
+            std::string host = this->header("Host");
+
+            if (host.empty())
+                return;
+
+            auto [url, port] = parseHostURL(host);
+            m_URL = url;
+            m_port = port;
+        }
+
+        std::pair<std::string, uint16_t> parseHostURL(const std::string host) {
+            size_t separatorIndex = host.find(':');
+
+            if (host.empty() or separatorIndex == std::string::npos)
+                return { host, 0 };
+
+            return { host.substr(0, separatorIndex), static_cast<uint16_t>(std::stoi(host.substr(separatorIndex + 1))) };
         }
     };
 }
