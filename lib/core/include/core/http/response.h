@@ -67,9 +67,9 @@ namespace http_n {
             this->setStartLine(std::format("{} {}", this->protocol()->name(), m_status.toString()));
         }
 
-        void parseFrom(const std::string& raw) {
+        void parseFrom(const std::string& stringResponse) {
             // TODO: Add protocol detection and change it accordingly
-            auto [headers, body] = this->protocol()->parse(raw);
+            auto [headers, body] = this->protocol()->parse(stringResponse);
 
             this->m_headers = headers;
             this->m_body = body;
