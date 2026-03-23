@@ -10,10 +10,8 @@ public:
     HttpFakeServer(HttpFakeServer& other) = delete;
     void operator=(const HttpFakeServer&) = delete;
 
-    static std::shared_ptr<HttpFakeServer> getInstance() {
-        if (!m_instance)
-            std::call_once(m_instanceCreated, [](){ m_instance = std::shared_ptr<HttpFakeServer>(new HttpFakeServer()); });
-
+    static std::shared_ptr<HttpFakeServer> instance() {
+        std::call_once(m_fakeInstanceCreated, &HttpFakeServer::createInstance);
         return m_instance;
     }
 
@@ -24,21 +22,21 @@ public:
     uint16_t port() { return m_port; }
 
     void run() {
-        if (m_thread and !m_stopped)
+        if (m_thread and not m_stopped)
             return;
 
-        m_thread = std::make_unique<std::jthread>(std::bind(&HttpFakeServer::start, this));
+        m_thread = std::make_unique<std::thread>(std::bind(&HttpFakeServer::start, this));
     }
 
     void stop() {
         m_stopped = true;
-        if (!m_acceptor)
+        if (not m_acceptor or not m_thread)
             return;
 
-        m_acceptor->close();
-        m_acceptor = nullptr;
-
-        m_thread.reset();
+        asio::error_code ec;
+        m_acceptor->close(ec);
+        m_ioCtx->stop();
+        m_thread->join();
     }
 
 protected:
@@ -47,11 +45,13 @@ protected:
 private:
     std::unique_ptr<asio::ip::tcp::acceptor> m_acceptor = nullptr;
     static inline std::shared_ptr<HttpFakeServer> m_instance = nullptr;
-    static inline std::once_flag m_instanceCreated;
+    static inline std::once_flag m_fakeInstanceCreated;
     std::unique_ptr<asio::io_context> m_ioCtx = nullptr;
     uint16_t m_port = 4000;
     bool m_stopped = false;
-    std::unique_ptr<std::jthread> m_thread = nullptr;
+    std::unique_ptr<std::thread> m_thread = nullptr;
+
+    static void createInstance() { m_instance = std::shared_ptr<HttpFakeServer>(new HttpFakeServer()); }
 
     size_t getContentLength(std::string headers) {
         int contentLengthValue = -1;
