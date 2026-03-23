@@ -94,10 +94,12 @@ namespace http_n
 
             template<typename T>
             asio::ip::tcp::socket send(const Request<T>& request) const {
-                asio::ip::tcp::resolver resolver(m_ioContext);
-                asio::ip::tcp::socket socket(m_ioContext);
-                asio::connect(socket, resolver.resolve(request.url(), std::to_string(request.port())));
-                asio::write(socket, asio::buffer(request.toString()));
+                using namespace asio;
+                
+                ip::tcp::resolver resolver(m_ioContext);
+                ip::tcp::socket socket(m_ioContext);
+                connect(socket, resolver.resolve(request.url(), std::to_string(request.port())));
+                write(socket, buffer(request.toString()));
                 return std::move(socket);
             }
 
