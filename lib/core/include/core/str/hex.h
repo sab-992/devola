@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string>
 
-std::string toHex(unsigned long num) {
+inline std::string toHex(unsigned long num) {
     using namespace std;
 
     stringstream ss;
@@ -11,6 +11,6 @@ std::string toHex(unsigned long num) {
     return ss.str();
 }
 
-unsigned long fromHex(const std::string& num) {
+inline unsigned long fromHex(const std::string& num) {
     return std::stoul(num, nullptr, 16);
 }
