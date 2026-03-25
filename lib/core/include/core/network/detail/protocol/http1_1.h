@@ -125,7 +125,7 @@ namespace network_n
                     throw std::invalid_argument("HTTP message is ill-formed");
 
                 // Returned pair = { Headers (string), Body (string) }.
-                return std::make_pair(message.substr(0, END_OF_HEADERS + HEADER_END_TOKEN.size()), message.substr(END_OF_HEADERS  + HEADER_END_TOKEN.size()));
+                return std::make_pair(message.substr(0, END_OF_HEADERS), message.substr(END_OF_HEADERS  + HEADER_END_TOKEN.size()));
             }
         };
     }
