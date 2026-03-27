@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
 #include <core/http/request.h>
+#include <core/http/utils/build_headers.h>
+#include <core/network/protocol_factory.h>
 #include <nlohmann/json.hpp>
 #include <pugixml.hpp>
 #include <format>
@@ -71,4 +73,45 @@ TEST_F(RequestTest, BuildWithoutURL_ThrowsException) {
     EXPECT_THROW(request.build(), std::invalid_argument);
 }
 
-// TODO: Test the Request::set(...) method. 
+TEST_F(RequestTest, BuildWithoutProtocol_ThrowsException) {
+    using network_n::protocol_n::Protocol; 
+    Request<std::string> request = Request<std::string>().setMethod("GET")
+                                                         .setAPIEndpoint("/")
+                                                         .setURL("www.test.com");
+
+    request.setProtocol(Protocol::NONE);
+
+    EXPECT_THROW(request.build(), std::invalid_argument);
+}
+
+TEST_F(RequestTest, Set_CreatesValidHTTPRequest) {
+    using namespace http_n;
+    using namespace network_n;
+    const std::string EXPECTED_METHOD = "DELETE";
+    const std::string EXPECTED_API_ENDPOINT = "/resource/1";
+    const std::string EXPECTED_PROTOCOL = "HTTP/1.1";
+    const std::string EXPECTED_URL = "www.test2.com";
+    const uint16_t EXPECTED_PORT = 5503;
+    const std::string EXPECTED_BODY = "Hello world!";
+    const std::map<std::string, std::string> sortedHeadersMap{ {"Host", std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT)}, {"Transfer-encoding", "chunked"}, {"Accept", "application/xml"}, {"Content-Length", std::to_string(EXPECTED_BODY.size())}};
+
+    const std::string EXPECTED_REQUEST = std::format("{} {} HTTP/1.1\r\n{}\r\n{}", EXPECTED_METHOD,
+                                                                                   EXPECTED_API_ENDPOINT,
+                                                                                   buildHeaders(sortedHeadersMap),
+                                                                                   EXPECTED_BODY);
+
+    Request<std::string> request = Request<std::string>().set(EXPECTED_REQUEST);
+
+    EXPECT_NO_THROW(request.build());
+
+    EXPECT_EQ(EXPECTED_METHOD, request.method());
+    EXPECT_EQ(EXPECTED_API_ENDPOINT, request.APIEndpoint());
+    EXPECT_EQ(EXPECTED_PROTOCOL, protocol_n::Factory::create<std::string>(request.protocol())->name());
+    EXPECT_EQ(EXPECTED_URL, request.url());
+    EXPECT_EQ(EXPECTED_PORT, request.port());
+    EXPECT_EQ(sortedHeadersMap.size(), request.headersMap().size());
+    for (const auto& [header, expected_value]: sortedHeadersMap)
+        EXPECT_EQ(expected_value, request.header(header));
+    EXPECT_EQ(EXPECTED_BODY, request.body());
+    EXPECT_EQ(EXPECTED_REQUEST, request.toString());
+}

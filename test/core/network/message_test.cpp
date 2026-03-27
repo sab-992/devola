@@ -51,21 +51,9 @@ TYPED_TEST_P(MessageTest, SetHeader_OverwritesExistingHeader) {
     EXPECT_EQ(EXPECTED_HEADER_VALUE, message.header(EXPECTED_HEADER_NAME));
 }
 
-TYPED_TEST_P(MessageTest, BuildWithoutProtocol_ThrowsException) {
-    using network_n::protocol_n::Protocol; 
-    TypeParam message.setMethod("GET")
-                     .setAPIEndpoint("/")
-                     .setURL("www.test.com");
-
-    message.setProtocol(Protocol::NONE);
-
-    EXPECT_THROW(message.build(), std::invalid_argument);
-}
-
 REGISTER_TYPED_TEST_SUITE_P(MessageTest, SetHeader_AddsNewHeader,
                                          SetHeader_IncrementsSize,
-                                         SetHeader_OverwritesExistingHeader,
-                                         BuildWithoutProtocol_ThrowsException);
+                                         SetHeader_OverwritesExistingHeader);
 
 
 template <template <typename> class Message>
