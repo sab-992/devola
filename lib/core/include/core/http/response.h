@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/http/detail/settings.h>
 #include <core/network/detail/message.h>
 #include <core/network/network.h>
 
