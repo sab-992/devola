@@ -31,7 +31,7 @@ namespace http_n {
         }
 
         std::string get() {
-            return this->protocol()->build(this->m_headers, this->m_body);
+            return this->getProtocol()->build(this->m_headers, this->m_body);
         }
 
         Response<T>& set(const std::string& stringResponse) {
@@ -65,17 +65,17 @@ namespace http_n {
 
         void finalize() {
             validateMembers();
-            this->setStartLine(std::format("{} {}", this->protocol()->name(), m_status.toString()));
+            this->setStartLine(std::format("{} {}", this->getProtocol()->name(), m_status.toString()));
         }
 
         void parseFrom(const std::string& stringResponse) {
             // TODO: Add protocol detection and change it accordingly
-            auto [headers, body] = this->protocol()->parse(stringResponse);
+            auto [headers, body] = this->getProtocol()->parse(stringResponse);
 
             this->m_headers = headers;
             this->m_body = body;
 
-            std::string statusCode = this->protocol()->parseStartLine(this->m_headers.startLine())["code"];
+            std::string statusCode = this->getProtocol()->parseStartLine(this->m_headers.startLine())["code"];
             m_status = network_n::Status_s(static_cast<network_n::Code>(std::stoi(statusCode)));
         }
     };

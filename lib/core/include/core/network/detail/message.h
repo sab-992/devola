@@ -19,6 +19,10 @@ namespace network_n
         std::string header(std::string name) const { return m_headers.get(name); }
         headersUMap_t headersMap() const { return m_headers.toMap(); }
 
+        protocol_n::Protocol protocol() {
+            return m_protocol;
+        }
+
         Derived& setBody(const T& body) {
             m_body.set(body);
             return static_cast<Derived&>(*this);
@@ -34,7 +38,7 @@ namespace network_n
             return static_cast<Derived&>(*this);
         }
 
-        std::string toString() const override { return protocol()->serializeMessage(m_headers, m_body); }
+        std::string toString() const override { return getProtocol()->serializeMessage(m_headers, m_body); }
 
     protected:
         Message() = default;
@@ -46,7 +50,7 @@ namespace network_n
         Headers m_headers;
         protocol_n::Protocol m_protocol = protocol_n::Protocol::NONE;
 
-        std::unique_ptr<protocol_n::Protocol_i<T>> protocol() const {
+        std::unique_ptr<protocol_n::Protocol_i<T>> getProtocol() const {
             return protocol_n::Factory::create<T>(m_protocol);
         }
 

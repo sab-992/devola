@@ -43,7 +43,7 @@ namespace http_n {
         }
 
         std::string get() {
-            return this->protocol()->build(this->m_headers, this->m_body);
+            return this->getProtocol()->build(this->m_headers, this->m_body);
         }
 
         std::string method() const { return m_method; }
@@ -104,19 +104,19 @@ namespace http_n {
 
         void finalize() {
             validateMembers();
-            m_port = m_port == 0 ? this->protocol()->defaultPort() :  m_port;
-            this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->protocol()->name()));
+            m_port = m_port == 0 ? this->getProtocol()->defaultPort() :  m_port;
+            this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->getProtocol()->name()));
             this->m_headers.setHeader("Host", std::format("{}:{}", m_URL, m_port));
         }
 
         void parseFrom(const std::string& stringRequest) {
             // TODO: Add protocol detection and change it accordingly
-            auto [headers, body] = this->protocol()->parse(stringRequest);
+            auto [headers, body] = this->getProtocol()->parse(stringRequest);
 
             this->m_headers = headers;
             this->m_body = body;
 
-            const std::unordered_map<std::string, std::string> requestInfo = this->protocol()->parseStartLine(this->m_headers.startLine());
+            const std::unordered_map<std::string, std::string> requestInfo = this->getProtocol()->parseStartLine(this->m_headers.startLine());
 
             m_APIEndpoint = requestInfo.at("APIEndpoint");
             m_method = requestInfo.at("method");
