@@ -93,15 +93,6 @@ namespace http_n {
         uint16_t m_port = 0;
         std::string m_URL;
 
-        void validateMembers() const {
-            using network_n::protocol_n::Protocol;
-
-            if (m_APIEndpoint.empty()) throw std::invalid_argument("Request API endpoint cannot be empty");
-            if (m_method.empty()) throw std::invalid_argument("Request HTTP method cannot be empty");
-            if (m_URL.empty()) throw std::invalid_argument("Request host URL cannot be empty");
-            if (this->m_protocol == Protocol::NONE) throw std::invalid_argument("Protocol cannot be NONE");
-        }
-
         void finalize() {
             validateMembers();
             m_port = m_port == 0 ? this->getProtocol()->defaultPort() :  m_port;
@@ -138,6 +129,15 @@ namespace http_n {
                 return { host, 0 };
 
             return { host.substr(0, separatorIndex), static_cast<uint16_t>(std::stoi(host.substr(separatorIndex + 1))) };
+        }
+
+        void validateMembers() const {
+            using network_n::protocol_n::Protocol;
+
+            if (m_APIEndpoint.empty()) throw std::invalid_argument("Request API endpoint cannot be empty");
+            if (m_method.empty()) throw std::invalid_argument("Request HTTP method cannot be empty");
+            if (m_URL.empty()) throw std::invalid_argument("Request host URL cannot be empty");
+            if (this->m_protocol == Protocol::NONE) throw std::invalid_argument("Protocol cannot be NONE");
         }
     };
 }
