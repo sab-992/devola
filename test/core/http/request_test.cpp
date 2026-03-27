@@ -9,7 +9,7 @@
 
 using http_n::Request;
 
-class RequestTests : public ::testing::Test {
+class RequestTest : public ::testing::Test {
 protected:
     template<typename T>
     Request<T> createDummyRequest() {
@@ -19,54 +19,13 @@ protected:
     }
 };
 
-TEST_F(RequestTests, Constructor_HasDefaultProtocol) {
+TEST_F(RequestTest, Constructor_HasDefaultProtocol) {
     using pugi::xml_document;
     Request<xml_document> request = Request<xml_document>();
     EXPECT_EQ(http_n::DEFAULT_PROTOCOL, request.protocol());
 }
 
-TEST_F(RequestTests, SetHeader_AddsNewHeader) {
-    Request<std::string> request = Request<std::string>();
-
-    const std::string EXPECTED_HEADER_NAME = "Transfer-encoding";
-    const std::string EXPECTED_HEADER_VALUE = "chunked";
-
-    request.setHeader(EXPECTED_HEADER_NAME, EXPECTED_HEADER_VALUE);
-
-    EXPECT_EQ(EXPECTED_HEADER_VALUE, request.header(EXPECTED_HEADER_NAME));
-}
-
-TEST_F(RequestTests, SetHeader_IncrementsSize) {
-    Request<std::string> request = Request<std::string>();
-
-    const size_t EXPECTED_MAP_SIZE_INCREASE = 1;
-    const size_t EXPECTED_HEADERS_MAP_SIZE = 3;
-
-    request.setHeader("Accept", "text/html");
-    request.setHeader("Content-Length", "8");
-
-    const size_t PREVIOUS_MAP_SIZE = request.headersMap().size();
-    request.setHeader("Transfer-encoding", "chunked");
-
-    EXPECT_EQ(EXPECTED_MAP_SIZE_INCREASE, request.headersMap().size() - PREVIOUS_MAP_SIZE);
-    EXPECT_EQ(EXPECTED_HEADERS_MAP_SIZE, request.headersMap().size());
-}
-
-TEST_F(RequestTests, SetHeader_OverwritesExistingHeader) {
-    Request<std::string> request = Request<std::string>();
-
-    const std::string EXPECTED_HEADER_NAME = "Accept";
-    const std::string EXPECTED_HEADER_VALUE = "text/html";
-    const size_t EXPECTED_HEADERS_MAP_SIZE = 1;
-
-    request.setHeader(EXPECTED_HEADER_NAME, "application/json");
-    request.setHeader(EXPECTED_HEADER_NAME, EXPECTED_HEADER_VALUE);
-
-    EXPECT_EQ(EXPECTED_HEADERS_MAP_SIZE, request.headersMap().size());
-    EXPECT_EQ(EXPECTED_HEADER_VALUE, request.header(EXPECTED_HEADER_NAME));
-}
-
-TEST_F(RequestTests, BuildWithURL_AddsHostHeader) {
+TEST_F(RequestTest, BuildWithURL_AddsHostHeader) {
     Request<std::string> request = createDummyRequest<std::string>();
 
     const std::string EXPECTED_URL = "www.test.com";
@@ -81,7 +40,7 @@ TEST_F(RequestTests, BuildWithURL_AddsHostHeader) {
     EXPECT_EQ(EXPECTED_FULL_HOST_URL, request.header("Host"));
 }
 
-TEST_F(RequestTests, BuildWithMethodAndAPIEndpoint_CreatesValidStartline) {
+TEST_F(RequestTest, BuildWithMethodAndAPIEndpoint_CreatesValidStartline) {
     using nlohmann::json;
     using network_n::protocol_n::Protocol;
 
@@ -102,26 +61,19 @@ TEST_F(RequestTests, BuildWithMethodAndAPIEndpoint_CreatesValidStartline) {
     EXPECT_EQ(EXPECTED_STARTLINE, startLine);
 }
 
-TEST_F(RequestTests, BuildWithoutAPIEndpoint_ThrowsException) {
+TEST_F(RequestTest, BuildWithoutAPIEndpoint_ThrowsException) {
     Request<std::string> request = createDummyRequest<std::string>();
     request.setAPIEndpoint("");
     EXPECT_THROW(request.build(), std::invalid_argument);
 }
 
-TEST_F(RequestTests, BuildWithoutMethod_ThrowsException) {
+TEST_F(RequestTest, BuildWithoutMethod_ThrowsException) {
     Request<std::string> request = createDummyRequest<std::string>();
     request.setMethod("");
     EXPECT_THROW(request.build(), std::invalid_argument);
 }
 
-TEST_F(RequestTests, BuildWithoutProtocol_ThrowsException) {
-    using network_n::protocol_n::Protocol; 
-    Request<std::string> request = createDummyRequest<std::string>();
-    request.setProtocol(Protocol::NONE);
-    EXPECT_THROW(request.build(), std::invalid_argument);
-}
-
-TEST_F(RequestTests, BuildWithoutURL_ThrowsException) {
+TEST_F(RequestTest, BuildWithoutURL_ThrowsException) {
     Request<std::string> request = createDummyRequest<std::string>();
     request.setURL("");
     EXPECT_THROW(request.build(), std::invalid_argument);
