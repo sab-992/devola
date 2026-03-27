@@ -4,6 +4,5 @@
 
 namespace http_n
 {
-    using network_n::protocol_n::Protocol;
-    constexpr Protocol DEFAULT_PROTOCOL = Protocol::HTTP1_1;
+    constexpr auto DEFAULT_PROTOCOL = network_n::protocol_n::Protocol::HTTP1_1;
 }
