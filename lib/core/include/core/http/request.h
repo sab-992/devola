@@ -103,8 +103,8 @@ namespace http_n {
         }
 
         void finalize() {
-            m_port = m_port == 0 ? this->protocol()->defaultPort() :  m_port;
             validateMembers();
+            m_port = m_port == 0 ? this->protocol()->defaultPort() :  m_port;
             this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->protocol()->name()));
             this->m_headers.setHeader("Host", std::format("{}:{}", m_URL, m_port));
         }
