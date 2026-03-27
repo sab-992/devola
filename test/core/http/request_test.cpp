@@ -9,15 +9,7 @@
 
 using http_n::Request;
 
-class RequestTest : public ::testing::Test {
-protected:
-    template<typename T>
-    Request<T> createDummyRequest() {
-        return std::move(Request<T>().setMethod("GET")
-                                     .setAPIEndpoint("/")
-                                     .setURL("www.test.com"));
-    }
-};
+class RequestTest : public ::testing::Test {};
 
 TEST_F(RequestTest, Constructor_HasDefaultProtocol) {
     using pugi::xml_document;
@@ -26,16 +18,16 @@ TEST_F(RequestTest, Constructor_HasDefaultProtocol) {
 }
 
 TEST_F(RequestTest, BuildWithURL_AddsHostHeader) {
-    Request<std::string> request = createDummyRequest<std::string>();
-
     const std::string EXPECTED_URL = "www.test.com";
     const uint16_t EXPECTED_PORT = 4992;
+    const std::string EXPECTED_FULL_HOST_URL = std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT);
+
+    Request<std::string> request = Request<std::string>().setMethod("GET")
+                                                         .setAPIEndpoint("/");
 
     request.setURL(EXPECTED_URL);
     request.setPort(EXPECTED_PORT);
     request.build();
-
-    const std::string EXPECTED_FULL_HOST_URL = std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT);
 
     EXPECT_EQ(EXPECTED_FULL_HOST_URL, request.header("Host"));
 }
@@ -62,20 +54,20 @@ TEST_F(RequestTest, BuildWithMethodAndAPIEndpoint_CreatesValidStartline) {
 }
 
 TEST_F(RequestTest, BuildWithoutAPIEndpoint_ThrowsException) {
-    Request<std::string> request = createDummyRequest<std::string>();
-    request.setAPIEndpoint("");
+    Request<std::string> request = Request<std::string>().setMethod("GET")
+                                                         .setURL("www.test.com");
     EXPECT_THROW(request.build(), std::invalid_argument);
 }
 
 TEST_F(RequestTest, BuildWithoutMethod_ThrowsException) {
-    Request<std::string> request = createDummyRequest<std::string>();
-    request.setMethod("");
+    Request<std::string> request = Request<std::string>().setAPIEndpoint("/")
+                                                         .setURL("www.test.com");
     EXPECT_THROW(request.build(), std::invalid_argument);
 }
 
 TEST_F(RequestTest, BuildWithoutURL_ThrowsException) {
-    Request<std::string> request = createDummyRequest<std::string>();
-    request.setURL("");
+    Request<std::string> request = Request<std::string>().setMethod("GET")
+                                                         .setAPIEndpoint("/");
     EXPECT_THROW(request.build(), std::invalid_argument);
 }
 
