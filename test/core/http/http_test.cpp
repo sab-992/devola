@@ -54,11 +54,11 @@ TEST_P(HttpTest, Get) {
     read(socket, dynamic_buffer(response), transfer_all(), ec);
 
     if (ec and ec != error::eof)
-        std::cout << "ERROR:\n" << ec.message() << std::endl;
+        FAIL();
 
     auto res = Response<std::string>().set(response).build();
 
-    std::cout << "Response:\n" << res << std::endl;
+    // std::cout << "Response:\n" << res << std::endl;
 }
 
 INSTANTIATE_TEST_SUITE_P(HttpRequests, HttpTest, ::testing::Values(std::make_pair("T", "T")));
