@@ -24,4 +24,6 @@ class ServiceUpdater():
         log(f"Updated all services.", False, Color.GREEN)
 
     def get_services(self) -> list[str]:
-        return self.__fs.get_directories(os.path.join(self.__fs.find_root_folder(), SERVICES_PATH))
+        service_full_path = os.path.join(self.__fs.find_root_folder(), SERVICES_PATH)
+        os.makedirs(service_full_path, exist_ok=True);
+        return self.__fs.get_directories(service_full_path)
