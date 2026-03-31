@@ -27,7 +27,7 @@ include("${'{'}cmake_modules_path{'}'}/FindCppFiles.cmake")
 
 project({service_name_lower} VERSION 1.0)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_cpp_files("${'{'}{service_name_lower}_path{'}'}/src" {service_name_lower}_sources)
