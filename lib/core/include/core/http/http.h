@@ -13,6 +13,10 @@
 namespace http_n
 {
     class Http {
+    private:
+        class Asynchronous;
+        class Synchronous;
+
     public:
         Http(const Http&) = delete;
         Http& operator=(const Http&) = delete;
@@ -21,9 +25,6 @@ namespace http_n
         Http& operator=(Http&&) = delete;
 
         ~Http() {}
-
-        class Asynchronous;
-        class Synchronous;
 
         // Function names are capitalized because 'delete' is a C++ reserved keyword.
         template<typename T>
