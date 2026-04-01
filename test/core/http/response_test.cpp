@@ -2,6 +2,7 @@
 
 #include <core/http/response.h>
 #include <core/http/utils/build_headers.h>
+#include <core/xml/xml.h>
 #include <format>
 
 using http_n::Response;
@@ -9,8 +10,7 @@ using http_n::Response;
 class ResponseTest : public ::testing::Test {};
 
 TEST_F(ResponseTest, Constructor_HasDefaultProtocol) {
-    using pugi::xml_document;
-    Response<xml_document> response = Response<xml_document>();
+    Response<xml_n::Document> response = Response<xml_n::Document>();
     EXPECT_EQ(http_n::DEFAULT_PROTOCOL, response.protocol());
 }
 

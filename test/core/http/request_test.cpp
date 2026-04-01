@@ -3,8 +3,8 @@
 #include <core/http/request.h>
 #include <core/http/utils/build_headers.h>
 #include <core/network/protocol_factory.h>
+#include <core/xml/xml.h>
 #include <nlohmann/json.hpp>
-#include <pugixml.hpp>
 #include <format>
 #include <string>
 
@@ -14,8 +14,7 @@ using http_n::Request;
 class RequestTest : public ::testing::Test {};
 
 TEST_F(RequestTest, Constructor_HasDefaultProtocol) {
-    using pugi::xml_document;
-    Request<xml_document> request = Request<xml_document>();
+    Request<xml_n::Document> request = Request<xml_n::Document>();
     EXPECT_EQ(http_n::DEFAULT_PROTOCOL, request.protocol());
 }
 
