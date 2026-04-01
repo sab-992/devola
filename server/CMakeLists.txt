@@ -3,6 +3,11 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(MSVC)
+    add_compile_options(/std:c++latest /W4 /permissive-)
+endif()
 
 set(cmake_modules_path "${CMAKE_CURRENT_LIST_DIR}/../cmake")
 

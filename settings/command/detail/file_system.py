@@ -29,6 +29,11 @@ project({service_name_lower} VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(MSVC)
+    add_compile_options(/std:c++latest /W4 /permissive-)
+endif()
 
 find_cpp_files("${'{'}{service_name_lower}_path{'}'}/src" {service_name_lower}_sources)
 
