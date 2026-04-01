@@ -2,8 +2,8 @@
 
 #include <core/http/request.h>
 #include <core/http/response.h>
-#include <nlohmann/json.hpp>
 #include <core/xml/xml.h>
+#include <nlohmann/json.hpp>
 
 
 template<typename T>

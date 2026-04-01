@@ -4,9 +4,9 @@
 #include <core/str/detail/serializer/xml.h>
 #include <core/str/detail/serializer/string.h>
 #include <core/str/interface/serializer.h>
+#include <core/xml/xml.h>
 #include <memory>
 #include <nlohmann/json.hpp>
-#include <core/xml/xml.h>
 #include <string>
 
 
