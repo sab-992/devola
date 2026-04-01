@@ -96,7 +96,7 @@ namespace network_n
                     return rTrim(merged);
                 }
 
-                static std::string chunkBody(const std::string& mergedBody) { /* TODO */ return ""; }
+                static std::string chunkBody(const std::string& mergedBody) { /* TODO */ return mergedBody; }
 
             private:
                 static std::string extractChunk(std::string& message, size_t size) {
