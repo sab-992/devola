@@ -13,6 +13,8 @@ namespace network_n
         template <typename T>
         class Protocol_i {
         public:
+            virtual ~Protocol_i() = default;
+
             virtual std::string build(const network_n::Headers& headers, const network_n::Body<T>& body) const = 0;
             virtual uint16_t defaultPort() const = 0;
             virtual std::string name() const = 0;
