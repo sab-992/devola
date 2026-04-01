@@ -54,12 +54,12 @@ namespace http_n {
             return *this;
         }
 
-        Request<T>& setAPIEndpoint(std::string endpoint) {
+        Request<T>& setAPIEndpoint(const std::string& endpoint) {
             m_APIEndpoint = endpoint;
             return *this;
         }
 
-        Request<T>& setMethod(std::string method) {
+        Request<T>& setMethod(const std::string& method) {
             m_method = method;
             return *this;
         }
@@ -69,7 +69,7 @@ namespace http_n {
             return *this;
         }
 
-        Request<T>& setURL(std::string url) {
+        Request<T>& setURL(const std::string& url) {
             m_URL = url;
             return *this;
         }

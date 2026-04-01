@@ -6,7 +6,7 @@
 #include <core/str/interface/serializer.h>
 #include <memory>
 #include <nlohmann/json.hpp>
-#include <pugixml.hpp>
+#include <core/xml/xml.h>
 #include <string>
 
 
@@ -22,7 +22,7 @@ namespace serializer_n
     inline std::unique_ptr<Serializer_i<nlohmann::json>> Factory<nlohmann::json>::create() { return std::make_unique<JSON>(); }
 
     template <>
-    inline std::unique_ptr<Serializer_i<pugi::xml_document>> Factory<pugi::xml_document>::create() { return std::make_unique<XML>(); }
+    inline std::unique_ptr<Serializer_i<xml_n::Document>> Factory<xml_n::Document>::create() { return std::make_unique<XML>(); }
 
     template <>
     inline std::unique_ptr<Serializer_i<std::string>> Factory<std::string>::create() { return std::make_unique<String>(); }

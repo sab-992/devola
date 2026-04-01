@@ -16,7 +16,7 @@ namespace network_n
         virtual ~Message() = default;
 
         T body() const { return m_body.convert(); }
-        std::string header(std::string name) const { return m_headers.get(name); }
+        std::string header(const std::string& name) const { return m_headers.get(name); }
         headersUMap_t headersMap() const { return m_headers.toMap(); }
 
         protocol_n::Protocol protocol() {
@@ -28,7 +28,7 @@ namespace network_n
             return static_cast<Derived&>(*this);
         }
 
-        Derived& setHeader(std::string name, std::string value) {
+        Derived& setHeader(const std::string& name, const std::string& value) {
             m_headers.setHeader(name, value);
             return static_cast<Derived&>(*this);
         }
@@ -54,6 +54,6 @@ namespace network_n
             return protocol_n::Factory::create<T>(m_protocol);
         }
 
-        void setStartLine(std::string startLine) { m_headers.setStartLine(startLine); }
+        void setStartLine(const std::string& startLine) { m_headers.setStartLine(startLine); }
     };
 }

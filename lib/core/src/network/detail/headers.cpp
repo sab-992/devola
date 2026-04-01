@@ -23,7 +23,7 @@ network_n::Headers& network_n::Headers::operator=(Headers other) {
     return *this;
 }
 
-std::string network_n::Headers::get(std::string name) const {
+std::string network_n::Headers::get(const std::string& name) const {
     return m_headersMap.contains(name) ? m_headersMap.at(name) : "";
 }
 
@@ -52,11 +52,11 @@ void network_n::Headers::parse(const std::string& stringHeaders) {
     }
 }
 
-void network_n::Headers::setHeader(std::string name, std::string value) {
+void network_n::Headers::setHeader(const std::string& name, const std::string& value) {
     m_headersMap[name] = value;
 }
 
-void network_n::Headers::setStartLine(std::string startLine) {
+void network_n::Headers::setStartLine(const std::string& startLine) {
     m_startLine = startLine;
 }
 

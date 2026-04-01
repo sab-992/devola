@@ -22,10 +22,10 @@ namespace network_n
 
         Headers& operator=(Headers other);
 
-        std::string get(std::string name) const;
+        std::string get(const std::string& name) const;
 
-        void setHeader(std::string name, std::string value);
-        void setStartLine(std::string startLine);
+        void setHeader(const std::string& name, const std::string& value);
+        void setStartLine(const std::string& startLine);
 
         std::string startLine() const;
 

@@ -64,7 +64,7 @@ namespace network_n
                 return information[0].find(name()) == std::string::npos;
             }
 
-            std::string preprocessBody(const std::function<std::string(std::string)>& operation, const Headers& headers, const std::string& stringBody) const {
+            std::string preprocessBody(const std::function<std::string(const std::string&)>& operation, const Headers& headers, const std::string& stringBody) const {
                 return isBodyChunked(headers) ? operation(stringBody) : stringBody;
             }
 
@@ -96,7 +96,7 @@ namespace network_n
                     return rTrim(merged);
                 }
 
-                static std::string chunkBody(std::string mergedBody) { /* TODO */ return ""; }
+                static std::string chunkBody(const std::string& mergedBody) { /* TODO */ return ""; }
 
             private:
                 static std::string extractChunk(std::string& message, size_t size) {
