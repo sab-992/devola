@@ -4,6 +4,7 @@
 #include <string>
 
 
+// TODO: Change from cast to string stream
 template<typename T>
 std::string lTrim(const T& element) {
     if(not std::is_convertible_v<T, std::string>)

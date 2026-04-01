@@ -5,6 +5,7 @@
 
 
 // TODO: Add interval start/finish to specify on what to apply the split
+// TODO: Change from cast to string stream
 template<typename T>
 void split(T element, std::vector<std::string>& resultVector, char splittingToken = ' ') {
     if(not std::is_convertible_v<T, std::string>)
