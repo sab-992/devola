@@ -13,7 +13,7 @@
 // Rename function
 template<typename T, typename... Args>
 void trace(std::function<std::unique_ptr<DisplayColor_i>()> displayColorFunction, T firstArg, Args... otherArgs) {
-    std::string currentWord = Converter<T>::toString(firstArg);
+    const std::string currentWord = Converter<T>::toString(firstArg);
     if (trim(currentWord).empty()) {
         std::cout << rang::style::reset << std::endl;
         return ;

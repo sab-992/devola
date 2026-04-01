@@ -10,12 +10,12 @@ void split(T element, std::vector<std::string>& resultVector, char splittingToke
     if(not std::is_convertible_v<T, std::string>)
         return;
 
-    std::string string = static_cast<std::string>(element);
+    const std::string string = static_cast<std::string>(element);
     if (string.empty())
         return;
 
     size_t startOfPart = 0;
-    std::string::iterator it = string.begin();
+    std::string::const_iterator it = string.begin();
     while (true) {
         size_t currentIndex = it - string.begin();
         if (it == string.end()) {

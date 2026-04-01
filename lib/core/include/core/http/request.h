@@ -112,7 +112,7 @@ namespace http_n {
             m_APIEndpoint = requestInfo.at("APIEndpoint");
             m_method = requestInfo.at("method");
 
-            std::string host = this->header("Host");
+            const std::string host = this->header("Host");
 
             if (host.empty())
                 return;
@@ -122,7 +122,7 @@ namespace http_n {
             m_port = port;
         }
 
-        std::pair<std::string, uint16_t> parseHostURL(const std::string host) {
+        std::pair<std::string, uint16_t> parseHostURL(const std::string& host) {
             size_t separatorIndex = host.find(':');
 
             if (host.empty() or separatorIndex == std::string::npos)

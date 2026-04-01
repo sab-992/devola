@@ -75,7 +75,7 @@ namespace http_n {
             this->m_headers = headers;
             this->m_body = body;
 
-            std::string statusCode = this->getProtocol()->parseStartLine(this->m_headers.startLine())["code"];
+            const std::string statusCode = this->getProtocol()->parseStartLine(this->m_headers.startLine())["code"];
             m_status = network_n::Status_s(static_cast<network_n::Code>(std::stoi(statusCode)));
         }
     };

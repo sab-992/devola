@@ -5,7 +5,7 @@
 
 
 template<typename T>
-std::string lTrim(T element) {
+std::string lTrim(const T& element) {
     if(not std::is_convertible_v<T, std::string>)
         return "";
 
@@ -23,7 +23,7 @@ std::string lTrim(T element) {
 }
 
 template<typename T>
-std::string rTrim(T element) {
+std::string rTrim(const T& element) {
     if(not std::is_convertible_v<T, std::string>)
         return "";
 
@@ -41,7 +41,7 @@ std::string rTrim(T element) {
 }
 
 template<typename T>
-std::string trim(T element) {
+std::string trim(const T& element) {
     if(not std::is_convertible_v<T, std::string>)
         return "";
 

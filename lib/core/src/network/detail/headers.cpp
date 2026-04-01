@@ -45,8 +45,8 @@ void network_n::Headers::parse(const std::string& stringHeaders) {
         if (separator == std::string::npos)
             throw std::invalid_argument(std::format("Header: {} is ill-formed", line));
 
-        std::string name = line.substr(0, separator);
-        std::string value = trim(line.substr(separator + 1));
+        const std::string name = line.substr(0, separator);
+        const std::string value = trim(line.substr(separator + 1));
 
         setHeader(name, value);
     }
