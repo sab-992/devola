@@ -5,6 +5,7 @@
 #include <core/network/network.h>
 #include <memory>
 #include <stdexcept>
+#include <utility>
 
 
 namespace network_n
@@ -20,7 +21,7 @@ namespace network_n
                 case Protocol::HTTP1_1:
                     return std::make_unique<HTTP1_1<T>>();
                 default:
-                    throw std::runtime_error(std::format("Protocol #{}: Not Handled", static_cast<int>(protocol))); // TODO: Change for new error type;
+                    throw std::runtime_error(std::format("Protocol #{}: Not Handled", std::to_underlying(protocol))); // TODO: Change for new error type;
                 }
             }
         };
