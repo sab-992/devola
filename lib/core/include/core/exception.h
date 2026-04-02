@@ -1,3 +1,3 @@
 #pragma once
 
-#include <core/exception/detail/exception.h>
+#include <core/exception/exception.h>
