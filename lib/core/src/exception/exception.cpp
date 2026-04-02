@@ -1,5 +1,6 @@
 #include <core/exception/exception.h>
 
+
 Exception::Exception(const std::string& what) : m_what(what) {}
 Exception::~Exception() {}
 

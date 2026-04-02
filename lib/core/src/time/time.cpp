@@ -1,5 +1,6 @@
 #include <core/time/time.h>
 
+
 std::chrono::time_point<std::chrono::system_clock> Time::now() {
     return std::chrono::system_clock::now();
 }

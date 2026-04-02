@@ -1,5 +1,6 @@
 #include <core/xml/xml.h>
 
+
 xml_n::Document::Document(const std::string& document) {
     if (not document.empty())
         this->load_string(document.c_str());
