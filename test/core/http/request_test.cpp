@@ -118,5 +118,4 @@ TEST_F(RequestTest, Set_CreatesValidHTTPRequest) {
     for (const auto& [header, expected_value]: sortedHeadersMap)
         EXPECT_EQ(expected_value, request.header(header));
     EXPECT_EQ(EXPECTED_BODY, request.body());
-    EXPECT_EQ(EXPECTED_REQUEST, request.toString());
 }

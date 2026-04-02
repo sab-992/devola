@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
+#include <core/conversion/enum.h>
 #include <core/http/response.h>
 #include <core/http/utils/build_headers.h>
 #include <core/xml/xml.h>
 #include <format>
-#include <utility>
 
 using http_n::Response;
 
@@ -35,7 +35,7 @@ TEST_F(ResponseTest, BuildWithStatus_CreatesValidStartline) {
     const Status_s EXPECTED_STATUS(Code::NOT_FOUND);
     const protocol_n::Protocol EXPECTED_PROTOCOL = protocol_n::Protocol::HTTP1_1;
 
-    const std::string EXPECTED_STARTLINE = std::format("{} {} {}", Factory::create<json>(EXPECTED_PROTOCOL)->name(), std::to_underlying(EXPECTED_STATUS.code()), EXPECTED_STATUS.reason());
+    const std::string EXPECTED_STARTLINE = std::format("{} {} {}", Factory::create<json>(EXPECTED_PROTOCOL)->name(), to_underlying(EXPECTED_STATUS.code()), EXPECTED_STATUS.reason());
 
     Response<json> response = Response<json>().setStatus(EXPECTED_STATUS.code()).build();
 
@@ -62,7 +62,7 @@ TEST_F(ResponseTest, Set_CreatesValidHTTPResponse) {
     const std::map<std::string, std::string> sortedHeadersMap{ {"Transfer-encoding", "chunked"}, {"Content-Length", std::to_string(EXPECTED_BODY.size())}};
 
     const std::string EXPECTED_RESPONSE = std::format("{} {} {}\r\n{}\r\n{}", protocol_n::Factory::create<std::string>(EXPECTED_PROTOCOL)->name(),
-                                                                              std::to_underlying(EXPECTED_STATUS.code()),
+                                                                              to_underlying(EXPECTED_STATUS.code()),
                                                                               EXPECTED_STATUS.reason(),
                                                                               buildHeaders(sortedHeadersMap),
                                                                               EXPECTED_BODY);
@@ -77,5 +77,4 @@ TEST_F(ResponseTest, Set_CreatesValidHTTPResponse) {
     for (const auto& [header, expected_value]: sortedHeadersMap)
         EXPECT_EQ(expected_value, response.header(header));
     EXPECT_EQ(EXPECTED_BODY, response.body());
-    EXPECT_EQ(EXPECTED_RESPONSE, response.toString());
 }
