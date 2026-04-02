@@ -6,10 +6,11 @@
 
 class Exception : std::exception {
 public:
-    Exception(const std::string& what) : m_what(what) {}
+    Exception(const std::string& what);
+    ~Exception();
 
-    const char* what() const throw() override { return m_what.c_str(); }
-    constexpr const char* type() const throw() { return "Exception"; }
+    const char* what() const throw() override;
+    constexpr const char* type() const throw();
 
 private:
     const std::string m_what;
