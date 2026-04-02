@@ -1,11 +1,11 @@
 #pragma once
 
+#include <core/conversion/enum.h>
 #include <core/conversion/string_convertible.h>
 #include <format>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <unordered_map>
-#include <utility>
 
 
 namespace network_n
@@ -76,7 +76,7 @@ namespace network_n
             swap(lhs.m_reason, rhs.m_reason);
         }
 
-        std::string toString() const override { return std::format("{} {}", std::to_underlying(m_code), m_reason); }
+        std::string toString() const override { return std::format("{} {}", to_underlying(m_code), m_reason); }
 
     private:
         Code m_code;
