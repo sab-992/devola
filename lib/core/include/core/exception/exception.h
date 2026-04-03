@@ -4,14 +4,17 @@
 #include <string>
 
 
-class Exception : std::exception {
+class Exception : public std::exception {
 public:
-    Exception(const std::string& what);
+    Exception(const std::string& message);
     ~Exception();
 
     const char* what() const throw() override;
-    constexpr const char* type() const throw();
+    constexpr const char* type() const throw() { return m_type; };
 
-private:
-    const std::string m_what;
+protected:
+    const std::string m_message;
+    const char* m_type;
+
+    Exception(const std::string& message, const char* type);
 };
