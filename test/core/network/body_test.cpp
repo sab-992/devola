@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 
+#include <core/exception.h>
 #include <core/network/detail/body.h>
 #include <core/network/utils/inner_types.h>
+#include <sstream>
 
 
 template<typename T>
@@ -40,11 +42,33 @@ TYPED_TEST(BodyTest, Set_OverwritesExistingBody) {
     EXPECT_EQ(EXPECTED_BODY, body.convert());
 }
 
-TYPED_TEST(BodyTest, Body_IsConvertedCorrectly) {
+TYPED_TEST(BodyTest, Convert_ReturnsCorrectBodyType) {
     TypeParam body;
     const auto EXPECTED_BODY = this->GetTestBody();
 
     body.set(EXPECTED_BODY);
 
     EXPECT_EQ(typeid(EXPECTED_BODY), typeid(body.convert()));
+}
+
+TYPED_TEST(BodyTest, ToString_SerializeBodyCorrectly) {
+    TypeParam body;
+    const auto BODY = this->GetTestBody();
+    std::ostringstream oss;
+    oss << BODY;
+    const std::string EXPECTED_STRING_BODY = oss.str();
+
+    body.set(BODY);
+
+    EXPECT_EQ(EXPECTED_STRING_BODY, body.toString());
+}
+
+TYPED_TEST(BodyTest, SetWithoutAcceptedType_ThrowsException) {
+    network_n::Body<int> body;
+    EXPECT_THROW(body.set(400), Exception);
+}
+
+TYPED_TEST(BodyTest, ConvertWithoutAcceptedType_ThrowsException) {
+    network_n::Body<int> body;
+    EXPECT_THROW(body.convert(), Exception);
 }
