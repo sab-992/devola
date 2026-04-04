@@ -45,7 +45,6 @@ namespace network_n
         { Code::NONE,           "N/A" },
     };
 
-    // TODO: Overload operator==, for int and for Code.
     struct Status_s : public StringConvertible {
     public:
         Status_s(Code code = Code::NONE) : m_code(code), m_reason(STATUS_REASONS.at(code)) {}
@@ -66,6 +65,17 @@ namespace network_n
             swap(*this, other);
             return *this;
         }
+
+        bool operator==(const Status_s& other) const { return m_code == other.m_code; }
+        bool operator==(const Code& code) const { return m_code == code; }
+        bool operator==(uint16_t code) const { return to_underlying(m_code) == code; }
+
+        bool operator!=(const Status_s& other) const { return !(*this == other); }
+        bool operator!=(const Code& code) const { return !(*this == code); }
+        bool operator!=(uint16_t code) const { return !(*this == code); }
+
+        friend bool operator==(const Code& lhs, const Status_s& rhs) { return rhs == lhs; }
+        friend bool operator==(uint16_t lhs, const Status_s& rhs) { return rhs == lhs; }
 
         Code code() const { return m_code; }
         std::string reason() const { return m_reason; }
