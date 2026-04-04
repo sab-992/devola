@@ -6,7 +6,7 @@ from settings.command.detail.directory import Directory
 from settings.command.detail.options import MANUAL_OPTION
 
 
-class Debug(Command, Directory):
+class Launch(Command, Directory):
     def __init__(self):
         Command.__init__(self)
 
@@ -14,7 +14,7 @@ class Debug(Command, Directory):
         return { "manual": MANUAL_OPTION }
 
     def command(self) -> str:
-        return "debug"
+        return "launch"
 
     def command_explicit(self, args: Namespace) -> str:
         if platform.system() != "Windows":

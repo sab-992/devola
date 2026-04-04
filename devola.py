@@ -1,16 +1,16 @@
 import argparse
 
-from settings.command import compile, debug, deploy, install, service, shutdown, test
+from settings.command import add_service, compile, deploy, install, launch, shutdown, test
 from settings.command.detail.command import Command
 from settings.command.detail.options import OptionsType
 
 COMMANDS: dict[str, Command] = { "cmake"       : compile.CMake(), 
                                  "make"        : compile.Make(),
                                  "makeall"     : compile.MakeAll(),
-                                 "debug"       : debug.Debug(),
+                                 "launch"      : launch.Launch(),
                                  "deploy"      : deploy.Deploy(),
                                  "install"     : install.Install(),
-                                 "add_service" : service.AddService(),
+                                 "add_service" : add_service.AddService(),
                                  "shutdown"    : shutdown.Shutdown(),
                                  "test"        : test.Test() }
 

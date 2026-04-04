@@ -8,7 +8,7 @@ from settings.command.detail.config import SERVICES_PATH
 from settings.command.detail.file_system import FileSystem
 from settings.command.detail.log import log, Color
 from settings.command.detail.service_updater import ServiceUpdater
-from settings.command.detail.options import LOGS_OPTION, PROD_OPTION, MANUAL_OPTION
+from settings.command.detail.options import PROD_OPTION, OUTPUT_OPTION, MANUAL_OPTION
 
 
 # TODO: Fix deploy and docker files
@@ -19,13 +19,13 @@ class Deploy(Command, ServiceUpdater):
         self.__fs = FileSystem()
 
     def arguments(self) -> dict[str, dict]:
-        return { "logs": LOGS_OPTION, "prod": PROD_OPTION, "manual": MANUAL_OPTION }
+        return { "output": OUTPUT_OPTION, "prod": PROD_OPTION, "manual": MANUAL_OPTION }
 
     def command(self) -> str:
         return "deploy"
 
     def command_explicit(self, args: Namespace) -> str:
-        return f"docker ps{f" && docker logs -f {str(args.logs)};" if args.logs else ""}"
+        return f"docker ps{f" && docker logs -f {str(args.output)};" if args.output else ""}"
     
     def details(self) -> str:
         return "Deploy the application in docker containers."

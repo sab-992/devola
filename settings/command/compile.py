@@ -1,11 +1,11 @@
 import platform
 from argparse import Namespace
 
-from settings.command.debug import Debug
+from settings.command.launch import Launch
 from settings.command.detail.command import Command
 from settings.command.detail.config import POSTGRE_INSTALLATION_PATH
 from settings.command.detail.directory import Directory
-from settings.command.detail.options import DEBUG_OPTION, MANUAL_OPTION
+from settings.command.detail.options import LAUNCH_OPTION, MANUAL_OPTION
 from settings.command.detail.service_updater import ServiceUpdater
 
 
@@ -42,13 +42,13 @@ class Make(Command, Directory, ServiceUpdater):
         ServiceUpdater.__init__(self)
 
     def arguments(self) -> dict[str, dict]:
-        return { "debug": DEBUG_OPTION, "manual": MANUAL_OPTION } 
+        return { "launch": LAUNCH_OPTION, "manual": MANUAL_OPTION } 
 
     def command(self) -> str:
         return "make"
 
     def command_explicit(self, args: Namespace) -> str:
-        return f"cmake --build .{f" && {Debug().command_explicit(args)}" if args.debug else ""}"
+        return f"cmake --build .{f" && {Launch().command_explicit(args)}" if args.launch else ""}"
     
     def details(self) -> str:
         return "Use the environment made by the 'cmake' command and build/compiles the application."
@@ -66,7 +66,7 @@ class MakeAll(Command, Directory, ServiceUpdater):
         ServiceUpdater.__init__(self)
 
     def arguments(self) -> dict[str, dict]:
-        return { "debug": DEBUG_OPTION, "manual": MANUAL_OPTION } 
+        return { "launch": LAUNCH_OPTION, "manual": MANUAL_OPTION } 
 
     def command(self) -> str:
         return "makeall"
