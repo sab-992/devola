@@ -44,7 +44,7 @@ TEST_F(ResponseTest, BuildWithStatus_CreatesValidStartline) {
     const std::string stringResponse = response.toString();
     std::string startLine = stringResponse.substr(0, stringResponse.find("\r\n"));
 
-    EXPECT_EQ(EXPECTED_STATUS.code(), response.status().code());
+    EXPECT_EQ(EXPECTED_STATUS, response.status());
     EXPECT_EQ(EXPECTED_STARTLINE, startLine);
 }
 
@@ -83,7 +83,7 @@ TEST_F(ResponseTest, Set_CreatesValidHTTPResponse) {
 
     EXPECT_NO_THROW(response.build());
 
-    EXPECT_EQ(EXPECTED_STATUS.code(), response.status().code());
+    EXPECT_EQ(EXPECTED_STATUS, response.status());
     EXPECT_EQ(EXPECTED_PROTOCOL, response.protocol());
     EXPECT_EQ(sortedHeadersMap.size(), response.headersMap().size());
     for (const auto& [header, expected_value]: sortedHeadersMap)
