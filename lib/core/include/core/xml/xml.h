@@ -12,7 +12,7 @@ namespace xml_n
         Document(const std::string& document="");
 
         bool operator==(const Document& other);
-        inline bool operator!=(const Document& other);
+        bool operator!=(const Document& other);
 
         std::string toString() const override;
     };
