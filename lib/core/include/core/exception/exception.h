@@ -1,11 +1,13 @@
 #pragma once
 
+#include <core/conversion/string_convertible.h>
 #include <core/network/network.h>
 #include <exception>
 #include <string>
+#include <sstream>
 
 
-class Exception : public std::exception {
+class Exception : public std::exception, public StringConvertible {
 public:
     Exception(const std::string& message);
     ~Exception();
@@ -13,6 +15,8 @@ public:
     const char* what() const noexcept override;
     constexpr const char* type() const noexcept { return m_type; };
     constexpr network_n::Code code() const noexcept { return m_httpCodeEquivalent; };
+
+    std::string toString() const override;
 
 protected:
     const std::string m_message;
