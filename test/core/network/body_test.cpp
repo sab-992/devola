@@ -5,12 +5,26 @@
 
 
 template<typename T>
-class BodyTest : public ::testing::Test {};
+class BodyTest : public ::testing::Test {
+public:
+    template <typename ContentType>
+    struct TemplatedBody {
+        using type = network_n::Body<ContentType>;
+    };
 
-TYPED_TEST_SUITE_P(BodyTest);
+protected:
+    auto GetTestBody(bool alt=false) {
+        return InnerTypes<T, BodyTest<T>::template TemplatedBody>::GetTestBody(alt);
+    }
+};
 
-TYPED_TEST_P(BodyTest, Set_AddsNewBody) {}
+TYPED_TEST_SUITE(BodyTest, networkInnerTypes_t<network_n::Body>);
 
-REGISTER_TYPED_TEST_SUITE_P(BodyTest, Set_AddsNewBody);
+TYPED_TEST(BodyTest, Set_AddsNewBody) {
+    TypeParam body;
+    const auto EXPECTED_BODY = this->GetTestBody();
 
-INSTANTIATE_TYPED_TEST_SUITE_P(NetworkBody, BodyTest, networkInnerTypes_t<network_n::Body>);
+    body.set(EXPECTED_BODY);
+
+    EXPECT_EQ(EXPECTED_BODY, body.convert());
+}

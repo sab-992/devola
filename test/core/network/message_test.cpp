@@ -1,35 +1,23 @@
 #include <gtest/gtest.h>
 
-#include <core/network/utils/inner_types.h>
 #include <core/exception.h>
 #include <core/http/request.h>
 #include <core/http/response.h>
+#include <core/network/utils/inner_types.h>
 #include <core/xml/xml.h>
 #include <nlohmann/json.hpp>
 
 
-template<typename T>
+template<typename MessageType>
 class MessageTest : public ::testing::Test {
+public:
+    template<typename ContentType>
+    struct TemplatedMessage {
+        using type = network_n::Message<MessageType, ContentType>;
+    };
 protected:
-    auto GetTestBody(bool alternate=false) {
-        using network_n::Message;
-        if constexpr (std::is_base_of_v<Message<T, nlohmann::json>, T>)
-            return createJSON(alternate ? R"({ "alternateTest": "works!", "json": true })" : R"({ "test": "works!", "json": true })");
-        if constexpr (std::is_base_of_v<Message<T, std::string>, T>)
-            return std::string(alternate ? "Hello alternate test!" : "Hello test!");
-        if constexpr (std::is_base_of_v<Message<T, xml_n::Document>, T>)
-            return createXML(alternate ? "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n<item>Hello alternate xml test!</item>\n</root>\n" : 
-                                         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n<item>Hello xml test!</item>\n</root>\n");
-        throw Exception("Unhandled type in MessageTest::GetBody");
-    }
-
-private:
-    nlohmann::json createJSON(const std::string& content) {
-        return nlohmann::json::parse(content);
-    }
-
-    xml_n::Document createXML(const std::string& content) {
-        return xml_n::Document(content);
+    auto GetTestBody(bool alt=false) {
+        return InnerTypes<MessageType, MessageTest<MessageType>::template TemplatedMessage>::GetTestBody(alt);
     }
 };
 
@@ -46,7 +34,7 @@ TYPED_TEST_P(MessageTest, SetBody_AddsNewBody) {
 
 TYPED_TEST_P(MessageTest, SetBody_OverwritesExistingBody) {
     TypeParam message;
-    const auto ALTERNATE_BODY = this->GetTestBody(true);
+    const auto ALTERNATE_BODY = this->GetTestBody(true /* alt */);
     const auto EXPECTED_BODY = this->GetTestBody();
 
     message.setBody(ALTERNATE_BODY);
