@@ -7,6 +7,7 @@ from settings.command.detail.options import OptionsType
 COMMANDS: dict[str, Command] = { "cmake"       : compile.CMake(), 
                                  "make"        : compile.Make(),
                                  "makeall"     : compile.MakeAll(),
+                                 "maketest"    : compile.MakeTest(),
                                  "launch"      : launch.Launch(),
                                  "deploy"      : deploy.Deploy(),
                                  "install"     : install.Install(),
