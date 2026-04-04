@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <core/network/utils/inner_types.h>
 #include <core/exception.h>
 #include <core/http/request.h>
 #include <core/http/response.h>
@@ -107,8 +108,5 @@ REGISTER_TYPED_TEST_SUITE_P(MessageTest, SetBody_AddsNewBody,
                                          SetHeader_IncrementsSize,
                                          SetHeader_OverwritesExistingHeader);
 
-template <template <typename> class Message>
-using Messages = ::testing::Types<Message<std::string>, Message<nlohmann::json>, Message<xml_n::Document>>;
-
-INSTANTIATE_TYPED_TEST_SUITE_P(HTTPRequest, MessageTest, Messages<http_n::Request>);
-INSTANTIATE_TYPED_TEST_SUITE_P(HTTPResponse, MessageTest, Messages<http_n::Response>);
+INSTANTIATE_TYPED_TEST_SUITE_P(HTTPRequest, MessageTest, networkInnerTypes_t<http_n::Request>);
+INSTANTIATE_TYPED_TEST_SUITE_P(HTTPResponse, MessageTest, networkInnerTypes_t<http_n::Response>);
