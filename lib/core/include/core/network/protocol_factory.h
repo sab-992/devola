@@ -21,7 +21,7 @@ namespace network_n
                 case Protocol::HTTP1_1:
                     return std::make_unique<HTTP1_1<T>>();
                 default:
-                    throw std::runtime_error(std::format("Protocol #{}: Not Handled", to_underlying(protocol))); // TODO: Change for new error type;
+                    throw Exception(std::format("Protocol #{}: Not Handled", to_underlying(protocol)));
                 }
             }
         };

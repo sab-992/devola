@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <core/exception.h>
 #include <core/http/request.h>
 #include <core/http/utils/build_headers.h>
 #include <core/network/protocol_factory.h>
@@ -61,19 +62,19 @@ TEST_F(RequestTest, BuildWithMethodAndAPIEndpoint_CreatesValidStartline) {
 TEST_F(RequestTest, BuildWithoutAPIEndpoint_ThrowsException) {
     Request<std::string> request = Request<std::string>().setMethod("GET")
                                                          .setURL("www.test.com");
-    EXPECT_THROW(request.build(), std::invalid_argument);
+    EXPECT_THROW(request.build(), InvalidArgument);
 }
 
 TEST_F(RequestTest, BuildWithoutMethod_ThrowsException) {
     Request<std::string> request = Request<std::string>().setAPIEndpoint("/")
                                                          .setURL("www.test.com");
-    EXPECT_THROW(request.build(), std::invalid_argument);
+    EXPECT_THROW(request.build(), InvalidArgument);
 }
 
 TEST_F(RequestTest, BuildWithoutURL_ThrowsException) {
     Request<std::string> request = Request<std::string>().setMethod("GET")
                                                          .setAPIEndpoint("/");
-    EXPECT_THROW(request.build(), std::invalid_argument);
+    EXPECT_THROW(request.build(), InvalidArgument);
 }
 
 TEST_F(RequestTest, BuildWithoutProtocol_ThrowsException) {
@@ -84,7 +85,7 @@ TEST_F(RequestTest, BuildWithoutProtocol_ThrowsException) {
 
     request.setProtocol(Protocol::NONE);
 
-    EXPECT_THROW(request.build(), std::invalid_argument);
+    EXPECT_THROW(request.build(), InvalidArgument);
 }
 
 TEST_F(RequestTest, Set_CreatesValidHTTPRequest) {

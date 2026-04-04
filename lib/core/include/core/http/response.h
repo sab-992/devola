@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/exception.h>
 #include <core/http/detail/settings.h>
 #include <core/network/detail/message.h>
 #include <core/network/network.h>
@@ -60,7 +61,8 @@ namespace http_n {
         network_n::Status_s m_status;
 
         void validateMembers() const {
-            if (m_status.code() == network_n::Code::NONE)  throw std::invalid_argument("Response status cannot be empty");
+            if (m_status.code() == network_n::Code::NONE)  throw InvalidArgument("Cannot be empty", "Status");
+            if (this->m_protocol == network_n::protocol_n::Protocol::NONE) throw InvalidArgument("Cannot be NONE", "Protocol");
         }
 
         void finalize() {

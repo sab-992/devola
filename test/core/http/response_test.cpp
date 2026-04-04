@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <core/conversion/enum.h>
+#include <core/exception.h>
 #include <core/http/response.h>
 #include <core/http/utils/build_headers.h>
 #include <core/xml/xml.h>
@@ -50,7 +51,17 @@ TEST_F(ResponseTest, BuildWithStatus_CreatesValidStartline) {
 TEST_F(ResponseTest, BuildWithoutStatus_ThrowsException) {
     Response<std::string> response = Response<std::string>();
 
-    EXPECT_THROW(response.build(), std::invalid_argument);
+    EXPECT_THROW(response.build(), InvalidArgument);
+}
+
+TEST_F(ResponseTest, BuildWithoutProtocol_ThrowsException) {
+    using network_n::Code;
+    using network_n::protocol_n::Protocol; 
+    Response<std::string> response = Response<std::string>().setStatus(Code::CREATED);
+
+    response.setProtocol(Protocol::NONE);
+
+    EXPECT_THROW(response.build(), InvalidArgument);
 }
 
 TEST_F(ResponseTest, Set_CreatesValidHTTPResponse) {

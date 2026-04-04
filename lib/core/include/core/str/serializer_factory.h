@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/exception.h>
 #include <core/str/detail/serializer/json.h>
 #include <core/str/detail/serializer/xml.h>
 #include <core/str/detail/serializer/string.h>
@@ -15,7 +16,7 @@ namespace serializer_n
     template<typename T>
     class Factory {
     public:
-        static inline std::unique_ptr<Serializer_i<T>> create() { throw std::exception("Not implemented"); }
+        static inline std::unique_ptr<Serializer_i<T>> create() { throw Exception("Not Implemented"); }
     };
 
     template <>

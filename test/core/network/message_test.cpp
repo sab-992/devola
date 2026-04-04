@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <core/exception.h>
 #include <core/http/request.h>
 #include <core/http/response.h>
 #include <core/xml/xml.h>
@@ -18,7 +19,7 @@ protected:
         if constexpr (std::is_base_of_v<Message<T, xml_n::Document>, T>)
             return createXML(alternate ? "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n<item>Hello alternate xml test!</item>\n</root>\n" : 
                                          "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n<item>Hello xml test!</item>\n</root>\n");
-        throw std::invalid_argument("Unhandled type in MessageTest::GetBody");
+        throw Exception("Unhandled type in MessageTest::GetBody");
     }
 
 private:

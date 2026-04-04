@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/exception.h>
 #include <core/network/interface/protocol.h>
 #include <core/str/split.h>
 #include <core/str/hex.h>
@@ -41,7 +42,7 @@ namespace network_n
                 split(startLine, messageInformation);
 
                 if (messageInformation.size() < 3)
-                    throw std::invalid_argument("HTTP message startline is ill-formed");
+                    throw InvalidArgument("Ill-formed", "HTTP message startline");
 
                 if (isRequest(messageInformation))
                     return requestInformationMap(messageInformation);
@@ -110,7 +111,7 @@ namespace network_n
                     const size_t EOL = message.find(nextLine);
 
                     if (EOL == std::string::npos)
-                        throw std::invalid_argument("Message not chunked correctly");
+                        throw InvalidArgument("Not chunked correctly", "HTTP message body");
 
                     const std::string hexLength = message.substr(0, EOL);
                     return fromHex(hexLength);
@@ -122,7 +123,7 @@ namespace network_n
                 const size_t END_OF_HEADERS = message.find(HEADER_END_TOKEN);
 
                 if (END_OF_HEADERS == std::string::npos)
-                    throw std::invalid_argument("HTTP message is ill-formed");
+                    throw InvalidArgument("Ill-formed", "HTTP message");
 
                 // Returned pair = { Headers (string), Body (string) }.
                 return std::make_pair(message.substr(0, END_OF_HEADERS), message.substr(END_OF_HEADERS  + HEADER_END_TOKEN.size()));

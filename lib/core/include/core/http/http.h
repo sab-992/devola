@@ -1,6 +1,7 @@
 #pragma once
 
 #include <asio.hpp>
+#include <core/exception.h>
 #include <core/http/request.h>
 #include <core/http/response.h>
 #include <memory>
@@ -56,7 +57,7 @@ namespace http_n
             inline static const std::string CLOSE_CONNECTION = "close";
             inline static const std::string USER_AGENT = "Devola/1.0";
 
-            static std::string accept() { throw std::runtime_error("Not implemented"); }
+            static std::string accept() { throw Exception("Not Implemented"); }
             static Request<T> create() { return std::move(Request<T>().setProtocol(network_n::protocol_n::Protocol::HTTP1_1)); }
         };
 
@@ -113,7 +114,7 @@ namespace http_n
                 read(socket,  dynamic_buffer(message), transfer_all(), ec);
 
                 if (ec and ec != error::eof)
-                    throw std::runtime_error("Error while reading response: " + ec.message());
+                    throw Exception("Error while reading response: " + ec.message());
 
                 return std::move(Response<T>().set(message).build());
             }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/conversion/string_convertible.h>
+#include <core/exception.h>
 #include <core/str/trim.h>
 #include <format>
 #include <string>

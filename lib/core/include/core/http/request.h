@@ -1,7 +1,8 @@
 #pragma once
 
-#include <core/network/detail/message.h>
+#include <core/exception.h>
 #include <core/http/detail/settings.h>
+#include <core/network/detail/message.h>
 
 namespace http_n {
     template <typename T>
@@ -134,10 +135,10 @@ namespace http_n {
         void validateMembers() const {
             using network_n::protocol_n::Protocol;
 
-            if (m_APIEndpoint.empty()) throw std::invalid_argument("Request API endpoint cannot be empty");
-            if (m_method.empty()) throw std::invalid_argument("Request HTTP method cannot be empty");
-            if (m_URL.empty()) throw std::invalid_argument("Request host URL cannot be empty");
-            if (this->m_protocol == Protocol::NONE) throw std::invalid_argument("Protocol cannot be NONE");
+            if (m_APIEndpoint.empty()) throw InvalidArgument("Cannot be empty", "API endpoint");
+            if (m_method.empty()) throw InvalidArgument("Cannot be empty", "HTTP method");
+            if (m_URL.empty()) throw InvalidArgument("Cannot be empty", "Host URL");
+            if (this->m_protocol == Protocol::NONE) throw InvalidArgument("Cannot be NONE", "Protocol");
         }
     };
 }
