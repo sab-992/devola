@@ -19,7 +19,7 @@ public:
     std::string toString() const override;
 
 protected:
-    const std::string m_message;
+    std::string m_message;
     const char* m_type;
     const network_n::Code m_httpCodeEquivalent;
 
