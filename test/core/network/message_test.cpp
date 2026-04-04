@@ -49,7 +49,7 @@ TYPED_TEST_P(MessageTest, Body_IsConvertedCorrectly) {
 
     message.setBody(EXPECTED_BODY);
 
-    EXPECT_TRUE(typeid(EXPECTED_BODY) == typeid(message.body()));
+    EXPECT_EQ(typeid(EXPECTED_BODY), typeid(message.body()));
 }
 
 TYPED_TEST_P(MessageTest, SetHeader_AddsNewHeader) {

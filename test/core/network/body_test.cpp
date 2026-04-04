@@ -28,3 +28,23 @@ TYPED_TEST(BodyTest, Set_AddsNewBody) {
 
     EXPECT_EQ(EXPECTED_BODY, body.convert());
 }
+
+TYPED_TEST(BodyTest, Set_OverwritesExistingBody) {
+    TypeParam body;
+    const auto ALTERNATE_BODY = this->GetTestBody(true /* alt */);
+    const auto EXPECTED_BODY = this->GetTestBody();
+
+    body.set(ALTERNATE_BODY);
+    body.set(EXPECTED_BODY);
+
+    EXPECT_EQ(EXPECTED_BODY, body.convert());
+}
+
+TYPED_TEST(BodyTest, Body_IsConvertedCorrectly) {
+    TypeParam body;
+    const auto EXPECTED_BODY = this->GetTestBody();
+
+    body.set(EXPECTED_BODY);
+
+    EXPECT_EQ(typeid(EXPECTED_BODY), typeid(body.convert()));
+}
