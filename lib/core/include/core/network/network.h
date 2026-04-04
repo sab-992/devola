@@ -26,6 +26,7 @@ namespace network_n
         UNAUTHORIZED = 401,
         FORBIDDEN    = 403,
         NOT_FOUND    = 404,
+        NOT_ALLOWED  = 405,
         SERVER_ERROR = 500,
 
         NONE = 0 // For error handling
