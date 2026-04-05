@@ -19,7 +19,7 @@ class Test(Command, Directory, ServiceUpdater):
         return "test"
 
     def command_explicit(self, args: Namespace) -> str:
-        return f"./test/tests{ f"--gtest_filter=\"{args.regex}\"" if args.regex else "" }"
+        return f"./test/tests{ f" --gtest_filter=\"{args.regex}\"" if args.regex else "" }"
 
     def details(self) -> str:
         return "Launches automated tests."
