@@ -22,6 +22,8 @@ protected:
 
 TYPED_TEST_SUITE(BodyTest, networkInnerTypes_t<network_n::Body>);
 
+TYPED_TEST(BodyTest, Constructor_ParsesStringBodyCorrectly) { /* TODO */ }
+
 TYPED_TEST(BodyTest, Set_AddsNewBody) {
     TypeParam body;
     const auto EXPECTED_BODY = this->GetTestBody();
