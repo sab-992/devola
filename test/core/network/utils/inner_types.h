@@ -14,27 +14,35 @@ class InnerTypes {
 public:
     inline static auto GetTestBody(bool alt=false) {
         if constexpr (std::is_base_of_v<typename Object<nlohmann::json>::type, T>)
-            return createJSON(alt);
+            return nlohmann::json::parse(createJSONString(alt));
         if constexpr (std::is_base_of_v<typename Object<std::string>::type, T>)
-            return createString(alt);
+            return createTextString(alt);
         if constexpr (std::is_base_of_v<typename Object<xml_n::Document>::type, T>)
-            return createXML(alt);
+            return xml_n::Document(createXMLString(alt));
+        throw Exception("Unhandled single templated type object");
+    }
+
+    inline static std::string GetTestStringBody(bool alt=false) {
+        if constexpr (std::is_base_of_v<typename Object<nlohmann::json>::type, T>)
+            return createJSONString(alt);
+        if constexpr (std::is_base_of_v<typename Object<std::string>::type, T>)
+            return createTextString(alt);
+        if constexpr (std::is_base_of_v<typename Object<xml_n::Document>::type, T>)
+            return createXMLString(alt);
         throw Exception("Unhandled single templated type object");
     }
 
 private:
-    static nlohmann::json createJSON(bool alt) {
-        const std::string content = alt ? R"({ "alternateTest": "works!", "json": true })" : R"({ "test": "works!", "json": true })";
-        return nlohmann::json::parse(content);
+    inline static std::string createJSONString(bool alt) {
+        return alt ? R"({ "alternateTest": "works!", "json": true })" : R"({ "test": "works!", "json": true })";
     }
 
-    static std::string createString(bool alt) {
-        return std::string(alt ? "Hello alternate test!" : "Hello test!");
+    inline static std::string createTextString(bool alt) {
+        return alt ? "Hello alternate test!" : "Hello test!";
     }
 
-    static xml_n::Document createXML(bool alt) {
-        const std::string content = alt ? "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n<item>Hello alternate xml test!</item>\n</root>\n" : 
-                                          "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n<item>Hello xml test!</item>\n</root>\n";
-        return xml_n::Document(content);
+    inline static std::string createXMLString(bool alt) {
+        return alt ? "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n<item>Hello alternate xml test!</item>\n</root>\n" : 
+                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n<item>Hello xml test!</item>\n</root>\n";
     }
 };

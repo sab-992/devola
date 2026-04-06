@@ -22,7 +22,15 @@ protected:
 
 TYPED_TEST_SUITE(BodyTest, networkInnerTypes_t<network_n::Body>);
 
-TYPED_TEST(BodyTest, Constructor_ParsesStringBodyCorrectly) { /* TODO */ }
+TYPED_TEST(BodyTest, Constructor_ParsesStringBodyCorrectly) {
+    const auto EXPECTED_BODY = this->GetTestBody();
+    const auto EXPECTED_STRING_BODY = InnerTypes<TypeParam, BodyTest<TypeParam>::template TemplatedBody>::GetTestStringBody();
+
+    TypeParam body = TypeParam(EXPECTED_STRING_BODY);
+
+    EXPECT_EQ(EXPECTED_BODY, body.convert());
+    EXPECT_EQ(EXPECTED_STRING_BODY, body.toString());
+}
 
 TYPED_TEST(BodyTest, Set_AddsNewBody) {
     TypeParam body;
