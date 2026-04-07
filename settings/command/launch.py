@@ -16,11 +16,8 @@ class Launch(Command, Directory):
     def command(self) -> str:
         return "launch"
 
-    def command_explicit(self, args: Namespace) -> str:
-        if platform.system() != "Windows":
-            return f"./server/dev_server"
-
-        return "server/Debug/dev_server.exe".replace('/', '\\')
+    def command_explicit(self, args: Namespace) -> list[list[str]]:
+        return [[self.uniformizePath("server/Debug/dev_server.exe" if platform.system() == "Windows" else "./server/dev_server")]]
     
     def details(self) -> str:
         return "Starts the application."
@@ -29,4 +26,4 @@ class Launch(Command, Directory):
         self.set_working_directory(self.build_directory())
 
     def teardown(self, args: Namespace) -> str:
-        pass
+        self.reset_working_directory()

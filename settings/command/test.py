@@ -1,3 +1,4 @@
+import platform
 from argparse import Namespace
 
 from settings.command.detail.command import Command
@@ -18,15 +19,19 @@ class Test(Command, Directory, ServiceUpdater):
     def command(self) -> str:
         return "test"
 
-    def command_explicit(self, args: Namespace) -> str:
-        return f"./test/tests{ f" --gtest_filter=\"{args.regex}\"" if args.regex else "" }"
+    def command_explicit(self, args: Namespace) -> list[list[str]]:
+        command: list[str] = [self.uniformizePath("test/Debug/tests.exe" if platform.system() == "Windows" else "./test/tests")]
+
+        if args.regex:
+            command.append(f"--gtest_filter=\"{args.regex}\"")
+
+        return [command]
 
     def details(self) -> str:
         return "Launches automated tests."
 
     def setup(self, args: Namespace) -> str:
-        self.update_services()
         self.set_working_directory(self.build_directory())
 
     def teardown(self, args: Namespace) -> str:
-        pass
+        self.reset_working_directory()
