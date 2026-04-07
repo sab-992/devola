@@ -24,8 +24,13 @@ class Deploy(Command, ServiceUpdater):
     def command(self) -> str:
         return "deploy"
 
-    def command_explicit(self, args: Namespace) -> str:
-        return f"docker ps{f" && docker logs -f {str(args.output)};" if args.output else ""}"
+    def command_explicit(self, args: Namespace) -> list[list[str]]:
+        commands = [["docker", "ps"]]
+
+        if args.output:
+            commands += ["docker", "logs", "-f", f"{str(args.output)}"]
+
+        return commands
     
     def details(self) -> str:
         return "Deploy the application in docker containers."

@@ -10,7 +10,7 @@ from .errors import InvalidInputError
 
 class Command(ABC):
     def __init__(self):
-        self.working_dir = ""
+        self.initial_working_dir = os.getcwd()
 
     @abstractmethod
     def arguments(self) -> dict[str, dict]:
@@ -26,7 +26,7 @@ class Command(ABC):
         """
 
     @abstractmethod
-    def command_explicit(self, args: Namespace) -> str:
+    def command_explicit(self, args: Namespace) -> list[list[str]]:
         """
         Gives the command to execute.
         """
@@ -48,13 +48,14 @@ class Command(ABC):
 
         try:
             self.validate_arguments(args)
-            command = self.command_explicit(args)
+            commands = self.command_explicit(args)
 
-            if not command:
+            if len(commands) <= 0:
                 return
 
             self.setup(args)
-            subprocess.run(command, cwd=self.working_dir if self.working_dir and len(self.working_dir) != 0 else None, shell=True, env=os.environ.copy())
+            for command in commands:
+                subprocess.run(command, env=os.environ.copy(), check=True)
             self.teardown(args)
         except Exception as e:
             log(f"Something went wrong while running the command \"{self.command}\": {e}", True, Color.RED)
@@ -67,12 +68,12 @@ class Command(ABC):
         for argument, arguments_info in self.arguments().items():
             options += f"\t-{argument[0]}, {argument} - {arguments_info["help"]}\n"
         return f"{self.details()}\n\n{options[:-1]}"
-    
-    def set_working_directory(self, working_dir: Namespace) -> str:
-        self.working_dir = working_dir
-    
-    def get_working_directory(self) -> str:
-        return self.working_dir
+
+    def reset_working_directory(self) -> None:
+        os.chdir(self.initial_working_dir)
+
+    def set_working_directory(self, working_dir: Namespace) -> None:
+        os.chdir(working_dir)
 
     @abstractmethod
     def setup(self, args: Namespace) -> str:

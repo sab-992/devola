@@ -21,8 +21,13 @@ class CMake(Command, Directory, ServiceUpdater):
     def command(self) -> str:
         return "cmake"
 
-    def command_explicit(self, args: Namespace) -> str:
-        return f"cmake {f"-DPostgreSQL_ROOT=\"{POSTGRE_INSTALLATION_PATH}\" " if platform.system() == "Windows" else ""}-DCMAKE_BUILD_TYPE=debug .."
+    def command_explicit(self, args: Namespace, build_type: str="debug") -> list[list[str]]:
+        cmake_command = ["cmake"]
+
+        if platform.system() == "Windows":
+            cmake_command.append(f"-DPostgreSQL_ROOT={POSTGRE_INSTALLATION_PATH}")
+
+        return [cmake_command + [f"-DCMAKE_BUILD_TYPE={build_type}", ".."]]
 
     def details(self) -> str:
         return "Use the CMakeLists.txt to prepare the environment for the application.\n\n" \
@@ -34,8 +39,7 @@ class CMake(Command, Directory, ServiceUpdater):
         self.set_working_directory(self.build_directory())
 
     def teardown(self, args: Namespace) -> str:
-        pass
-
+        self.reset_working_directory()
 
 class Make(Command, Directory, ServiceUpdater):
     def __init__(self):
@@ -48,8 +52,14 @@ class Make(Command, Directory, ServiceUpdater):
     def command(self) -> str:
         return "make"
 
-    def command_explicit(self, args: Namespace) -> str:
-        return f"cmake --build .{f" && {Launch().command_explicit(args)}" if args.launch else ""}"
+    def command_explicit(self, args: Namespace, build_type="debug") -> list[list[str]]:
+        make_command = ["cmake", "--build", "."]
+
+        commands = [make_command]
+        if args.launch and build_type == "debug":
+            commands += Launch().command_explicit(args)
+
+        return commands
 
     def details(self) -> str:
         return "Use the environment made by the 'cmake' command and build/compiles the application."
@@ -59,7 +69,7 @@ class Make(Command, Directory, ServiceUpdater):
         self.set_working_directory(self.build_directory())
 
     def teardown(self, args: Namespace) -> str:
-        pass
+        self.reset_working_directory()
 
 class MakeAll(Command, Directory, ServiceUpdater):
     def __init__(self):
@@ -72,8 +82,8 @@ class MakeAll(Command, Directory, ServiceUpdater):
     def command(self) -> str:
         return "makeall"
 
-    def command_explicit(self, args: Namespace) -> str:
-        return f"{CMake().command_explicit(args)} && {Make().command_explicit(args)}"
+    def command_explicit(self, args: Namespace) -> list[list[str]]:
+        return CMake().command_explicit(args) + Make().command_explicit(args)
 
     def details(self) -> str:
         return "Combines the 'cmake' command and the 'make' command to prepare the application environment and build it."
@@ -83,7 +93,7 @@ class MakeAll(Command, Directory, ServiceUpdater):
         self.set_working_directory(self.build_directory())
 
     def teardown(self, args: Namespace) -> str:
-        pass
+        self.reset_working_directory()
 
 class MakeTest(Command, Directory, ServiceUpdater):
     def __init__(self):
@@ -96,8 +106,13 @@ class MakeTest(Command, Directory, ServiceUpdater):
     def command(self) -> str:
         return "maketest"
 
-    def command_explicit(self, args: Namespace) -> str:
-        return f"cmake -DCMAKE_BUILD_TYPE=test ..  && cmake --build .{f" && {Test().command_explicit(args)}" if args.launch else ""}"
+    def command_explicit(self, args: Namespace) -> list[list[str]]:
+        commands = CMake().command_explicit(args, "test") + Make().command_explicit(args, "test")
+
+        if args.launch:
+            commands += Test().command_explicit(args)
+
+        return commands
 
     def details(self) -> str:
         return "Compiles the google tests."
@@ -107,4 +122,4 @@ class MakeTest(Command, Directory, ServiceUpdater):
         self.set_working_directory(self.build_directory())
 
     def teardown(self, args: Namespace) -> str:
-        pass
+        self.reset_working_directory()

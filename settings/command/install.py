@@ -17,16 +17,16 @@ class Install(Command):
     def command(self) -> str:
         return "install"
 
-    def command_explicit(self, args: Namespace) -> str:
-        cmd = "";
+    def command_explicit(self, args: Namespace) -> list[list[str]]:
+        cmd = [];
         match platform.system():
             case "Windows":
                 if (USE_VCPKG):
-                    cmd = "vcpkg install libpq"
+                    cmd = [["vcpkg",  "install", "libpq"]]
                 else:
-                    cmd = "choco install postgresql --yes"
+                    cmd = [["choco", "install", "postgresql", "--yes"]]
             case "Linux":
-                cmd = "sudo apt update; sudo apt install libpq-dev zlib1g-dev"
+                cmd = [["sudo", "apt", "update"], ["sudo", "apt", "install", "libpq-dev", "zlib1g-dev"]]
             case _:
                 raise NotSupportedOperatingSystem()
         return cmd
