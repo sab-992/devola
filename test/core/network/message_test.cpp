@@ -3,7 +3,7 @@
 #include <core/exception.h>
 #include <core/http/request.h>
 #include <core/http/response.h>
-#include <core/network/utils/inner_types.h>
+#include <utils/core/inner_types.h>
 #include <core/xml/xml.h>
 #include <nlohmann/json.hpp>
 
@@ -15,6 +15,7 @@ public:
     struct TemplatedMessage {
         using type = network_n::Message<MessageType, ContentType>;
     };
+
 protected:
     auto GetTestBody(bool alt=false) {
         return InnerTypes<MessageType, MessageTest<MessageType>::template TemplatedMessage>::GetTestBody(alt);

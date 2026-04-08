@@ -2,7 +2,7 @@
 
 #include <core/exception.h>
 #include <core/network/detail/body.h>
-#include <core/network/utils/inner_types.h>
+#include <utils/core/inner_types.h>
 #include <sstream>
 
 

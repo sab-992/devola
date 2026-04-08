@@ -3,7 +3,7 @@
 #include <core/conversion/enum.h>
 #include <core/exception.h>
 #include <core/http/response.h>
-#include <core/http/utils/build_headers.h>
+#include <utils/core/build_headers.h>
 #include <core/xml/xml.h>
 #include <format>
 

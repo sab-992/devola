@@ -2,7 +2,7 @@
 
 #include <core/exception.h>
 #include <core/http/request.h>
-#include <core/http/utils/build_headers.h>
+#include <utils/core/build_headers.h>
 #include <core/network/protocol_factory.h>
 #include <core/xml/xml.h>
 #include <nlohmann/json.hpp>

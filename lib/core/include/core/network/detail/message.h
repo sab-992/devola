@@ -5,7 +5,7 @@
 #include <core/network/detail/headers.h>
 #include <core/network/network.h>
 #include <core/network/protocol_factory.h>
-#include <core/utils/interface/builder.h>
+#include <core/utility/interface/builder.h>
 
 
 namespace network_n
