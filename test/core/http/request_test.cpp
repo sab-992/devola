@@ -98,12 +98,12 @@ TEST_F(RequestTest, Set_CreatesValidHTTPRequest) {
     const std::string EXPECTED_URL = "www.test2.com";
     const uint16_t EXPECTED_PORT = 5503;
     const std::string EXPECTED_BODY = "Hello world!";
-    const std::map<std::string, std::string> sortedHeadersMap{ {"Host", std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT)}, {"Transfer-encoding", "chunked"}, {"Accept", "application/xml"}, {"Content-Length", std::to_string(EXPECTED_BODY.size())}};
+    const std::unordered_map<std::string, std::string> headersUMap{ {"Host", std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT)}, {"Transfer-encoding", "chunked"}, {"Accept", "application/xml"}, {"Content-Length", std::to_string(EXPECTED_BODY.size())}};
 
-    const std::string EXPECTED_REQUEST = std::format("{} {} {}\r\n{}\r\n{}", EXPECTED_METHOD,
+    const std::string EXPECTED_REQUEST = std::format("{} {} {}\r\n{}\r\n\r\n{}", EXPECTED_METHOD,
                                                                                    EXPECTED_API_ENDPOINT,
                                                                                    protocol_n::Factory::create<std::string>(EXPECTED_PROTOCOL)->name(),
-                                                                                   buildHeaders(sortedHeadersMap),
+                                                                                   buildHeaders(headersUMap),
                                                                                    EXPECTED_BODY);
 
     Request<std::string> request = Request<std::string>().set(EXPECTED_REQUEST);
@@ -115,8 +115,8 @@ TEST_F(RequestTest, Set_CreatesValidHTTPRequest) {
     EXPECT_EQ(EXPECTED_PROTOCOL, request.protocol());
     EXPECT_EQ(EXPECTED_URL, request.url());
     EXPECT_EQ(EXPECTED_PORT, request.port());
-    EXPECT_EQ(sortedHeadersMap.size(), request.headersMap().size());
-    for (const auto& [header, expected_value]: sortedHeadersMap)
+    EXPECT_EQ(headersUMap.size(), request.headersMap().size());
+    for (const auto& [header, expected_value]: headersUMap)
         EXPECT_EQ(expected_value, request.header(header));
     EXPECT_EQ(EXPECTED_BODY, request.body());
 }

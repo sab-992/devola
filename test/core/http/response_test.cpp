@@ -71,12 +71,12 @@ TEST_F(ResponseTest, Set_CreatesValidHTTPResponse) {
     const Status_s EXPECTED_STATUS(Code::NOT_FOUND);
     const protocol_n::Protocol EXPECTED_PROTOCOL = protocol_n::Protocol::HTTP1_1;
     const std::string EXPECTED_BODY = "Hello world!";
-    const std::map<std::string, std::string> sortedHeadersMap{ {"Transfer-encoding", "chunked"}, {"Content-Length", std::to_string(EXPECTED_BODY.size())}};
+    const std::unordered_map<std::string, std::string> headersUMap{ {"Transfer-encoding", "chunked"}, {"Content-Length", std::to_string(EXPECTED_BODY.size())}};
 
-    const std::string EXPECTED_RESPONSE = std::format("{} {} {}\r\n{}\r\n{}", protocol_n::Factory::create<std::string>(EXPECTED_PROTOCOL)->name(),
+    const std::string EXPECTED_RESPONSE = std::format("{} {} {}\r\n{}\r\n\r\n{}", protocol_n::Factory::create<std::string>(EXPECTED_PROTOCOL)->name(),
                                                                               to_underlying(EXPECTED_STATUS.code()),
                                                                               EXPECTED_STATUS.reason(),
-                                                                              buildHeaders(sortedHeadersMap),
+                                                                              buildHeaders(headersUMap),
                                                                               EXPECTED_BODY);
 
     Response<std::string> response = Response<std::string>().set(EXPECTED_RESPONSE);
@@ -85,8 +85,8 @@ TEST_F(ResponseTest, Set_CreatesValidHTTPResponse) {
 
     EXPECT_EQ(EXPECTED_STATUS, response.status());
     EXPECT_EQ(EXPECTED_PROTOCOL, response.protocol());
-    EXPECT_EQ(sortedHeadersMap.size(), response.headersMap().size());
-    for (const auto& [header, expected_value]: sortedHeadersMap)
+    EXPECT_EQ(headersUMap.size(), response.headersMap().size());
+    for (const auto& [header, expected_value]: headersUMap)
         EXPECT_EQ(expected_value, response.header(header));
     EXPECT_EQ(EXPECTED_BODY, response.body());
 }
