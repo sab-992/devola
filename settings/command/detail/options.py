@@ -13,3 +13,4 @@ SERVICE_NAME_OPTION = { "type": OptionsType.TYPE,   "value": str,          "requ
 PROD_OPTION         = { "type": OptionsType.ACTION, "value": "store_true", "required": False, "help": "(Optional) Deploy in production mode." }
 REGEX_OPTION        = { "type": OptionsType.TYPE,   "value": str,          "required": False, "help": "(Optional) To launch specific tests" }
 SERVICE_PATH_OPTION = { "type": OptionsType.TYPE,   "value": str,          "required": False, "help": "(Optional) Path of the created service." }
+VOLUMES_OPTION      = { "type": OptionsType.ACTION, "value": "store_true", "required": False, "help": "(Optional) Removes the volumes during cleaning." }

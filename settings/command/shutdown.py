@@ -3,7 +3,7 @@ import subprocess
 from argparse import Namespace
 
 from settings.command.detail.command import Command
-from settings.command.detail.options import CLEAN_OPTION, MANUAL_OPTION
+from settings.command.detail.options import CLEAN_OPTION, MANUAL_OPTION, VOLUMES_OPTION
 
 
 class Shutdown(Command):
@@ -11,16 +11,26 @@ class Shutdown(Command):
         Command.__init__(self)
 
     def arguments(self) -> dict[str, dict]:
-        return { "clean": CLEAN_OPTION, "manual": MANUAL_OPTION }
+        return { "clean": CLEAN_OPTION, "volumes": VOLUMES_OPTION, "manual": MANUAL_OPTION }
 
     def command(self) -> str:
         return "shutdown"
 
     def command_explicit(self, args: Namespace) -> list[list[str]]:
-        return [["docker", "system", "prune", "-a", "--volumes"]] if args.clean else []
+        commands = [["docker", "ps"]]
+
+        if args.clean:
+            clean_command = ["docker", "system", "prune", "-a"]
+
+            if args.volumes:
+                clean_command.append("--volumes")
+
+            commands.insert(0, clean_command)
+
+        return commands
 
     def details(self) -> str:
-        return "Stops and removes ALL locally running containers."
+        return "Stops ALL locally running containers."
     
     def setup(self, args: Namespace) -> str:
         ids = subprocess.check_output(["docker", "ps", "-q"]).decode().split()
