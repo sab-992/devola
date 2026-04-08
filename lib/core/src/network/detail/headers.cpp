@@ -57,7 +57,7 @@ void network_n::Headers::setHeader(const std::string& name, const std::string& v
 }
 
 void network_n::Headers::setStartLine(const std::string& startLine) {
-    m_startLine = startLine;
+    m_startLine = trim(startLine);
 }
 
 headersUMap_t network_n::Headers::toMap() const {
