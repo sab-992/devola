@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/conversion/converter.h>
 #include <string>
 #include <vector>
 
@@ -7,13 +8,15 @@
 // TODO: Add interval start/finish to specify on what to apply the split
 // TODO: Change from cast to string stream
 template<typename T>
-void split(T element, std::vector<std::string>& resultVector, char splittingToken = ' ') {
+void split(const T& element, std::vector<std::string>& resultVector, char splittingToken = ' ') {
     if(not std::is_convertible_v<T, std::string>)
         return;
 
-    const std::string string = static_cast<std::string>(element);
-    if (string.empty())
+    const std::string string = Converter<T>::toString(element);
+    if (string.empty()) {
+        resultVector.push_back(string);
         return;
+    }
 
     size_t startOfPart = 0;
     std::string::const_iterator it = string.begin();
