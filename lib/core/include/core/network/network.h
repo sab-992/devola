@@ -40,6 +40,7 @@ namespace network_n
         { Code::UNAUTHORIZED,   "Unauthorized" },
         { Code::FORBIDDEN,      "Forbidden" },
         { Code::NOT_FOUND,      "Not Found" },
+        { Code::NOT_ALLOWED,    "Method Not Allowed" },
         { Code::SERVER_ERROR,   "Internal Server Error" },
 
         { Code::NONE,           "N/A" },
