@@ -97,5 +97,5 @@ REGISTER_TYPED_TEST_SUITE_P(MessageTest, SetBody_AddsNewBody,
                                          SetHeader_IncrementsSize,
                                          SetHeader_OverwritesExistingHeader);
 
-INSTANTIATE_TYPED_TEST_SUITE_P(HTTPRequest, MessageTest, networkInnerTypes_t<http_n::Request>);
-INSTANTIATE_TYPED_TEST_SUITE_P(HTTPResponse, MessageTest, networkInnerTypes_t<http_n::Response>);
+INSTANTIATE_TYPED_TEST_SUITE_P(HTTPRequestTestSuite, MessageTest, networkInnerTypes_t<http_n::Request>);
+INSTANTIATE_TYPED_TEST_SUITE_P(HTTPResponseTestSuite, MessageTest, networkInnerTypes_t<http_n::Response>);
