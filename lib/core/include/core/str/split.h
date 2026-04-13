@@ -5,33 +5,17 @@
 #include <vector>
 
 
-// TODO: Add interval start/finish to specify on what to apply the split
-// TODO: Change from cast to string stream
+// Splits the string at the given range [start, end) using the specified delimiter and stores the results in the provided vector.
 template<typename T>
-void split(const T& element, std::vector<std::string>& resultVector, char splittingToken = ' ') {
-    if(not std::is_convertible_v<T, std::string>)
-        return;
+void split(const T& element, std::vector<std::string>& resultVector, const std::string& splittingToken=" ", size_t start=0, size_t end=std::string::npos) {
+    size_t countFromStart = end == std::string::npos ? end : end - start;
+    std::string string = Converter<T>::toString(element).substr(start, countFromStart);
 
-    const std::string string = Converter<T>::toString(element);
-    if (string.empty()) {
-        resultVector.push_back(string);
-        return;
+    size_t indexSplitToken;
+    while((indexSplitToken = string.find(splittingToken)) != std::string::npos) {
+        const std::string part = string.substr(0, indexSplitToken);
+        resultVector.push_back(part);
+        string = string.substr(indexSplitToken + splittingToken.size());
     }
-
-    size_t startOfPart = 0;
-    std::string::const_iterator it = string.begin();
-    while (true) {
-        size_t currentIndex = it - string.begin();
-        if (it == string.end()) {
-            resultVector.push_back(string.substr(startOfPart, currentIndex - startOfPart));
-            break;
-        }
-
-        ++it;
-        if(string[currentIndex] != splittingToken)
-            continue;
-
-        resultVector.push_back(string.substr(startOfPart, currentIndex - startOfPart));
-        startOfPart = currentIndex + 1;
-    }
+    resultVector.push_back(string);
 }
