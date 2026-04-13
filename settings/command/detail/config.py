@@ -1,5 +1,4 @@
-# TODO: Make sure this is up to date
-DEPENDENCIES = ["libpq-dev", "zlib"]
+DEPENDENCIES = ["libpq-dev"]
 
 # Libraries
 DATABASE_LIB_NAME = "database"
