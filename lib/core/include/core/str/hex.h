@@ -1,14 +1,14 @@
 #pragma once
 
+#include <core/str/case.h>
 #include <sstream>
 #include <string>
 
-inline std::string toHex(unsigned long num) {
-    using namespace std;
 
-    stringstream ss;
+inline std::string toHex(unsigned long num, bool uppercase=true) {
+    std::stringstream ss;
     ss << std::hex << num;
-    return ss.str();
+    return uppercase ? toUpper(ss.str()) : toLower(ss.str());
 }
 
 inline unsigned long fromHex(const std::string& num) {
