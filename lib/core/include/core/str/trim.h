@@ -1,16 +1,14 @@
 #pragma once
 
+#include <core/conversion/converter.h>
 #include <iostream>
 #include <string>
 
 
-// TODO: Change from cast to string stream
 template<typename T>
 std::string lTrim(const T& element) {
-    if(not std::is_convertible_v<T, std::string>)
-        return "";
+    std::string string = Converter<T>::toString(element);
 
-    std::string string = static_cast<std::string>(element);
     if (string.empty())
         return "";
 
@@ -25,10 +23,8 @@ std::string lTrim(const T& element) {
 
 template<typename T>
 std::string rTrim(const T& element) {
-    if(not std::is_convertible_v<T, std::string>)
-        return "";
+    std::string string = Converter<T>::toString(element);
 
-    std::string string = static_cast<std::string>(element);
     if (string.empty())
         return "";
 
@@ -43,9 +39,6 @@ std::string rTrim(const T& element) {
 
 template<typename T>
 std::string trim(const T& element) {
-    if(not std::is_convertible_v<T, std::string>)
-        return "";
-
     return rTrim(lTrim(element));
 }
 
