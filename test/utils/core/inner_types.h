@@ -12,7 +12,7 @@ using networkInnerTypes_t = ::testing::Types<Object<std::string>, Object<nlohman
 template <typename T, template <typename...> class Object>
 class InnerTypes {
 public:
-    inline static auto GetTestBody(bool alt=false) {
+    inline static auto getTestBody(bool alt=false) {
         if constexpr (std::is_base_of_v<typename Object<nlohmann::json>::type, T>)
             return nlohmann::json::parse(createJSONString(alt));
         if constexpr (std::is_base_of_v<typename Object<std::string>::type, T>)
@@ -22,7 +22,7 @@ public:
         throw Exception("Unhandled single templated type object");
     }
 
-    inline static std::string GetTestStringBody(bool alt=false) {
+    inline static std::string getTestStringBody(bool alt=false) {
         if constexpr (std::is_base_of_v<typename Object<nlohmann::json>::type, T>)
             return createJSONString(alt);
         if constexpr (std::is_base_of_v<typename Object<std::string>::type, T>)

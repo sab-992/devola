@@ -15,16 +15,16 @@ public:
     };
 
 protected:
-    auto GetTestBody(bool alt=false) {
-        return InnerTypes<T, BodyTest<T>::template TemplatedBody>::GetTestBody(alt);
+    auto getTestBody(bool alt=false) {
+        return InnerTypes<T, BodyTest<T>::template TemplatedBody>::getTestBody(alt);
     }
 };
 
 TYPED_TEST_SUITE(BodyTest, networkInnerTypes_t<network_n::Body>);
 
 TYPED_TEST(BodyTest, Constructor_ParsesStringBodyCorrectly) {
-    const auto EXPECTED_BODY = this->GetTestBody();
-    const auto EXPECTED_STRING_BODY = InnerTypes<TypeParam, BodyTest<TypeParam>::template TemplatedBody>::GetTestStringBody();
+    const auto EXPECTED_BODY = this->getTestBody();
+    const auto EXPECTED_STRING_BODY = InnerTypes<TypeParam, BodyTest<TypeParam>::template TemplatedBody>::getTestStringBody();
 
     TypeParam body = TypeParam(EXPECTED_STRING_BODY);
 
@@ -34,7 +34,7 @@ TYPED_TEST(BodyTest, Constructor_ParsesStringBodyCorrectly) {
 
 TYPED_TEST(BodyTest, Set_AddsNewBody) {
     TypeParam body;
-    const auto EXPECTED_BODY = this->GetTestBody();
+    const auto EXPECTED_BODY = this->getTestBody();
 
     body.set(EXPECTED_BODY);
 
@@ -43,8 +43,8 @@ TYPED_TEST(BodyTest, Set_AddsNewBody) {
 
 TYPED_TEST(BodyTest, Set_OverwritesExistingBody) {
     TypeParam body;
-    const auto ALTERNATE_BODY = this->GetTestBody(true /* alt */);
-    const auto EXPECTED_BODY = this->GetTestBody();
+    const auto ALTERNATE_BODY = this->getTestBody(true /* alt */);
+    const auto EXPECTED_BODY = this->getTestBody();
 
     body.set(ALTERNATE_BODY);
     body.set(EXPECTED_BODY);
@@ -54,7 +54,7 @@ TYPED_TEST(BodyTest, Set_OverwritesExistingBody) {
 
 TYPED_TEST(BodyTest, Convert_ReturnsCorrectBodyType) {
     TypeParam body;
-    const auto EXPECTED_BODY = this->GetTestBody();
+    const auto EXPECTED_BODY = this->getTestBody();
 
     body.set(EXPECTED_BODY);
 
@@ -63,7 +63,7 @@ TYPED_TEST(BodyTest, Convert_ReturnsCorrectBodyType) {
 
 TYPED_TEST(BodyTest, ToString_SerializeBodyCorrectly) {
     TypeParam body;
-    const auto BODY = this->GetTestBody();
+    const auto BODY = this->getTestBody();
     std::ostringstream oss;
     oss << BODY;
     const std::string EXPECTED_STRING_BODY = oss.str();

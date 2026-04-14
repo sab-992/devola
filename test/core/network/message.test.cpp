@@ -17,8 +17,8 @@ public:
     };
 
 protected:
-    auto GetTestBody(bool alt=false) {
-        return InnerTypes<MessageType, MessageTest<MessageType>::template TemplatedMessage>::GetTestBody(alt);
+    auto getTestBody(bool alt=false) {
+        return InnerTypes<MessageType, MessageTest<MessageType>::template TemplatedMessage>::getTestBody(alt);
     }
 };
 
@@ -26,7 +26,7 @@ TYPED_TEST_SUITE_P(MessageTest);
 
 TYPED_TEST_P(MessageTest, SetBody_AddsNewBody) {
     TypeParam message;
-    const auto EXPECTED_BODY = this->GetTestBody();
+    const auto EXPECTED_BODY = this->getTestBody();
 
     message.setBody(EXPECTED_BODY);
 
@@ -35,8 +35,8 @@ TYPED_TEST_P(MessageTest, SetBody_AddsNewBody) {
 
 TYPED_TEST_P(MessageTest, SetBody_OverwritesExistingBody) {
     TypeParam message;
-    const auto ALTERNATE_BODY = this->GetTestBody(true /* alt */);
-    const auto EXPECTED_BODY = this->GetTestBody();
+    const auto ALTERNATE_BODY = this->getTestBody(true /* alt */);
+    const auto EXPECTED_BODY = this->getTestBody();
 
     message.setBody(ALTERNATE_BODY);
     message.setBody(EXPECTED_BODY);
@@ -46,7 +46,7 @@ TYPED_TEST_P(MessageTest, SetBody_OverwritesExistingBody) {
 
 TYPED_TEST_P(MessageTest, Body_IsConvertedCorrectly) {
     TypeParam message;
-    const auto EXPECTED_BODY = this->GetTestBody();
+    const auto EXPECTED_BODY = this->getTestBody();
 
     message.setBody(EXPECTED_BODY);
 
