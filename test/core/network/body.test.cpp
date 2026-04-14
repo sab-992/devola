@@ -14,9 +14,15 @@ public:
         using type = network_n::Body<ContentType>;
     };
 
+    using Inner = InnerTypes<T, BodyTest<T>::template TemplatedBody>;
+
 protected:
     auto getTestBody(bool alt=false) {
-        return InnerTypes<T, BodyTest<T>::template TemplatedBody>::getTestBody(alt);
+        return Inner::getTestObject(Inner::getTestStringObject(alt));
+    }
+
+    auto getTestStringBody(bool alt=false) {
+        return Inner::getTestStringObject(alt);
     }
 };
 
@@ -24,7 +30,7 @@ TYPED_TEST_SUITE(BodyTest, networkInnerTypes_t<network_n::Body>);
 
 TYPED_TEST(BodyTest, Constructor_ParsesStringBodyCorrectly) {
     const auto EXPECTED_BODY = this->getTestBody();
-    const auto EXPECTED_STRING_BODY = InnerTypes<TypeParam, BodyTest<TypeParam>::template TemplatedBody>::getTestStringBody();
+    const auto EXPECTED_STRING_BODY = this->getTestStringBody();
 
     TypeParam body = TypeParam(EXPECTED_STRING_BODY);
 

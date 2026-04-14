@@ -18,7 +18,8 @@ public:
 
 protected:
     auto getTestBody(bool alt=false) {
-        return InnerTypes<MessageType, MessageTest<MessageType>::template TemplatedMessage>::getTestBody(alt);
+        using Inner = InnerTypes<MessageType, MessageTest<MessageType>::template TemplatedMessage>;
+        return Inner::getTestObject(Inner::getTestStringObject(alt));
     }
 };
 

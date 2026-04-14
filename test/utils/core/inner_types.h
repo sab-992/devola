@@ -12,17 +12,17 @@ using networkInnerTypes_t = ::testing::Types<Object<std::string>, Object<nlohman
 template <typename T, template <typename...> class Object>
 class InnerTypes {
 public:
-    inline static auto getTestBody(bool alt=false) {
+    inline static auto getTestObject(const std::string& stringContent) {
         if constexpr (std::is_base_of_v<typename Object<nlohmann::json>::type, T>)
-            return nlohmann::json::parse(createJSONString(alt));
+            return nlohmann::json::parse(stringContent);
         if constexpr (std::is_base_of_v<typename Object<std::string>::type, T>)
-            return createTextString(alt);
+            return stringContent;
         if constexpr (std::is_base_of_v<typename Object<xml_n::Document>::type, T>)
-            return xml_n::Document(createXMLString(alt));
+            return xml_n::Document(stringContent);
         throw Exception("Unhandled single templated type object");
     }
 
-    inline static std::string getTestStringBody(bool alt=false) {
+    inline static std::string getTestStringObject(bool alt) {
         if constexpr (std::is_base_of_v<typename Object<nlohmann::json>::type, T>)
             return createJSONString(alt);
         if constexpr (std::is_base_of_v<typename Object<std::string>::type, T>)
