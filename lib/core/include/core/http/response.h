@@ -10,7 +10,7 @@ namespace http_n {
     template <typename T>
     class Response : public network_n::Message<Response<T>, T> {
     public:
-        Response() { this->m_protocol = http_n::DEFAULT_PROTOCOL; }
+        Response() : network_n::Message<Response<T>, T>(http_n::DEFAULT_PROTOCOL) {}
         Response(const Response<T>& other) : network_n::Message<Response<T>, T>(other) { m_status = other.m_status; }
         Response(Response<T>&& other) : network_n::Message<Response<T>, T>(std::move(other)) { m_status = std::move(other.m_status); }
 
@@ -72,12 +72,12 @@ namespace http_n {
 
         void parseFrom(const std::string& stringResponse) {
             // TODO: Add protocol detection and change it accordingly
-            auto [headers, body] = this->getProtocol()->parse(stringResponse);
+            const auto& [headers, body] = this->getProtocol()->parse(stringResponse);
 
-            this->m_headers = headers;
-            this->m_body = body;
+            this->updateHeadersPtr(headers);
+            this->updateBodyPtr(body);
 
-            const std::string statusCode = this->getProtocol()->parseStartLine(this->m_headers.startLine())["code"];
+            const std::string statusCode = this->getProtocol()->parseStartLine(this->m_headers->startLine())["code"];
             m_status = network_n::Status_s(static_cast<network_n::Code>(std::stoi(statusCode)));
         }
     };

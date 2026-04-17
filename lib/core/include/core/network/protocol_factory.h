@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/conversion/enum.h>
-#include <core/network/detail/protocol/http1_1.h>
+#include <core/network/detail/protocol/http1_1/http1_1.h>
 #include <core/network/interface/protocol.h>
 #include <core/network/network.h>
 #include <memory>

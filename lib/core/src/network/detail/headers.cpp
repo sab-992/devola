@@ -1,9 +1,9 @@
 #include <core/network/detail/headers.h>
 
 
-network_n::Headers::Headers(const std::string& stringHeaders) {
-    if (not stringHeaders.empty())
-        parse(stringHeaders);
+network_n::Headers::Headers(std::unique_ptr<protocol_n::HeadersParser_i> parser, const std::string& stringHeaders) {
+    setParser(std::move(parser));
+    setHeaders(stringHeaders);
 }
 
 network_n::Headers::Headers(const Headers& other)  {
@@ -31,29 +31,25 @@ std::string network_n::Headers::startLine() const {
     return m_startLine;
 }
 
-void network_n::Headers::parse(const std::string& stringHeaders) {
-    std::istringstream input(trim(stringHeaders));
-    std::string line;
-
-    std::getline(input, line);
-    setStartLine(line);
-
-    for (; std::getline(input, line);) {
-        line = trim(line);
-        size_t separator = line.find(":");
-
-        if (separator == std::string::npos)
-            throw InvalidArgument("Ill-formed", std::format("Header: \"{}\"", line));
-
-        const std::string name = line.substr(0, separator);
-        const std::string value = trim(line.substr(separator + 1));
-
-        setHeader(name, value);
-    }
-}
-
 void network_n::Headers::setHeader(const std::string& name, const std::string& value) {
     m_headersMap[name] = value;
+}
+
+void network_n::Headers::setHeaders(const std::string& stringHeaders) {
+    if (stringHeaders.empty())
+        return;
+
+    const auto& [startline, headersUMap] = m_parser->parse(stringHeaders);
+
+    m_headersMap = headersUMap;
+    m_startLine = startline;
+}
+
+void network_n::Headers::setParser(std::unique_ptr<protocol_n::HeadersParser_i> parser) {
+    if (parser == nullptr)
+        throw Exception("No parser given");
+
+    m_parser = std::move(parser);
 }
 
 void network_n::Headers::setStartLine(const std::string& startLine) {
@@ -65,10 +61,5 @@ headersUMap_t network_n::Headers::toMap() const {
 }
 
 std::string network_n::Headers::toString() const {
-    std::string headers = m_startLine;
-
-    for (auto& [header, value] : m_headersMap)
-        headers += std::format("\r\n{}: {}", header, value);
-
-    return trim(headers);
+    return m_parser->build(*this);
 }

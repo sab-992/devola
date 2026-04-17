@@ -2,6 +2,7 @@
 
 #include <core/conversion/string_convertible.h>
 #include <core/exception.h>
+#include <core/network/interface/headers_parser.h>
 #include <core/str/trim.h>
 #include <format>
 #include <string>
@@ -13,9 +14,11 @@ using headersUMap_t = std::unordered_map<std::string, std::string>;
 
 namespace network_n
 {
+    namespace protocol_n { class HeadersParser_i; }
+
     class Headers : public StringConvertible {
     public:
-        Headers(const std::string& stringHeaders="");
+        Headers(std::unique_ptr<protocol_n::HeadersParser_i> parser, const std::string& stringHeaders="");
         Headers(const Headers& other);
         Headers(Headers&& other);
 
@@ -26,6 +29,8 @@ namespace network_n
         std::string get(const std::string& name) const;
 
         void setHeader(const std::string& name, const std::string& value);
+        void setHeaders(const std::string& stringHeaders);
+        void setParser(std::unique_ptr<protocol_n::HeadersParser_i> parser);
         void setStartLine(const std::string& startLine);
 
         std::string startLine() const;
@@ -42,8 +47,7 @@ namespace network_n
 
     private:
         headersUMap_t m_headersMap;
+        std::unique_ptr<protocol_n::HeadersParser_i> m_parser;
         std::string m_startLine;
-
-        void parse(const std::string& stringHeaders);
     };
 }

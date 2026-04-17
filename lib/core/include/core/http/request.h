@@ -8,7 +8,7 @@ namespace http_n {
     template <typename T>
     class Request : public network_n::Message<Request<T>, T> {
     public:
-        Request() { this->m_protocol = http_n::DEFAULT_PROTOCOL; }
+        Request() : network_n::Message<Request<T>, T>(http_n::DEFAULT_PROTOCOL) {}
 
         Request(const Request<T>& other) : network_n::Message<Request<T>, T>(other) {
             m_APIEndpoint = other.m_APIEndpoint;
@@ -98,17 +98,17 @@ namespace http_n {
             validateMembers();
             m_port = m_port == 0 ? this->getProtocol()->defaultPort() :  m_port;
             this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->getProtocol()->name()));
-            this->m_headers.setHeader("Host", std::format("{}:{}", m_URL, m_port));
+            this->m_headers->setHeader("Host", std::format("{}:{}", m_URL, m_port));
         }
 
         void parseFrom(const std::string& stringRequest) {
             // TODO: Add protocol detection and change it accordingly
             auto [headers, body] = this->getProtocol()->parse(stringRequest);
 
-            this->m_headers = headers;
-            this->m_body = body;
+            this->updateHeadersPtr(headers);
+            this->updateBodyPtr(body);
 
-            const std::unordered_map<std::string, std::string> requestInfo = this->getProtocol()->parseStartLine(this->m_headers.startLine());
+            const std::unordered_map<std::string, std::string> requestInfo = this->getProtocol()->parseStartLine(this->m_headers->startLine());
 
             m_APIEndpoint = requestInfo.at("APIEndpoint");
             m_method = requestInfo.at("method");
