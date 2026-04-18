@@ -36,7 +36,7 @@ namespace http_n {
         }
 
         Response<T>& set(const std::string& stringResponse) {
-            parseFrom(stringResponse);
+            parse(stringResponse);
             return *this;
         }
         
@@ -70,15 +70,9 @@ namespace http_n {
             this->setStartLine(std::format("{} {}", this->getProtocol()->name(), m_status.toString()));
         }
 
-        void parseFrom(const std::string& stringResponse) {
-            // TODO: Add protocol detection and change it accordingly
-            const auto& [headers, body] = this->getProtocol()->parse(stringResponse);
-
-            this->updateHeadersPtr(headers);
-            this->updateBodyPtr(body);
-
-            const std::string statusCode = this->getProtocol()->parseStartLine(this->m_headers->startLine())["code"];
-            m_status = network_n::Status_s(static_cast<network_n::Code>(std::stoi(statusCode)));
+        void parse(const std::string& stringResponse) {
+            const std::unordered_map<std::string, std::string> responseInfo = this->processMessage(stringResponse);
+            m_status = network_n::Status_s(static_cast<network_n::Code>(std::stoi(responseInfo.at("code"))));
         }
     };
 }

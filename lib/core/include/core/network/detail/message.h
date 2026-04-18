@@ -56,12 +56,19 @@ namespace network_n
         std::shared_ptr<Headers> m_headers = nullptr;
         protocol_n::Protocol m_protocol;
 
+        std::unordered_map<std::string, std::string> processMessage(const std::string& message) {
+            // TODO: Add protocol detection and change it accordingly
+            const auto& [headers, body] = this->getProtocol()->parse(message);
+
+            m_headers = std::make_shared<network_n::Headers>(headers);
+            m_body = std::make_shared<network_n::Body<T>>(body);
+
+            return this->getProtocol()->parseStartLine(m_headers->startLine());
+        }
+
         std::unique_ptr<protocol_n::Protocol_i<T>> getProtocol() const {
             return protocol_n::Factory::create<T>(m_protocol);
         }
-
-        void updateBodyPtr(const Body<T>& body) { m_body = std::make_shared<network_n::Body<T>>(body); }
-        void updateHeadersPtr(const Headers& headers) { m_headers = std::make_shared<network_n::Headers>(headers); }
 
         void setStartLine(const std::string& startLine) { m_headers->setStartLine(startLine); }
     };

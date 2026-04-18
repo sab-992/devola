@@ -51,7 +51,7 @@ namespace http_n {
         uint16_t port() const { return m_port; }
 
         Request<T>& set(const std::string& stringRequest) {
-            parseFrom(stringRequest);
+            parse(stringRequest);
             return *this;
         }
 
@@ -101,14 +101,8 @@ namespace http_n {
             this->m_headers->setHeader("Host", std::format("{}:{}", m_URL, m_port));
         }
 
-        void parseFrom(const std::string& stringRequest) {
-            // TODO: Add protocol detection and change it accordingly
-            auto [headers, body] = this->getProtocol()->parse(stringRequest);
-
-            this->updateHeadersPtr(headers);
-            this->updateBodyPtr(body);
-
-            const std::unordered_map<std::string, std::string> requestInfo = this->getProtocol()->parseStartLine(this->m_headers->startLine());
+        void parse(const std::string& stringRequest) {
+            const std::unordered_map<std::string, std::string> requestInfo = this->processMessage(stringRequest);
 
             m_APIEndpoint = requestInfo.at("APIEndpoint");
             m_method = requestInfo.at("method");
@@ -118,7 +112,7 @@ namespace http_n {
             if (host.empty())
                 return;
 
-            auto [url, port] = parseHostURL(host);
+            const auto& [url, port] = parseHostURL(host);
             m_URL = url;
             m_port = port;
         }
