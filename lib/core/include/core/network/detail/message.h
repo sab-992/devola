@@ -40,7 +40,7 @@ namespace network_n
             return static_cast<Derived&>(*this);
         }
 
-        std::string toString() const override { return getProtocol()->serializeMessage(*m_headers, *m_body); }
+        std::string toString() const override { return getProtocol()->messageToString(*m_headers, *m_body); }
 
     protected:
         Message(protocol_n::Protocol protocol) : m_protocol(protocol) {

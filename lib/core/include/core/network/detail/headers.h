@@ -18,7 +18,7 @@ namespace network_n
 
     class Headers : public StringConvertible {
     public:
-        Headers(std::unique_ptr<protocol_n::HeadersParser_i> parser, const std::string& stringHeaders="");
+        Headers(std::unique_ptr<protocol_n::HeadersParser_i> parser);
         Headers(const Headers& other);
         Headers(Headers&& other);
 
@@ -26,10 +26,13 @@ namespace network_n
 
         Headers& operator=(Headers other);
 
+        std::string build() const; // To match the structure of network_n::Body
+
         std::string get(const std::string& name) const;
 
+        void parse(const std::string& stringHeaders);
+
         void setHeader(const std::string& name, const std::string& value);
-        void setHeaders(const std::string& stringHeaders);
         void setParser(std::unique_ptr<protocol_n::HeadersParser_i> parser);
         void setStartLine(const std::string& startLine);
 

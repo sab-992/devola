@@ -13,7 +13,9 @@ TEST_F(HeadersTest, Constructor_ParsesHeadersCorrectly) {
     using namespace network_n;
     const auto& [EXPECTED_STARTLINE, EXPECTED_HEADERS_UMAP] = HeadersParserMock().parse("");
     const std::string EXPECTED_HEADERS = EXPECTED_STARTLINE + std::format("\r\n{}", buildHeaders(EXPECTED_HEADERS_UMAP));
-    Headers headers(std::make_unique<HeadersParserMock>(), EXPECTED_HEADERS);
+
+    Headers headers(std::make_unique<HeadersParserMock>());
+    headers.parse(EXPECTED_HEADERS);
 
     EXPECT_EQ(EXPECTED_HEADERS_UMAP.size(), headers.toMap().size());
     for (const auto& [header, expected_value]: EXPECTED_HEADERS_UMAP)

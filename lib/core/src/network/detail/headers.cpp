@@ -1,9 +1,8 @@
 #include <core/network/detail/headers.h>
 
 
-network_n::Headers::Headers(std::unique_ptr<protocol_n::HeadersParser_i> parser, const std::string& stringHeaders) {
+network_n::Headers::Headers(std::unique_ptr<protocol_n::HeadersParser_i> parser) {
     setParser(std::move(parser));
-    setHeaders(stringHeaders);
 }
 
 network_n::Headers::Headers(const Headers& other)  {
@@ -23,8 +22,22 @@ network_n::Headers& network_n::Headers::operator=(Headers other) {
     return *this;
 }
 
+std::string network_n::Headers::build() const {
+    return toString();
+}
+
 std::string network_n::Headers::get(const std::string& name) const {
     return m_headersMap.contains(name) ? m_headersMap.at(name) : "";
+}
+
+void network_n::Headers::parse(const std::string& stringHeaders) {
+    if (stringHeaders.empty())
+        return;
+
+    const auto& [startline, headersUMap] = m_parser->parse(stringHeaders);
+
+    m_headersMap = headersUMap;
+    m_startLine = startline;
 }
 
 std::string network_n::Headers::startLine() const {
@@ -33,16 +46,6 @@ std::string network_n::Headers::startLine() const {
 
 void network_n::Headers::setHeader(const std::string& name, const std::string& value) {
     m_headersMap[name] = value;
-}
-
-void network_n::Headers::setHeaders(const std::string& stringHeaders) {
-    if (stringHeaders.empty())
-        return;
-
-    const auto& [startline, headersUMap] = m_parser->parse(stringHeaders);
-
-    m_headersMap = headersUMap;
-    m_startLine = startline;
 }
 
 void network_n::Headers::setParser(std::unique_ptr<protocol_n::HeadersParser_i> parser) {

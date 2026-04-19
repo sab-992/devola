@@ -25,7 +25,7 @@ namespace network_n
             virtual std::string name() const = 0;
             virtual std::pair<network_n::Headers, network_n::Body<T>> parse(const std::string& raw) const = 0;
             virtual std::unordered_map<std::string, std::string> parseStartLine(const std::string& startLine) const = 0;
-            virtual std::string serializeMessage(const network_n::Headers& headers, const network_n::Body<T>& body) const = 0;
+            virtual std::string messageToString(const network_n::Headers& headers, const network_n::Body<T>& body) const = 0;
         };
     }
 }

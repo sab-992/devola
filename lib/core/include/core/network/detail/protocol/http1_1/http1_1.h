@@ -23,7 +23,7 @@ namespace network_n
 
             // Used to send request/response.
             std::string build(const Headers& headers, const Body<T>& body) const override {
-                return std::format("{}\r\n\r\n{}", headers.toString(), body.build(headers));
+                return std::format("{}\r\n\r\n{}", headers.build(), body.build(headers));
             }
 
             std::unique_ptr<BodyParser_i<T>> bodyParser() const override { return std::make_unique<http1_1_n::BodyParser<T>>(); }
@@ -37,7 +37,8 @@ namespace network_n
             // Used when receiving request/response.
             std::pair<Headers, Body<T>> parse(const std::string& raw) const override {
                 const auto& [rawHeaders, rawBody] = splitMessage(raw);
-                Headers headers = Headers(headersParser(), rawHeaders);
+                Headers headers = Headers(headersParser());
+                headers.parse(rawHeaders);
                 Body<T> body = Body<T>(bodyParser());
                 body.parse(headers, rawBody);
                 return std::make_pair(headers, body);
@@ -47,7 +48,7 @@ namespace network_n
             std::unordered_map<std::string, std::string> parseStartLine(const std::string& startLine) const override { return http1_1_n::HeadersParser::parseStartLine(startLine); }
 
             // Used for debugging + tests purposes.
-            std::string serializeMessage(const Headers& headers, const Body<T>& body) const override {
+            std::string messageToString(const Headers& headers, const Body<T>& body) const override {
                 return std::format("{}\r\n\r\n{}", headers.toString(), body.toString());
             }
 
