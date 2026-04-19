@@ -45,7 +45,7 @@ namespace network_n
     protected:
         Message(protocol_n::Protocol protocol) : m_protocol(protocol) {
             m_headers = std::make_shared<Headers>(getProtocol()->headersParser());
-            m_body = std::make_shared<Body<T>>();
+            m_body = std::make_shared<Body<T>>(getProtocol()->bodyParser());
         }
 
         Message(const Message&) = default;

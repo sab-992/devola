@@ -2,7 +2,10 @@
 
 #include <core/exception.h>
 #include <core/network/detail/body.h>
+#include <core/network/detail/headers.h>
 #include <sstream>
+#include <utils/core/body_parser_mock.h>
+#include <utils/core/headers_parser_mock.h>
 #include <utils/core/inner_types.h>
 
 
@@ -18,28 +21,34 @@ public:
 
 protected:
     auto getTestBody(bool alt=false) {
-        return Inner::getTestObject(Inner::getTestStringObject(alt));
+        return Inner::getTestObject(getTestStringBody(alt));
     }
 
-    auto getTestStringBody(bool alt=false) {
+    std::string getTestStringBody(bool alt=false) {
         return Inner::getTestStringObject(alt);
+    }
+    
+    auto getParserMock(bool alt=false) {
+        return Inner::getBodyParserMock(alt);
     }
 };
 
 TYPED_TEST_SUITE(BodyTest, networkInnerTypes_t<network_n::Body>);
 
 TYPED_TEST(BodyTest, Constructor_ParsesStringBodyCorrectly) {
+    const network_n::Headers headers(std::make_unique<HeadersParserMock>());
     const auto EXPECTED_BODY = this->getTestBody();
-    const auto EXPECTED_STRING_BODY = this->getTestStringBody();
+    const std::string EXPECTED_STRING_BODY = this->getTestStringBody();
 
-    TypeParam body = TypeParam(EXPECTED_STRING_BODY);
+    TypeParam body = TypeParam(this->getParserMock());
+    body.parse(headers, EXPECTED_STRING_BODY);
 
     EXPECT_EQ(EXPECTED_BODY, body.convert());
     EXPECT_EQ(EXPECTED_STRING_BODY, body.toString());
 }
 
 TYPED_TEST(BodyTest, Set_AddsNewBody) {
-    TypeParam body;
+    TypeParam body = TypeParam(this->getParserMock());
     const auto EXPECTED_BODY = this->getTestBody();
 
     body.set(EXPECTED_BODY);
@@ -48,7 +57,7 @@ TYPED_TEST(BodyTest, Set_AddsNewBody) {
 }
 
 TYPED_TEST(BodyTest, Set_OverwritesExistingBody) {
-    TypeParam body;
+    TypeParam body = TypeParam(this->getParserMock());
     const auto ALTERNATE_BODY = this->getTestBody(true /* alt */);
     const auto EXPECTED_BODY = this->getTestBody();
 
@@ -59,7 +68,7 @@ TYPED_TEST(BodyTest, Set_OverwritesExistingBody) {
 }
 
 TYPED_TEST(BodyTest, Convert_ReturnsCorrectBodyType) {
-    TypeParam body;
+    TypeParam body = TypeParam(this->getParserMock());
     const auto EXPECTED_BODY = this->getTestBody();
 
     body.set(EXPECTED_BODY);
@@ -68,7 +77,7 @@ TYPED_TEST(BodyTest, Convert_ReturnsCorrectBodyType) {
 }
 
 TYPED_TEST(BodyTest, ToString_SerializeBodyCorrectly) {
-    TypeParam body;
+    TypeParam body = TypeParam(this->getParserMock());
     const auto BODY = this->getTestBody();
     std::ostringstream oss;
     oss << BODY;
@@ -80,11 +89,11 @@ TYPED_TEST(BodyTest, ToString_SerializeBodyCorrectly) {
 }
 
 TYPED_TEST(BodyTest, SetWithoutAcceptedType_ThrowsException) {
-    network_n::Body<int> body;
+    network_n::Body<int> body = network_n::Body<int>(std::make_unique<BodyParserMock<int>>(""));
     EXPECT_THROW(body.set(400), Exception);
 }
 
 TYPED_TEST(BodyTest, ConvertWithoutAcceptedType_ThrowsException) {
-    network_n::Body<int> body;
+    network_n::Body<int> body = network_n::Body<int>(std::make_unique<BodyParserMock<int>>(""));
     EXPECT_THROW(body.convert(), Exception);
 }

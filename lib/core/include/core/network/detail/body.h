@@ -1,6 +1,8 @@
 #pragma once
 
 #include <core/conversion/string_convertible.h>
+#include <core/network/detail/headers.h>
+#include <core/network/interface/body_parser.h>
 #include <core/str/interface/serializer.h>
 #include <core/str/serializer_factory.h>
 #include <memory>
@@ -9,10 +11,17 @@
 
 namespace network_n
 {
+    namespace protocol_n
+    {
+        template<typename T>
+        class BodyParser_i;
+    }
+
     template<typename T>
     class Body : public StringConvertible {
     public:
-        Body(const std::string& stringBody="") : m_stringBody(stringBody) {}
+        Body(std::unique_ptr<protocol_n::BodyParser_i<T>> parser) { setParser(std::move(parser)); }
+
         Body(const Body<T>& other) { m_stringBody = other.m_stringBody; }
         Body(Body<T>&& other) { m_stringBody = std::move(other.m_stringBody); }
 
@@ -23,8 +32,23 @@ namespace network_n
             return *this;
         }
 
+        std::string build(const Headers& headers) const { return m_parser->build(headers, *this); }
+
         T convert() const { return serializer()->deserialize(m_stringBody); }
+
+        void parse(const Headers& headers, const std::string& stringBody) {
+            if (not stringBody.empty())
+                m_stringBody = m_parser->parse(headers, stringBody);
+        }
+
         void set(const T& body) { m_stringBody = serializer()->serialize(body); }
+
+        void setParser(std::unique_ptr<protocol_n::BodyParser_i<T>> parser) {
+            if (parser == nullptr)
+                throw InvalidArgument("No parser given", "Body parser");
+
+            m_parser = std::move(parser);
+        }
 
         friend void swap(Body<T>& lhs, Body<T>& rhs) { std::swap(lhs.m_stringBody, rhs.m_stringBody); }
 
@@ -32,6 +56,7 @@ namespace network_n
 
     private:
         std::string m_stringBody;
+        std::unique_ptr<protocol_n::BodyParser_i<T>> m_parser = nullptr;
 
         std::unique_ptr<serializer_n::Serializer_i<T>> serializer() const {
             return serializer_n::Factory<T>::create();

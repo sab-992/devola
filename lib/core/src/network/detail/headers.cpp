@@ -47,7 +47,7 @@ void network_n::Headers::setHeaders(const std::string& stringHeaders) {
 
 void network_n::Headers::setParser(std::unique_ptr<protocol_n::HeadersParser_i> parser) {
     if (parser == nullptr)
-        throw Exception("No parser given");
+        throw InvalidArgument("No parser given", "Headers parser");
 
     m_parser = std::move(parser);
 }

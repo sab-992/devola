@@ -7,6 +7,9 @@
 
 namespace network_n
 {
+    template<typename T>
+    class Body;
+
     namespace protocol_n
     {
         template <typename T>
@@ -14,7 +17,7 @@ namespace network_n
         public:
             virtual ~BodyParser_i() = default;
 
-            virtual std::string parse(const Headers& headers, const Body<T>& body) const = 0;
+            virtual std::string build(const Headers& headers, const Body<T>& body) const = 0;
             virtual std::string parse(const Headers& headers, const std::string& stringBody) const = 0;
         };
     }

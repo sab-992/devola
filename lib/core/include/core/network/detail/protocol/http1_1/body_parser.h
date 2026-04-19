@@ -20,14 +20,14 @@ namespace network_n
                 BodyParser() {}
                 ~BodyParser() {}
 
-                std::string parse(const Headers& headers, const Body<T>& body) const {
+                std::string build(const Headers& headers, const Body<T>& body) const override {
                     if (not HeadersParser::isContentChunked(headers))
                         return body.toString();
 
                     return chunk(body.toString());
                 }
 
-                std::string parse(const Headers& headers, const std::string& stringBody) const {
+                std::string parse(const Headers& headers, const std::string& stringBody) const override {
                     if (not HeadersParser::isContentChunked(headers))
                         return stringBody;
 

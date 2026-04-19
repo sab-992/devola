@@ -23,7 +23,7 @@ namespace network_n
 
             // Used to send request/response.
             std::string build(const Headers& headers, const Body<T>& body) const override {
-                return std::format("{}\r\n\r\n{}", headers.toString(), bodyParser()->parse(headers, body));
+                return std::format("{}\r\n\r\n{}", headers.toString(), body.build(headers));
             }
 
             std::unique_ptr<BodyParser_i<T>> bodyParser() const override { return std::make_unique<http1_1_n::BodyParser<T>>(); }
@@ -36,9 +36,11 @@ namespace network_n
 
             // Used when receiving request/response.
             std::pair<Headers, Body<T>> parse(const std::string& raw) const override {
-                auto [rawHeaders, rawBody] = splitMessage(raw);
-                Headers headers = Headers(std::make_unique<http1_1_n::HeadersParser>(), rawHeaders);
-                return std::make_pair(headers, Body<T>(bodyParser()->parse(headers, rawBody)));
+                const auto& [rawHeaders, rawBody] = splitMessage(raw);
+                Headers headers = Headers(headersParser(), rawHeaders);
+                Body<T> body = Body<T>(bodyParser());
+                body.parse(headers, rawBody);
+                return std::make_pair(headers, body);
             }
 
             // Used when receiving request/response.
