@@ -7,14 +7,25 @@
 #include <utils/core/headers_parser_mock.h>
 
 
-class HeadersTest : public ::testing::Test {};
+class HeadersTest : public ::testing::Test {
+protected:
+    std::unique_ptr<HeadersParserMock> getHeaderParserMockPtr() { return std::make_unique<HeadersParserMock>(); }
+};
 
-TEST_F(HeadersTest, Constructor_ParsesHeadersCorrectly) {
+TEST_F(HeadersTest, ConstructorWithNullptr_ThrowsException) {
+    EXPECT_THROW(network_n::Headers(nullptr), InvalidArgument);
+}
+
+TEST_F(HeadersTest, SetParserWithNullptr_ThrowsException) {
+    EXPECT_THROW(network_n::Headers(this->getHeaderParserMockPtr()).setParser(nullptr), InvalidArgument);
+}
+
+TEST_F(HeadersTest, Parse_ParsesHeadersCorrectly) {
     using namespace network_n;
     const auto& [EXPECTED_STARTLINE, EXPECTED_HEADERS_UMAP] = HeadersParserMock().parse("");
     const std::string EXPECTED_HEADERS = EXPECTED_STARTLINE + std::format("\r\n{}", buildHeaders(EXPECTED_HEADERS_UMAP));
 
-    Headers headers(std::make_unique<HeadersParserMock>());
+    Headers headers(this->getHeaderParserMockPtr());
     headers.parse(EXPECTED_HEADERS);
 
     EXPECT_EQ(EXPECTED_HEADERS_UMAP.size(), headers.toMap().size());
@@ -28,7 +39,7 @@ TEST_F(HeadersTest, SetHeader_AddsNewHeader) {
 
     const std::string HEADER = "Content-Type";
     const std::string EXPECTED_HEADER_VALUE = "application/json";
-    Headers headers(std::make_unique<HeadersParserMock>());
+    Headers headers(this->getHeaderParserMockPtr());
     const size_t PREVIOUS_SIZE = headers.toMap().size();
 
     headers.setHeader(HEADER, EXPECTED_HEADER_VALUE);
@@ -44,7 +55,7 @@ TEST_F(HeadersTest, SetHeader_OverwritesExistingHeader) {
     const std::string OLD_HEADER_VALUE = "application/json";
     const std::string EXPECTED_HEADER_VALUE = "text/html";
 
-    Headers headers(std::make_unique<HeadersParserMock>());
+    Headers headers(this->getHeaderParserMockPtr());
     headers.setHeader(HEADER, OLD_HEADER_VALUE);
     const size_t PREVIOUS_SIZE = headers.toMap().size();
     headers.setHeader(HEADER, EXPECTED_HEADER_VALUE);
@@ -59,7 +70,7 @@ TEST_F(HeadersTest, GetWithExistingHeader_ReturnsCorrectHeaderValue) {
     const std::string HEADER = "Content-Type";
     const std::string EXPECTED_HEADER_VALUE = "application/json";
 
-    Headers headers(std::make_unique<HeadersParserMock>());
+    Headers headers(this->getHeaderParserMockPtr());
     headers.setHeader(HEADER, EXPECTED_HEADER_VALUE);
 
     EXPECT_EQ(EXPECTED_HEADER_VALUE, headers.get(HEADER));
@@ -70,7 +81,7 @@ TEST_F(HeadersTest, GetWithNonExistingHeader_ReturnsEmptyString) {
     const std::string HEADER = "Content-Type";
     const std::string EXPECTED_HEADER_VALUE = "";
 
-    Headers headers(std::make_unique<HeadersParserMock>());
+    Headers headers(this->getHeaderParserMockPtr());
 
     EXPECT_EQ(EXPECTED_HEADER_VALUE, headers.get(HEADER));
 }
@@ -79,7 +90,7 @@ TEST_F(HeadersTest, SetStartLine_AddsNewStartLine) {
     using namespace network_n;
     const std::string EXPECTED_STARTLINE = "HTTP/1.1 200 OK";
 
-    Headers headers(std::make_unique<HeadersParserMock>());
+    Headers headers(this->getHeaderParserMockPtr());
     headers.setStartLine(EXPECTED_STARTLINE);
 
     EXPECT_EQ(EXPECTED_STARTLINE, headers.startLine());
@@ -90,7 +101,7 @@ TEST_F(HeadersTest, SetStartLine_OverwritesExistingStartLine) {
     const std::string OLD_STARTLINE = "HTTP/1.1 200 OK";
     const std::string EXPECTED_STARTLINE = "HTTP/1.1 404 Not Found";
 
-    Headers headers(std::make_unique<HeadersParserMock>());
+    Headers headers(this->getHeaderParserMockPtr());
     headers.setStartLine(OLD_STARTLINE);
     headers.setStartLine(EXPECTED_STARTLINE);
 
@@ -105,7 +116,7 @@ TEST_F(HeadersTest, ToMap_ReturnsMapContainingAllHeaders) {
                                                                        {"Connection", "close"},
                                                                        {"Host", "www.test.com"} };
 
-    Headers headers(std::make_unique<HeadersParserMock>());
+    Headers headers(this->getHeaderParserMockPtr());
     for (const auto& [header, value] : headersUMap)
         headers.setHeader(header, value);
     

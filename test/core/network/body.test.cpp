@@ -35,7 +35,15 @@ protected:
 
 TYPED_TEST_SUITE(BodyTest, networkInnerTypes_t<network_n::Body>);
 
-TYPED_TEST(BodyTest, Constructor_ParsesStringBodyCorrectly) {
+TYPED_TEST(BodyTest, ConstructorWithNullptr_ThrowsException) {
+    EXPECT_THROW(TypeParam(nullptr), InvalidArgument);
+}
+
+TYPED_TEST(BodyTest, SetParserWithNullptr_ThrowsException) {
+    EXPECT_THROW(TypeParam(this->getParserMock()).setParser(nullptr), InvalidArgument);
+}
+
+TYPED_TEST(BodyTest, Parse_ParsesStringBodyCorrectly) {
     const network_n::Headers headers(std::make_unique<HeadersParserMock>());
     const auto EXPECTED_BODY = this->getTestBody();
     const std::string EXPECTED_STRING_BODY = this->getTestStringBody();
