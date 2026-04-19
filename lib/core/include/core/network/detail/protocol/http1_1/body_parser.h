@@ -3,6 +3,7 @@
 #include <core/exception.h>
 #include <core/network/detail/protocol/http1_1/headers_parser.h>
 #include <core/network/interface/body_parser.h>
+#include <core/network/network.h>
 #include <core/str/hex.h>
 #include <core/str/trim.h>
 #include <string>
@@ -24,7 +25,7 @@ namespace network_n
                     if (not HeadersParser::isContentChunked(headers))
                         return body.toString();
 
-                    return chunk(body.toString());
+                    return chunk(headers, body.toString());
                 }
 
                 std::string parse(const Headers& headers, const std::string& stringBody) const override {
@@ -35,7 +36,7 @@ namespace network_n
                 }
 
             private:
-                std::string chunk(const std::string& mergedBody) const { /* TODO */ return mergedBody; }
+                std::string chunk(const Headers& headers, const std::string& mergedBody) const { /* TODO */ return mergedBody; }
 
                 std::string extractChunk(std::string& message, size_t size) const {
                     const std::string chunk = message.substr(0, size);

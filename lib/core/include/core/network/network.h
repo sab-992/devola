@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <core/conversion/enum.h>
 #include <core/conversion/string_convertible.h>
 #include <format>
@@ -10,6 +11,10 @@
 
 namespace network_n
 {
+    const int KB = std::pow(10, 3);
+    const uint32_t DOWNLOAD_BUFFER_MAX_SIZE = 64 * KB;
+    const uint32_t REQUEST_BUFFER_MAX_SIZE = 32 * KB;
+
     namespace protocol_n
     {
         enum class Protocol {
