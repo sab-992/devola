@@ -1,7 +1,6 @@
 #pragma once
 
 #include <database/interface/database.h>
-#include <iostream>
 #include <memory>
 
 

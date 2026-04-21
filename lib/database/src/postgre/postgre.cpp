@@ -4,10 +4,7 @@
 PostgreSQL::PostgreSQL() {};
 PostgreSQL::~PostgreSQL() {};
 
-bool PostgreSQL::connect() { 
-    std::cout << "Connecting ..." << std::endl; 
-    return true;
-};
+bool PostgreSQL::connect() {  return true; };
 
 std::shared_ptr<Database_i> PostgreSQL::get() { 
     if (m_instance == nullptr)
