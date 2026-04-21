@@ -4,6 +4,7 @@
 #include <core/http/detail/settings.h>
 #include <core/network/detail/message.h>
 #include <core/network/network.h>
+#include <vector>
 
 
 namespace http_n {
@@ -29,10 +30,6 @@ namespace http_n {
         Response<T> build() && override {
             finalize();
             return std::move(*this);
-        }
-
-        std::string get() {
-            return this->getProtocol()->build(this->m_headers, this->m_body);
         }
 
         Response<T>& set(const std::string& stringResponse) {

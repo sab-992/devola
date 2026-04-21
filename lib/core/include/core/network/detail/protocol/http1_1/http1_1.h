@@ -22,8 +22,11 @@ namespace network_n
             friend std::unique_ptr<HTTP1_1> std::make_unique<HTTP1_1>();
 
             // Used to send request/response.
-            std::string build(const Headers& headers, const Body<T>& body) const override {
-                return std::format("{}\r\n\r\n{}", headers.build(), body.build(headers));
+            std::vector<std::string> packetize(const Headers& headers, const Body<T>& body) const override {
+                std::vector<std::string> packets { headers.build() };
+                const std::vector<std::string>& bodyPackets = body.build(headers);
+                packets.insert(packets.end(), bodyPackets.begin(), bodyPackets.end());
+                return packets;
             }
 
             std::unique_ptr<BodyParser_i<T>> bodyParser() const override { return std::make_unique<http1_1_n::BodyParser<T>>(); }

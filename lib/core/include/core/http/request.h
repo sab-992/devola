@@ -8,7 +8,7 @@ namespace http_n {
     template <typename T>
     class Request : public network_n::Message<Request<T>, T> {
     public:
-        Request() : network_n::Message<Request<T>, T>(http_n::DEFAULT_PROTOCOL) {}
+        Request() : network_n::Message<Request<T>, T>(http_n::DEFAULT_PROTOCOL), m_port(this->getProtocol()->defaultPort()) { }
 
         Request(const Request<T>& other) : network_n::Message<Request<T>, T>(other) {
             m_APIEndpoint = other.m_APIEndpoint;
@@ -41,10 +41,6 @@ namespace http_n {
         Request<T> build() && override {
             finalize();
             return std::move(*this);
-        }
-
-        std::string get() {
-            return this->getProtocol()->build(this->m_headers, this->m_body);
         }
 
         std::string method() const { return m_method; }
@@ -91,12 +87,11 @@ namespace http_n {
     private:
         std::string m_APIEndpoint;
         std::string m_method;
-        uint16_t m_port = 0;
+        uint16_t m_port;
         std::string m_URL;
 
         void finalize() {
             validateMembers();
-            m_port = m_port == 0 ? this->getProtocol()->defaultPort() :  m_port;
             this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->getProtocol()->name()));
             this->m_headers->setHeader("Host", std::format("{}:{}", m_URL, m_port));
         }
@@ -121,7 +116,7 @@ namespace http_n {
             size_t separatorIndex = host.find(':');
 
             if (host.empty() or separatorIndex == std::string::npos)
-                return { host, 0 };
+                return { host, m_port };
 
             return { host.substr(0, separatorIndex), static_cast<uint16_t>(std::stoi(host.substr(separatorIndex + 1))) };
         }
@@ -131,6 +126,7 @@ namespace http_n {
 
             if (m_APIEndpoint.empty()) throw InvalidArgument("Cannot be empty", "API endpoint");
             if (m_method.empty()) throw InvalidArgument("Cannot be empty", "HTTP method");
+            if (m_port == 0) throw InvalidArgument("Cannot be '0'", "Host port");
             if (m_URL.empty()) throw InvalidArgument("Cannot be empty", "Host URL");
             if (this->m_protocol == Protocol::NONE) throw InvalidArgument("Cannot be NONE", "Protocol");
         }

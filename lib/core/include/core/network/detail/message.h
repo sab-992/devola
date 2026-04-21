@@ -7,8 +7,6 @@
 #include <core/network/protocol_factory.h>
 #include <core/utility/interface/builder.h>
 
-#include <iostream>
-
 
 namespace network_n
 {
@@ -18,6 +16,11 @@ namespace network_n
         virtual ~Message() = default;
 
         T body() const { return m_body->convert(); }
+
+        std::vector<std::string> prepareTransmissionPackets() const {
+            return getProtocol()->packetize(*this->m_headers, *this->m_body);
+        }
+
         std::string header(const std::string& name) const { return m_headers->get(name); }
         headersUMap_t headersMap() const { return m_headers->toMap(); }
 

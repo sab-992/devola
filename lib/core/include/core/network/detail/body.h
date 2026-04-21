@@ -32,7 +32,7 @@ namespace network_n
             return *this;
         }
 
-        std::string build(const Headers& headers) const { return m_parser->build(headers, *this); }
+        std::vector<std::string> build(const Headers& headers) const { return m_parser->build(headers, *this); }
 
         T convert() const { return serializer()->deserialize(m_stringBody); }
 

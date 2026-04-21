@@ -21,9 +21,9 @@ namespace network_n
                 BodyParser() {}
                 ~BodyParser() {}
 
-                std::string build(const Headers& headers, const Body<T>& body) const override {
+                std::vector<std::string> build(const Headers& headers, const Body<T>& body) const override {
                     if (not HeadersParser::isContentChunked(headers))
-                        return body.toString();
+                        return { body.toString() };
 
                     return chunk(headers, body.toString());
                 }
@@ -36,7 +36,7 @@ namespace network_n
                 }
 
             private:
-                std::string chunk(const Headers& headers, const std::string& mergedBody) const { /* TODO */ return mergedBody; }
+                std::vector<std::string> chunk(const Headers& headers, const std::string& mergedBody) const { /* TODO */ return { mergedBody }; }
 
                 std::string extractChunk(std::string& message, size_t size) const {
                     const std::string chunk = message.substr(0, size);

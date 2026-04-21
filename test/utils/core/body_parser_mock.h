@@ -12,7 +12,7 @@ public:
 
     friend std::unique_ptr<BodyParserMock<T>> std::make_unique<BodyParserMock<T>>();
 
-    std::string build(const network_n::Headers& headers, const network_n::Body<T>& body) const override { return m_returned; }
+    std::vector<std::string> build(const network_n::Headers& headers, const network_n::Body<T>& body) const override { return { m_returned }; }
     std::string parse(const network_n::Headers& headers, const std::string& stringBody) const override { return m_returned; }
 private:
     std::string m_returned;
