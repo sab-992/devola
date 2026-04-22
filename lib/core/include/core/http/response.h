@@ -22,16 +22,6 @@ namespace http_n {
             return *this;
         }
 
-        Response<T>& build() & override {
-            finalize();
-            return *this;
-        }
-
-        Response<T> build() && override {
-            finalize();
-            return std::move(*this);
-        }
-
         Response<T>& set(const std::string& stringResponse) {
             parse(stringResponse);
             return *this;
@@ -54,22 +44,25 @@ namespace http_n {
             swap(lhs.m_status, rhs.m_status);
         }
 
-    private:
-        network_n::Status_s m_status;
-
-        void validateMembers() const {
-            if (m_status.code() == network_n::Code::NONE)  throw InvalidArgument("Cannot be empty", "Status");
-            if (this->m_protocol == network_n::protocol_n::Protocol::NONE) throw InvalidArgument("Cannot be NONE", "Protocol");
-        }
-
-        void finalize() {
+    protected:
+        void finalize() override {
             validateMembers();
             this->setStartLine(std::format("{} {}", this->getProtocol()->name(), m_status.toString()));
         }
 
+        void updateLastBuild() override {}
+
+    private:
+        network_n::Status_s m_status;
+
         void parse(const std::string& stringResponse) {
             const std::unordered_map<std::string, std::string> responseInfo = this->processMessage(stringResponse);
             m_status = network_n::Status_s(static_cast<network_n::Code>(std::stoi(responseInfo.at("code"))));
+        }
+
+        void validateMembers() const {
+            if (m_status.code() == network_n::Code::NONE)  throw InvalidArgument("Cannot be empty", "Status");
+            if (this->m_protocol == network_n::protocol_n::Protocol::NONE) throw InvalidArgument("Cannot be NONE", "Protocol");
         }
     };
 }

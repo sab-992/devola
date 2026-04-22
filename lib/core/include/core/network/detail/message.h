@@ -8,6 +8,8 @@
 #include <core/utility/interface/builder.h>
 
 
+#define DERIVED_REF_STATIC_CAST static_cast<Derived&>(*this)
+
 namespace network_n
 {
     template <typename Derived, typename T>
@@ -17,12 +19,24 @@ namespace network_n
 
         T body() const { return m_body->convert(); }
 
-        std::vector<std::string> prepareTransmissionPackets() const {
-            return getProtocol()->packetize(*this->m_headers, *this->m_body);
+        Derived& build() & override {
+            updateLastBuild();
+            finalize();
+            return DERIVED_REF_STATIC_CAST;
+        }
+
+        Derived build() && override {
+            updateLastBuild();
+            finalize();
+            return std::move(DERIVED_REF_STATIC_CAST);
         }
 
         std::string header(const std::string& name) const { return m_headers->get(name); }
         headersUMap_t headersMap() const { return m_headers->toMap(); }
+
+        std::vector<std::string> prepareTransmissionPackets() const {
+            return getProtocol()->packetize(*this->m_headers, *this->m_body);
+        }
 
         protocol_n::Protocol protocol() {
             return m_protocol;
@@ -30,17 +44,17 @@ namespace network_n
 
         Derived& setBody(const T& body) {
             m_body->set(body);
-            return static_cast<Derived&>(*this);
+            return DERIVED_REF_STATIC_CAST;
         }
 
         Derived& setHeader(const std::string& name, const std::string& value) {
             m_headers->setHeader(name, value);
-            return static_cast<Derived&>(*this);
+            return DERIVED_REF_STATIC_CAST;
         }
 
         Derived& setProtocol(protocol_n::Protocol protocol) {
             m_protocol = protocol;
-            return static_cast<Derived&>(*this);
+            return DERIVED_REF_STATIC_CAST;
         }
 
         std::string toString() const override { return getProtocol()->messageToString(*m_headers, *m_body); }
@@ -58,6 +72,9 @@ namespace network_n
         std::shared_ptr<Body<T>> m_body = nullptr;
         std::shared_ptr<Headers> m_headers = nullptr;
         protocol_n::Protocol m_protocol;
+
+        virtual void updateLastBuild() = 0;
+        virtual void finalize() = 0;
 
         std::unordered_map<std::string, std::string> processMessage(const std::string& message) {
             // TODO: Add protocol detection and change it accordingly

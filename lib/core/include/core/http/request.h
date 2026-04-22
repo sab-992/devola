@@ -32,17 +32,6 @@ namespace http_n {
         }
 
         std::string APIEndpoint() const { return m_APIEndpoint; }
-
-        Request<T>& build() & override {
-            finalize();
-            return *this;
-        }
-
-        Request<T> build() && override {
-            finalize();
-            return std::move(*this);
-        }
-
         std::string method() const { return m_method; }
         uint16_t port() const { return m_port; }
 
@@ -84,17 +73,20 @@ namespace http_n {
 
         std::string url() const { return m_URL; }
 
+    protected:
+        void finalize() override {
+            validateMembers();
+            this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->getProtocol()->name()));
+            this->m_headers->setHeader("Host", std::format("{}:{}", m_URL, m_port));
+        }
+
+        void updateLastBuild() override {}
+
     private:
         std::string m_APIEndpoint;
         std::string m_method;
         uint16_t m_port;
         std::string m_URL;
-
-        void finalize() {
-            validateMembers();
-            this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->getProtocol()->name()));
-            this->m_headers->setHeader("Host", std::format("{}:{}", m_URL, m_port));
-        }
 
         void parse(const std::string& stringRequest) {
             const std::unordered_map<std::string, std::string> requestInfo = this->processMessage(stringRequest);
