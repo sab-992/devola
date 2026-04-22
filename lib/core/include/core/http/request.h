@@ -1,10 +1,20 @@
 #pragma once
 
 #include <core/exception.h>
+#include <core/http/detail/memento/request.h>
 #include <core/http/detail/settings.h>
 #include <core/network/detail/message.h>
+#include <memory>
 
-namespace http_n {
+
+namespace http_n
+{
+    namespace memento_n
+    {
+        template <typename T>
+        class Request;
+    }
+
     template <typename T>
     class Request : public network_n::Message<Request<T>, T> {
     public:
@@ -12,6 +22,8 @@ namespace http_n {
 
         Request(const Request<T>& other) : network_n::Message<Request<T>, T>(other) {
             m_APIEndpoint = other.m_APIEndpoint;
+            if (other.m_lastBuild)
+                m_lastBuild = std::make_unique<memento_n::Request<T>>(*other.m_lastBuild);
             m_method = other.m_method;
             m_port = other.m_port;
             m_URL = other.m_URL;
@@ -19,6 +31,7 @@ namespace http_n {
 
         Request(Request<T>&& other) : network_n::Message<Request<T>, T>(std::move(other)) {
             m_APIEndpoint = std::move(other.m_APIEndpoint);
+            m_lastBuild = std::move(other.m_lastBuild);
             m_method = std::move(other.m_method);
             m_port = std::move(other.m_port);
             m_URL = std::move(other.m_URL);
@@ -66,6 +79,7 @@ namespace http_n {
             swap(static_cast<network_n::Message<Request<T>, T>&>(lhs), static_cast<network_n::Message<Request<T>, T>&>(rhs));
 
             swap(lhs.m_APIEndpoint, rhs.m_APIEndpoint);
+            swap(lhs.m_lastBuild, rhs.m_lastBuild);
             swap(lhs.m_method, rhs.m_method);
             swap(lhs.m_port, rhs.m_port);
             swap(lhs.m_URL, rhs.m_URL);
@@ -80,13 +94,26 @@ namespace http_n {
             this->m_headers->setHeader("Host", std::format("{}:{}", m_URL, m_port));
         }
 
-        void updateLastBuild() override {}
+        bool hasChangedSinceLastBuild() const override {
+            // If it is nullptr, build() was never called.
+            // Since this is not a static function, we are guaranteed that an object has been created,
+            // therefore the object has changed.
+            if (not m_lastBuild)
+                return true;
+
+            return *m_lastBuild == memento_n::Request<T>(*this);
+        }
+
+        void updateLastBuild() override { m_lastBuild = std::make_unique<memento_n::Request<T>>(*this); }
 
     private:
         std::string m_APIEndpoint;
+        std::unique_ptr<memento_n::Request<T>> m_lastBuild;
         std::string m_method;
         uint16_t m_port;
         std::string m_URL;
+
+        friend class memento_n::Request<T>;
 
         void parse(const std::string& stringRequest) {
             const std::unordered_map<std::string, std::string> requestInfo = this->processMessage(stringRequest);

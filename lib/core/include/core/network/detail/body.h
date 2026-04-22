@@ -32,6 +32,15 @@ namespace network_n
             return *this;
         }
 
+        bool operator==(const Body<T>& other) const {
+            // IF UPDATED, ALSO UPDATE THE COMMENT IN http_n::Headers
+            // The parsers are not dereferenced before the comparison because they are singletons
+            // (will always be the same pointee if coming from the same parser class).
+            // Moreover, they are stateless, meaning that are the same from creation to destruction.
+            return m_parser     == m_parser and
+                   m_stringBody == other.m_stringBody;
+        }
+
         std::vector<std::string> build(const Headers& headers) const { return m_parser->build(headers, *this); }
 
         T convert() const { return serializer()->deserialize(m_stringBody); }
@@ -55,8 +64,8 @@ namespace network_n
         std::string toString() const override { return m_stringBody; }
 
     private:
-        std::string m_stringBody;
         std::unique_ptr<protocol_n::BodyParser_i<T>> m_parser = nullptr;
+        std::string m_stringBody;
 
         std::unique_ptr<serializer_n::Serializer_i<T>> serializer() const {
             return serializer_n::Factory<T>::create();

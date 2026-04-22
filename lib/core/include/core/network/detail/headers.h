@@ -26,6 +26,8 @@ namespace network_n
 
         Headers& operator=(Headers other);
 
+        bool operator==(const Headers& other) const;
+
         std::string build() const; // To match the structure of network_n::Body
 
         std::string get(const std::string& name) const;

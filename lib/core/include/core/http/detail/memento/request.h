@@ -1,0 +1,67 @@
+#pragma once
+
+#include <core/http/request.h>
+#include <core/network/detail/body.h>
+#include <core/network/detail/headers.h>
+#include <core/network/network.h>
+#include <core/utility/interface/memento.h>
+#include <core/utility/compare.h>
+#include <memory>
+
+
+namespace http_n
+{
+    template <typename T>
+    class Request;
+
+    namespace memento_n
+    {
+        template <typename T>
+        class Request : public Memento_i<Request<T>> {
+        public:
+            Request(const http_n::Request<T>& toSave) {
+                m_APIEndpoint = toSave.m_APIEndpoint;
+                m_body = toSave.m_body;
+                m_headers = toSave.m_headers;
+                m_method = toSave.m_method;
+                m_port = toSave.m_port;
+                m_protocol = toSave.m_protocol;
+                m_URL = toSave.m_URL;
+            }
+
+            Request(const Request<T>& other) {
+                m_APIEndpoint = other.m_APIEndpoint;
+                m_body = other.m_body;
+                m_headers = other.m_headers;
+                m_method = other.m_method;
+                m_port = other.m_port;
+                m_protocol = other.m_protocol;
+                m_URL = other.m_URL;
+            }
+
+            ~Request() {}
+
+            friend std::unique_ptr<Request> std::make_unique<Request>();
+
+            bool operator==(const Request<T>& other) const override {
+                return m_APIEndpoint !=  other.m_APIEndpoint   or
+                       not pointersEqual(m_body, other.m_body)       or
+                       not pointersEqual(m_headers, other.m_headers) or
+                       m_headers     !=  other.m_headers       or
+                       m_method      !=  other.m_method        or
+                       m_port        !=  other.m_port          or
+                       m_protocol    !=  other.m_protocol      or
+                       m_URL         !=  other.m_URL;
+            }
+
+        private:
+            std::string m_APIEndpoint;
+            std::shared_ptr<network_n::Body<T>> m_body = nullptr;
+            std::shared_ptr<network_n::Headers> m_headers = nullptr;
+            std::string m_method;
+            uint16_t m_port;
+            network_n::protocol_n::Protocol m_protocol;
+            std::string m_URL;
+        };
+    }
+}

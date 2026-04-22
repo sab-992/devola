@@ -35,6 +35,7 @@ namespace network_n
         headersUMap_t headersMap() const { return m_headers->toMap(); }
 
         std::vector<std::string> prepareTransmissionPackets() const {
+            assert(not hasChangedSinceLastBuild() && "network_n::Message::build() needs to be called after making changes to the object");
             return getProtocol()->packetize(*this->m_headers, *this->m_body);
         }
 
@@ -73,8 +74,9 @@ namespace network_n
         std::shared_ptr<Headers> m_headers = nullptr;
         protocol_n::Protocol m_protocol;
 
-        virtual void updateLastBuild() = 0;
         virtual void finalize() = 0;
+        virtual bool hasChangedSinceLastBuild() const = 0;
+        virtual void updateLastBuild() = 0;
 
         std::unordered_map<std::string, std::string> processMessage(const std::string& message) {
             // TODO: Add protocol detection and change it accordingly
