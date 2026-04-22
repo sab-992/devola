@@ -20,11 +20,13 @@ namespace http_n
     class Response : public network_n::Message<Response<T>, T> {
     public:
         Response() : network_n::Message<Response<T>, T>(http_n::DEFAULT_PROTOCOL) {}
+
         Response(const Response<T>& other) : network_n::Message<Response<T>, T>(other) {
             if (other.m_lastBuild)
                 m_lastBuild = std::make_unique<memento_n::Response<T>>(*other.m_lastBuild);
             m_status = other.m_status;
         }
+
         Response(Response<T>&& other) : network_n::Message<Response<T>, T>(std::move(other)) {
             m_lastBuild = std::move(other.m_lastBuild);
             m_status = std::move(other.m_status);
