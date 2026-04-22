@@ -20,7 +20,7 @@ namespace network_n
     template<typename T>
     class Body : public StringConvertible {
     public:
-        Body(std::unique_ptr<protocol_n::BodyParser_i<T>> parser) { setParser(std::move(parser)); }
+        Body(std::shared_ptr<protocol_n::BodyParser_i<T>> parser) { setParser(parser); }
 
         Body(const Body<T>& other) { m_stringBody = other.m_stringBody; }
         Body(Body<T>&& other) { m_stringBody = std::move(other.m_stringBody); }
@@ -52,11 +52,11 @@ namespace network_n
 
         void set(const T& body) { m_stringBody = serializer()->serialize(body); }
 
-        void setParser(std::unique_ptr<protocol_n::BodyParser_i<T>> parser) {
+        void setParser(std::shared_ptr<protocol_n::BodyParser_i<T>> parser) {
             if (parser == nullptr)
                 throw InvalidArgument("No parser given", "Body parser");
 
-            m_parser = std::move(parser);
+            m_parser = parser;
         }
 
         friend void swap(Body<T>& lhs, Body<T>& rhs) { std::swap(lhs.m_stringBody, rhs.m_stringBody); }
@@ -64,7 +64,7 @@ namespace network_n
         std::string toString() const override { return m_stringBody; }
 
     private:
-        std::unique_ptr<protocol_n::BodyParser_i<T>> m_parser = nullptr;
+        std::shared_ptr<protocol_n::BodyParser_i<T>> m_parser;
         std::string m_stringBody;
 
         std::unique_ptr<serializer_n::Serializer_i<T>> serializer() const {

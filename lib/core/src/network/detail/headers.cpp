@@ -1,8 +1,8 @@
 #include <core/network/detail/headers.h>
 
 
-network_n::Headers::Headers(std::unique_ptr<protocol_n::HeadersParser_i> parser) {
-    setParser(std::move(parser));
+network_n::Headers::Headers(std::shared_ptr<protocol_n::HeadersParser_i> parser) {
+    setParser(parser);
 }
 
 network_n::Headers::Headers(const Headers& other)  {
@@ -58,11 +58,11 @@ void network_n::Headers::setHeader(const std::string& name, const std::string& v
     m_headersMap[name] = value;
 }
 
-void network_n::Headers::setParser(std::unique_ptr<protocol_n::HeadersParser_i> parser) {
+void network_n::Headers::setParser(std::shared_ptr<protocol_n::HeadersParser_i> parser) {
     if (parser == nullptr)
         throw InvalidArgument("No parser given", "Headers parser");
 
-    m_parser = std::move(parser);
+    m_parser = parser;
 }
 
 void network_n::Headers::setStartLine(const std::string& startLine) {

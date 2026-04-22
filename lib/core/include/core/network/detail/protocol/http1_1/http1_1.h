@@ -29,11 +29,11 @@ namespace network_n
                 return packets;
             }
 
-            std::unique_ptr<BodyParser_i<T>> bodyParser() const override { return std::make_unique<http1_1_n::BodyParser<T>>(); }
+            std::shared_ptr<BodyParser_i<T>> bodyParser() const override { return http1_1_n::BodyParser<T>::instance(); }
 
             uint16_t defaultPort() const override { return DEFAULT_PORT; }
 
-            std::unique_ptr<HeadersParser_i> headersParser() const override { return std::make_unique<http1_1_n::HeadersParser>(); }
+            std::shared_ptr<HeadersParser_i> headersParser() const override { return http1_1_n::HeadersParser::instance(); }
 
             std::string name() const override { return http1_1_n::PROTOCOL_VERSION_NAME; }
 

@@ -18,7 +18,7 @@ namespace network_n
 
     class Headers : public StringConvertible {
     public:
-        Headers(std::unique_ptr<protocol_n::HeadersParser_i> parser);
+        Headers(std::shared_ptr<protocol_n::HeadersParser_i> parser);
         Headers(const Headers& other);
         Headers(Headers&& other);
 
@@ -35,7 +35,7 @@ namespace network_n
         void parse(const std::string& stringHeaders);
 
         void setHeader(const std::string& name, const std::string& value);
-        void setParser(std::unique_ptr<protocol_n::HeadersParser_i> parser);
+        void setParser(std::shared_ptr<protocol_n::HeadersParser_i> parser);
         void setStartLine(const std::string& startLine);
 
         std::string startLine() const;
@@ -52,7 +52,7 @@ namespace network_n
 
     private:
         headersUMap_t m_headersMap;
-        std::unique_ptr<protocol_n::HeadersParser_i> m_parser;
+        std::shared_ptr<protocol_n::HeadersParser_i> m_parser;
         std::string m_startLine;
     };
 }

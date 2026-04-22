@@ -19,10 +19,13 @@ namespace network_n
 
             class HeadersParser : public HeadersParser_i {
             public:
-                HeadersParser() {}
-                ~HeadersParser() {}
+                HeadersParser(const HeadersParser&) = delete;
+                HeadersParser& operator=(const HeadersParser&) = delete;
 
-                friend std::unique_ptr<HeadersParser> std::make_unique<HeadersParser>();
+                HeadersParser(HeadersParser&&) = delete;
+                HeadersParser& operator=(HeadersParser&&) = delete;
+
+                ~HeadersParser() {}
 
                 std::string build(const Headers& headers) const override {
                     std::string stringHeaders = headers.startLine();
@@ -34,6 +37,11 @@ namespace network_n
                 }
 
                 static bool isContentChunked(const Headers& headers) { return headers.get(TRANSFER_ENCODING) == CHUNKED; }
+
+                static std::shared_ptr<HeadersParser> instance() {
+                    std::call_once(m_headerParserInitFlag, &HeadersParser::createInstance);
+                    return m_instance;
+                }
 
                 std::pair<std::string, headersUMap_t> parse(const std::string& stringHeaders) const override {
                     std::istringstream input(trim(stringHeaders));
@@ -75,8 +83,16 @@ namespace network_n
                 }
 
             private:
+                HeadersParser() {};
+
                 inline static const std::string CHUNKED = "chunked";
                 inline static const std::string TRANSFER_ENCODING = "Transfer-Encoding";
+
+                inline static std::once_flag m_headerParserInitFlag;
+                inline static std::shared_ptr<HeadersParser> m_instance;
+
+                static void createInstance() { m_instance = std::shared_ptr<HeadersParser>(new HeadersParser()); }
+
 
                 static bool isRequest(const std::vector<std::string>& information) { return information[2].find(PROTOCOL_VERSION_NAME) != std::string::npos; }
                 static bool isResponse(const std::vector<std::string>& information) { return information[0].find(PROTOCOL_VERSION_NAME) != std::string::npos; }
