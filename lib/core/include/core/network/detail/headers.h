@@ -44,6 +44,7 @@ namespace network_n
             using std::swap;
 
             swap(lhs.m_headersMap, rhs.m_headersMap);
+            swap(lhs.m_parser, rhs.m_parser);
             swap(lhs.m_startLine, rhs.m_startLine);
         }
 

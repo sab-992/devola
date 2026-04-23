@@ -7,11 +7,13 @@ network_n::Headers::Headers(std::shared_ptr<protocol_n::HeadersParser_i> parser)
 
 network_n::Headers::Headers(const Headers& other)  {
     m_headersMap = other.m_headersMap;
+    m_parser = other.m_parser;
     m_startLine = other.m_startLine;
 }
 
 network_n::Headers::Headers(Headers&& other) {
     m_headersMap = std::move(other.m_headersMap);
+    m_parser = std::move(other.m_parser);
     m_startLine = std::move(other.m_startLine);
 }
 

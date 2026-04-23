@@ -22,8 +22,15 @@ namespace network_n
     public:
         Body(std::shared_ptr<protocol_n::BodyParser_i<T>> parser) { setParser(parser); }
 
-        Body(const Body<T>& other) { m_stringBody = other.m_stringBody; }
-        Body(Body<T>&& other) { m_stringBody = std::move(other.m_stringBody); }
+        Body(const Body<T>& other) {
+            m_stringBody = other.m_stringBody;
+            m_parser = other.m_parser;
+        }
+
+        Body(Body<T>&& other) {
+            m_stringBody = std::move(other.m_stringBody);
+            m_parser = other.m_parser;
+        }
 
         ~Body() {}
 
@@ -59,7 +66,10 @@ namespace network_n
             m_parser = parser;
         }
 
-        friend void swap(Body<T>& lhs, Body<T>& rhs) { std::swap(lhs.m_stringBody, rhs.m_stringBody); }
+        friend void swap(Body<T>& lhs, Body<T>& rhs) {
+            std::swap(lhs.m_parser, rhs.m_parser);
+            std::swap(lhs.m_stringBody, rhs.m_stringBody);
+        }
 
         std::string toString() const override { return m_stringBody; }
 
