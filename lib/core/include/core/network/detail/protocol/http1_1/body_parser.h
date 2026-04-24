@@ -54,7 +54,21 @@ namespace network_n
 
                 static void createInstance() { m_instance = std::shared_ptr<BodyParser>(new BodyParser()); }
                 
-                std::vector<std::string> chunk(const Headers& headers, const std::string& mergedBody) const { /* TODO */ return { mergedBody }; }
+                std::vector<std::string> chunk(const Headers& headers, const std::string& mergedBody) const {
+                    const size_t chunkSize = headers.get("X-IsDownload") == "true" ? DOWNLOAD_BUFFER_MAX_SIZE : REQUEST_BUFFER_MAX_SIZE;
+
+                    if (mergedBody.size() < chunkSize)
+                        return { mergedBody };
+
+                    std::vector<std::string> chunks;
+                    size_t startOfChunk = 0;
+                    while(startOfChunk + chunkSize < mergedBody.size()) {
+                        chunks.emplace_back(mergedBody.substr(startOfChunk, chunkSize));
+                        startOfChunk += chunkSize;
+                    }
+                    chunks.emplace_back(mergedBody.substr(startOfChunk));
+                    return chunks;
+                }
 
                 std::string extractChunk(std::string& message, size_t size) const {
                     const std::string chunk = message.substr(0, size);
