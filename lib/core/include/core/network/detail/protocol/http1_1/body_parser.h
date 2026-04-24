@@ -62,11 +62,18 @@ namespace network_n
 
                     std::vector<std::string> chunks;
                     size_t startOfChunk = 0;
+
+                    auto addCurrentChunk = [&mergedBody, &chunks, &startOfChunk](size_t count=std::string::npos){
+                        const std::string chunk = mergedBody.substr(startOfChunk, count);
+                        chunks.emplace_back(std::format("{}\r\n{}", toHex(chunk.size()), chunk));
+                    };
+
                     while(startOfChunk + chunkSize < mergedBody.size()) {
-                        chunks.emplace_back(mergedBody.substr(startOfChunk, chunkSize));
+                        addCurrentChunk(chunkSize);
                         startOfChunk += chunkSize;
                     }
-                    chunks.emplace_back(mergedBody.substr(startOfChunk));
+                    addCurrentChunk();
+                    chunks.emplace_back("0\r\n\r\n");
                     return chunks;
                 }
 
