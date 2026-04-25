@@ -8,21 +8,47 @@
 
 class HeadersParserMock : public network_n::protocol_n::HeadersParser_i {
 public:
-    HeadersParserMock() {}
     ~HeadersParserMock() {}
 
-    friend std::unique_ptr<HeadersParserMock> std::make_unique<HeadersParserMock>();
+    static std::unique_ptr<HeadersParserMock> get(bool isChunked, bool isDownload=false) { 
+        return std::unique_ptr<HeadersParserMock>(new HeadersParserMock(isChunked, isDownload));
+    }
 
     std::string build(const network_n::Headers& headers) const override {
-        return  "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 256\r\nConnection: keep-alive\r\nServer: Test/2.4.41";
+        std::string stringHeaders = "HTTP/1.1 200 OK\r\n"
+                                    "Content-Type: application/json\r\n"
+                                    "Content-Length: 256\r\n"
+                                    "Connection: keep-alive\r\n"
+                                    "Server: Test/2.4.41";
+
+        if (m_chunked)
+            stringHeaders += "\r\nTransfer-Encoding: chunked";
+
+        if (m_isDownload)
+            stringHeaders += "\r\nX-IsDownload: true";
+
+        return stringHeaders;
     }
 
     std::pair<std::string, std::unordered_map<std::string, std::string>> parse(const std::string& stringHeaders) const override {
         const std::string startline = "HTTP/1.1 200 OK";
-        const std::unordered_map<std::string, std::string> headersUMap = { {"Content-Type",   "application/json"},
-                                                                           {"Content-Length", "256"},
-                                                                           {"Connection",     "keep-alive"},
-                                                                           {"Server",         "Test/2.4.41"} };
+        std::unordered_map<std::string, std::string> headersUMap = { {"Content-Type",   "application/json"},
+                                                                     {"Content-Length", "256"},
+                                                                     {"Connection",     "keep-alive"},
+                                                                     {"Server",         "Test/2.4.41"} };
+
+        if (m_chunked)
+            headersUMap.insert({ "Transfer-Encoding", "chunked" });
+
+        if (m_isDownload)
+            headersUMap.insert({ "X-IsDownload", "true" });
+
         return { startline , headersUMap };
     }
+
+private:
+    HeadersParserMock(bool isChunked, bool isDownload) : m_chunked(isChunked), m_isDownload(isDownload) {}
+
+    bool m_chunked;
+    bool m_isDownload;
 };

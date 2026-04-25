@@ -25,11 +25,11 @@ public:
 
     inline static std::string getTestStringObject(bool alt) {
         if constexpr (std::is_base_of_v<typename Object<nlohmann::json>::type, T>)
-            return createJSONString(alt);
+            return getTestObject(createJSONString(alt)).dump();
         if constexpr (std::is_base_of_v<typename Object<std::string>::type, T>)
-            return createTextString(alt);
+            return getTestObject(createTextString(alt));
         if constexpr (std::is_base_of_v<typename Object<xml_n::Document>::type, T>)
-            return createXMLString(alt);
+            return getTestObject(createXMLString(alt)).toString();
         throw Exception("Unhandled single templated type object");
     }
 

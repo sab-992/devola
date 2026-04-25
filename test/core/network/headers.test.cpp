@@ -9,7 +9,7 @@
 
 class HeadersTest : public ::testing::Test {
 protected:
-    std::unique_ptr<HeadersParserMock> getHeaderParserMockPtr() { return std::make_unique<HeadersParserMock>(); }
+    std::unique_ptr<HeadersParserMock> getHeaderParserMockPtr() { return HeadersParserMock::get(false); }
 };
 
 TEST_F(HeadersTest, ConstructorWithNullptr_ThrowsException) {
@@ -22,7 +22,7 @@ TEST_F(HeadersTest, SetParserWithNullptr_ThrowsException) {
 
 TEST_F(HeadersTest, Parse_ParsesHeadersCorrectly) {
     using namespace network_n;
-    const auto& [EXPECTED_STARTLINE, EXPECTED_HEADERS_UMAP] = HeadersParserMock().parse("");
+    const auto& [EXPECTED_STARTLINE, EXPECTED_HEADERS_UMAP] = this->getHeaderParserMockPtr()->parse("");
     const std::string EXPECTED_HEADERS = EXPECTED_STARTLINE + std::format("\r\n{}", buildHeaders(EXPECTED_HEADERS_UMAP));
 
     Headers headers(this->getHeaderParserMockPtr());
