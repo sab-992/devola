@@ -57,9 +57,6 @@ namespace network_n
                 std::vector<std::string> chunk(const Headers& headers, const std::string& mergedBody) const {
                     const size_t chunkSize = headers.get("X-IsDownload") == "true" ? DOWNLOAD_BUFFER_MAX_SIZE : REQUEST_BUFFER_MAX_SIZE;
 
-                    if (mergedBody.size() < chunkSize)
-                        return { mergedBody };
-
                     std::vector<std::string> chunks;
                     size_t startOfChunk = 0;
 
@@ -72,6 +69,7 @@ namespace network_n
                         addCurrentChunk(chunkSize);
                         startOfChunk += chunkSize;
                     }
+
                     addCurrentChunk();
                     chunks.emplace_back("0\r\n\r\n");
                     return chunks;
