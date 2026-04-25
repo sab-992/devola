@@ -189,3 +189,18 @@ TEST_F(BodyParserTest, ParseWithChunkedHeaderAndDownload_ReturnsMergedBody) {
 
     EXPECT_EQ(EXPECTED_PARSED_RESULT, result);
 }
+
+TEST_F(BodyParserTest, ParseWithIncorrectStringBody_ThrowsException) {
+    using namespace network_n;
+    using protocol_n::http1_1_n::BodyParser;
+
+    const std::string POORLY_CHUNKED_BODY = "5"
+                                            "Hello\r\n"
+                                            "6\r\n"
+                                            " world\r\n"
+                                            "0\r\n\r\n";
+
+    Headers headers(HeadersParserMock::get(true, true));
+    headers.parse("Hello world");
+    EXPECT_THROW(BodyParser<std::string>::instance()->parse(headers,  POORLY_CHUNKED_BODY), InvalidArgument);
+}

@@ -86,10 +86,13 @@ namespace network_n
                     const size_t EOL = message.find(nextLine);
 
                     if (EOL == std::string::npos)
-                        throw InvalidArgument("Not chunked correctly", "HTTP message body");
+                        throw InvalidArgument("One or more chunk sizes are ill-formed", "HTTP message body");
 
                     const std::string hexLength = message.substr(0, EOL);
-                    return fromHex(hexLength);
+
+                    try { return fromHex(hexLength); } catch (...) {}
+
+                    throw InvalidArgument("Couldn't extract body chunk sizes", "HTTP message body");
                 }
 
                 std::string merge(const std::string& rawBody) const {
