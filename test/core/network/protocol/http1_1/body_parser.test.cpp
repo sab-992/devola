@@ -68,12 +68,51 @@ TYPED_TEST(BodyParserTypedTest, ParseWithoutChunkedHeader_ReturnsBody) {
     EXPECT_EQ(EXPECTED_PARSED_RESULT, result);
 }
 
+
 class BodyParserTest : public ::testing::Test {
 protected:
     std::string getBodyToChunk(size_t sizeOfChunk) { return std::string(sizeOfChunk + 1, '*'); }
 };
 
-TEST_F(BodyParserTest, BuildWithChunkedHeader_ReturnsBodyChunks) {
+TEST_F(BodyParserTest, BuildWithChunkedHeaderAndBodySmallerThanChunkSize_ReturnsSingleBodyChunk) {
+    using namespace network_n;
+    using protocol_n::http1_1_n::BodyParser;
+
+    const std::string EXPECTED_STRING_BODY = "Hello world";
+    const std::vector<std::string> EXPECTED_CHUNKS { std::format("{}\r\n{}", toHex(EXPECTED_STRING_BODY.size()), EXPECTED_STRING_BODY), "0\r\n\r\n" };
+
+    Headers headers(HeadersParserMock::get(true));
+    headers.parse("Hello world");
+    std::shared_ptr<BodyParser<std::string>> parser = BodyParser<std::string>::instance();
+
+    Body<std::string> body(parser);
+    body.set(EXPECTED_STRING_BODY);
+
+    const std::vector<std::string> result = parser->build(headers, body);
+
+    EXPECT_EQ(EXPECTED_CHUNKS, result);
+}
+
+TEST_F(BodyParserTest, BuildWithChunkedHeaderAndDownloadAndBodySmallerThanChunkSize_ReturnsSingleBodyChunk) {
+    using namespace network_n;
+    using protocol_n::http1_1_n::BodyParser;
+
+    const std::string EXPECTED_STRING_BODY = "Hello world";
+    const std::vector<std::string> EXPECTED_CHUNKS { std::format("{}\r\n{}", toHex(EXPECTED_STRING_BODY.size()), EXPECTED_STRING_BODY), "0\r\n\r\n" };
+
+    Headers headers(HeadersParserMock::get(true, true));
+    headers.parse("Hello world");
+    std::shared_ptr<BodyParser<std::string>> parser = BodyParser<std::string>::instance();
+
+    Body<std::string> body(parser);
+    body.set(EXPECTED_STRING_BODY);
+
+    const std::vector<std::string> result = parser->build(headers, body);
+
+    EXPECT_EQ(EXPECTED_CHUNKS, result);
+}
+
+TEST_F(BodyParserTest, BuildWithChunkedHeader_ReturnsMultipleBodyChunks) {
     using namespace network_n;
     using protocol_n::http1_1_n::BodyParser;
 
@@ -95,24 +134,7 @@ TEST_F(BodyParserTest, BuildWithChunkedHeader_ReturnsBodyChunks) {
     EXPECT_EQ(EXPECTED_CHUNKS, result);
 }
 
-TEST_F(BodyParserTest, ParseWithChunkedHeader_ReturnsMergedBody) {
-    using namespace network_n;
-    using protocol_n::http1_1_n::BodyParser;
-
-    const std::string EXPECTED_PARSED_RESULT = "hello world";
-
-    Headers headers(HeadersParserMock::get(true));
-    headers.parse("Hello world");
-    const std::string result = BodyParser<std::string>::instance()->parse(headers,  "5\r\n"
-                                                                                    "hello\r\n"
-                                                                                    "6\r\n"
-                                                                                    " world\r\n"
-                                                                                    "0\r\n\r\n");
-
-    EXPECT_EQ(EXPECTED_PARSED_RESULT, result);
-}
-
-TEST_F(BodyParserTest, BuildWithChunkedHeaderAndDownload_ReturnsBiggerBodyChunks) {
+TEST_F(BodyParserTest, BuildWithChunkedHeaderAndDownload_ReturnsMultipleBiggerBodyChunks) {
     using namespace network_n;
     using protocol_n::http1_1_n::BodyParser;
 
@@ -134,16 +156,33 @@ TEST_F(BodyParserTest, BuildWithChunkedHeaderAndDownload_ReturnsBiggerBodyChunks
     EXPECT_EQ(EXPECTED_CHUNKS, result);
 }
 
+TEST_F(BodyParserTest, ParseWithChunkedHeader_ReturnsMergedBody) {
+    using namespace network_n;
+    using protocol_n::http1_1_n::BodyParser;
+
+    const std::string EXPECTED_PARSED_RESULT = "Hello world";
+
+    Headers headers(HeadersParserMock::get(true));
+    headers.parse("Hello world");
+    const std::string result = BodyParser<std::string>::instance()->parse(headers,  "5\r\n"
+                                                                                    "Hello\r\n"
+                                                                                    "6\r\n"
+                                                                                    " world\r\n"
+                                                                                    "0\r\n\r\n");
+
+    EXPECT_EQ(EXPECTED_PARSED_RESULT, result);
+}
+
 TEST_F(BodyParserTest, ParseWithChunkedHeaderAndDownload_ReturnsMergedBody) {
     using namespace network_n;
     using protocol_n::http1_1_n::BodyParser;
 
-    const std::string EXPECTED_PARSED_RESULT = "hello world2";
+    const std::string EXPECTED_PARSED_RESULT = "Hello world2";
 
     Headers headers(HeadersParserMock::get(true, true));
     headers.parse("Hello world");
     const std::string result = BodyParser<std::string>::instance()->parse(headers,  "5\r\n"
-                                                                                    "hello\r\n"
+                                                                                    "Hello\r\n"
                                                                                     "7\r\n"
                                                                                     " world2\r\n"
                                                                                     "0\r\n\r\n");
