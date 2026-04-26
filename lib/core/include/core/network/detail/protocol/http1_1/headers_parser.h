@@ -48,7 +48,9 @@ namespace network_n
                     std::string line;
 
                     std::getline(input, line);
-                
+
+                    validateStartline(splitStartLine(line));
+
                     const std::string startLine = line;
                     headersUMap_t headersUMap;
                     for (; std::getline(input, line);) {
@@ -68,11 +70,9 @@ namespace network_n
                 }
 
                 static std::unordered_map<std::string, std::string> parseStartLine(const std::string& startLine) {
-                    std::vector<std::string> messageInformation;
-                    split(startLine, messageInformation);
+                    const std::vector<std::string>& messageInformation = splitStartLine(startLine);
 
-                    if (messageInformation.size() < 3)
-                        throw InvalidArgument("Ill-formed: Missing information", "HTTP message startline");
+                    validateStartline(messageInformation);
 
                     if (isRequest(messageInformation))
                         return requestInformationMap(messageInformation);
@@ -93,6 +93,16 @@ namespace network_n
 
                 static void createInstance() { m_instance = std::shared_ptr<HeadersParser>(new HeadersParser()); }
 
+                static std::vector<std::string> splitStartLine(const std::string& startLine) {
+                    std::vector<std::string> messageInformation;
+                    split(startLine, messageInformation);
+                    return messageInformation;
+                };
+
+                static void validateStartline(const std::vector<std::string>& messageInformation) {
+                    if (messageInformation.size() < 3)
+                        throw InvalidArgument("Ill-formed: Missing information", "HTTP message startline");
+                };
 
                 static bool isRequest(const std::vector<std::string>& information) { return information[2].find(PROTOCOL_VERSION_NAME) != std::string::npos; }
                 static bool isResponse(const std::vector<std::string>& information) { return information[0].find(PROTOCOL_VERSION_NAME) != std::string::npos; }
