@@ -94,12 +94,29 @@ namespace network_n
                 static void createInstance() { m_instance = std::shared_ptr<HeadersParser>(new HeadersParser()); }
 
                 static std::vector<std::string> splitStartLine(const std::string& startLine) {
+                    std::string startLineCopy(startLine);
+
                     std::vector<std::string> messageInformation;
-                    split(startLine, messageInformation);
+                    while (messageInformation.size() < 2) {
+                        size_t endOfWord = startLineCopy.find(" ");
+
+                        if (endOfWord == std::string::npos)
+                            break;
+
+                        const std::string word = startLineCopy.substr(0, endOfWord);
+                        messageInformation.emplace_back(word);
+                        startLineCopy = startLineCopy.substr(endOfWord + 1);
+                    }
+
+                    const std::string lastWord = startLineCopy.substr(0);
+                    if (not lastWord.empty())
+                        messageInformation.emplace_back(lastWord);
+
                     return messageInformation;
                 };
 
                 static void validateStartline(const std::vector<std::string>& messageInformation) {
+                    // Cannot be more than 3 based on how the startline is parsed.
                     if (messageInformation.size() < 3)
                         throw InvalidArgument("Ill-formed: Missing information", "HTTP message startline");
                 };
