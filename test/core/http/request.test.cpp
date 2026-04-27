@@ -104,10 +104,10 @@ TEST_F(RequestTest, Set_CreatesValidHTTPRequest) {
                                                                     {"Content-Length",    std::to_string(EXPECTED_BODY.size()) } };
 
     const std::string EXPECTED_REQUEST = std::format("{} {} {}\r\n{}\r\n\r\n{}", EXPECTED_METHOD,
-                                                                                   EXPECTED_API_ENDPOINT,
-                                                                                   protocol_n::Factory::create<std::string>(EXPECTED_PROTOCOL)->name(),
-                                                                                   buildHeaders(headersUMap),
-                                                                                   EXPECTED_BODY);
+                                                                                 EXPECTED_API_ENDPOINT,
+                                                                                 protocol_n::Factory::create<std::string>(EXPECTED_PROTOCOL)->name(),
+                                                                                 buildHeaders(headersUMap),
+                                                                                 EXPECTED_BODY);
 
     Request<std::string> request = Request<std::string>().set(EXPECTED_REQUEST);
 

@@ -74,10 +74,10 @@ TEST_F(ResponseTest, Set_CreatesValidHTTPResponse) {
     const std::unordered_map<std::string, std::string> headersUMap{ {"Transfer-encoding", "chunked"}, {"Content-Length", std::to_string(EXPECTED_BODY.size())}};
 
     const std::string EXPECTED_RESPONSE = std::format("{} {} {}\r\n{}\r\n\r\n{}", protocol_n::Factory::create<std::string>(EXPECTED_PROTOCOL)->name(),
-                                                                              to_underlying(EXPECTED_STATUS.code()),
-                                                                              EXPECTED_STATUS.reason(),
-                                                                              buildHeaders(headersUMap),
-                                                                              EXPECTED_BODY);
+                                                                                  to_underlying(EXPECTED_STATUS.code()),
+                                                                                  EXPECTED_STATUS.reason(),
+                                                                                  buildHeaders(headersUMap),
+                                                                                  EXPECTED_BODY);
 
     Response<std::string> response = Response<std::string>().set(EXPECTED_RESPONSE);
 
