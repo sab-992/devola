@@ -66,7 +66,7 @@ namespace network_n
                         headersUMap[name] = value;
                     }
 
-                    return { startLine, headersUMap };
+                    return { rTrim(startLine), headersUMap };
                 }
 
                 static std::unordered_map<std::string, std::string> parseStartLine(const std::string& startLine) {
