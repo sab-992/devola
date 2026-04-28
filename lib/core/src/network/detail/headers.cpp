@@ -35,7 +35,7 @@ bool network_n::Headers::operator==(const Headers& other) const {
 }
 
 std::string network_n::Headers::build() const {
-    return toString();
+    return m_parser->build(*this);
 }
 
 std::string network_n::Headers::get(const std::string& name) const {
@@ -76,5 +76,5 @@ headersUMap_t network_n::Headers::toMap() const {
 }
 
 std::string network_n::Headers::toString() const {
-    return m_parser->build(*this);
+    return build();
 }
