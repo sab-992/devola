@@ -36,11 +36,11 @@ public:
     inline static auto getBodyParserMock(bool alt) {
         const std::string mockedResult = getTestStringObject(alt);
         if constexpr (std::is_base_of_v<typename Object<nlohmann::json>::type, T>)
-            return std::make_unique<BodyParserMock<nlohmann::json>>(mockedResult);
+            return BodyParserMock<nlohmann::json>::get(mockedResult);
         if constexpr (std::is_base_of_v<typename Object<std::string>::type, T>)
-            return std::make_unique<BodyParserMock<std::string>>(mockedResult);
+            return BodyParserMock<std::string>::get(mockedResult);
         if constexpr (std::is_base_of_v<typename Object<xml_n::Document>::type, T>)
-            return std::make_unique<BodyParserMock<xml_n::Document>>(mockedResult);
+            return BodyParserMock<xml_n::Document>::get(mockedResult);
         throw Exception("Unhandled single templated type object");
     }
 

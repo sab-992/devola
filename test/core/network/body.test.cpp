@@ -97,11 +97,11 @@ TYPED_TEST(BodyTest, ToString_SerializeBodyCorrectly) {
 }
 
 TYPED_TEST(BodyTest, SetWithoutAcceptedType_ThrowsException) {
-    network_n::Body<int> body = network_n::Body<int>(std::make_unique<BodyParserMock<int>>(""));
+    network_n::Body<int> body(BodyParserMock<int>::get(""));
     EXPECT_THROW(body.set(400), Exception);
 }
 
 TYPED_TEST(BodyTest, ConvertWithoutAcceptedType_ThrowsException) {
-    network_n::Body<int> body = network_n::Body<int>(std::make_unique<BodyParserMock<int>>(""));
+    network_n::Body<int> body(BodyParserMock<int>::get(""));
     EXPECT_THROW(body.convert(), Exception);
 }
