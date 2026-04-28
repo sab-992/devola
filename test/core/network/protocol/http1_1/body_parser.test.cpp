@@ -13,11 +13,11 @@ template<typename T>
 class BodyParserTypedTest : public ::testing::Test {
 public:
     template <typename ContentType>
-    struct TemplatedBody {
+    struct TemplatedBodyParser {
         using type = network_n::protocol_n::http1_1_n::BodyParser<ContentType>;
     };
 
-    using Inner = InnerTypes<T, BodyParserTypedTest<T>::template TemplatedBody>;
+    using Inner = InnerTypes<T, BodyParserTypedTest<T>::template TemplatedBodyParser>;
 
 protected:
     auto getTestBody(bool alt=false) {
