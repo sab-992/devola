@@ -4,6 +4,7 @@
 #include <core/exception.h>
 #include <core/network/interface/headers_parser.h>
 #include <core/str/trim.h>
+#include <core/utility/compare.h>
 #include <format>
 #include <string>
 #include <sstream>

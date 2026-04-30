@@ -27,6 +27,8 @@ namespace network_n
 
                 ~HeadersParser() {}
 
+                bool operator==(const HeadersParser_i& other) const override { return dynamic_cast<const HeadersParser*>(&other) != nullptr; }
+
                 std::string build(const Headers& headers) const override {
                     std::string stringHeaders = headers.startLine();
 

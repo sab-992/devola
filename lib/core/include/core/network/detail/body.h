@@ -5,6 +5,7 @@
 #include <core/network/interface/body_parser.h>
 #include <core/str/interface/serializer.h>
 #include <core/str/serializer_factory.h>
+#include <core/utility/compare.h>
 #include <memory>
 #include <string>
 
@@ -40,11 +41,7 @@ namespace network_n
         }
 
         bool operator==(const Body<T>& other) const {
-            // IF UPDATED, ALSO UPDATE THE COMMENT IN http_n::Headers
-            // The parsers are not dereferenced before the comparison because they are singletons
-            // (will always be the same pointee if coming from the same parser class).
-            // Moreover, they are stateless, meaning that are the same from creation to destruction.
-            return m_parser     == m_parser and
+            return pointersEqual(m_parser, other.m_parser) and
                    m_stringBody == other.m_stringBody;
         }
 

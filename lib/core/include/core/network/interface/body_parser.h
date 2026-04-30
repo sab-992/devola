@@ -17,6 +17,8 @@ namespace network_n
         public:
             virtual ~BodyParser_i() = default;
 
+            virtual bool operator==(const BodyParser_i<T>& other) const = 0;
+
             virtual std::vector<std::string> build(const Headers& headers, const Body<T>& body) const = 0;
             virtual std::string parse(const Headers& headers, const std::string& stringBody) const = 0;
         };

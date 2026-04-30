@@ -25,12 +25,8 @@ network_n::Headers& network_n::Headers::operator=(Headers other)  {
 }
 
 bool network_n::Headers::operator==(const Headers& other) const {
-    // IF UPDATED, ALSO UPDATE THE COMMENT IN http_n::Body
-    // The parsers are not dereferenced before the comparison because they are singletons
-    // (will always be the same pointee if coming from the same parser class).
-    // Moreover, they are stateless, meaning that are the same from creation to destruction.
-    return m_headersMap == other.m_headersMap and
-           m_parser     == other.m_parser     and
+    return m_headersMap == other.m_headersMap      and
+           pointersEqual(m_parser, other.m_parser) and
            m_startLine  == m_startLine;
 }
 

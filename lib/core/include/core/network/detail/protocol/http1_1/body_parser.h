@@ -27,6 +27,8 @@ namespace network_n
 
                 ~BodyParser() {}
 
+                bool operator==(const BodyParser_i<T>& other) const override { return dynamic_cast<const BodyParser<T>*>(&other) != nullptr; }
+
                 std::vector<std::string> build(const Headers& headers, const Body<T>& body) const override {
                     if (not HeadersParser::isContentChunked(headers))
                         return { body.toString() };
