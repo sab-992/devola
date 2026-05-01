@@ -78,14 +78,13 @@ namespace network_n
         virtual bool hasChangedSinceLastBuild() const = 0;
         virtual void updateLastBuild() = 0;
 
-        std::unordered_map<std::string, std::string> processMessage(const std::string& message) {
-            // TODO: Add protocol detection and change it accordingly
-            const auto& [headers, body] = this->getProtocol()->parse(message);
+        startLineInformation_t processMessage(const std::string& message) {
+            const auto& [startLineInformation, headers, body] = this->getProtocol()->parse(message);
 
-            m_headers = std::make_shared<network_n::Headers>(headers);
-            m_body = std::make_shared<network_n::Body<T>>(body);
+            m_headers = std::make_shared<network_n::Headers>(std::move(headers));
+            m_body = std::make_shared<network_n::Body<T>>(std::move(body));
 
-            return this->getProtocol()->parseStartLine(m_headers->startLine());
+            return startLineInformation;
         }
 
         std::unique_ptr<protocol_n::Protocol_i<T>> getProtocol() const {

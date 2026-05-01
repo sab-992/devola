@@ -12,6 +12,7 @@
 
 
 using headersUMap_t = std::unordered_map<std::string, std::string>;
+using startLineInformation_t = std::unordered_map<std::string, std::string>;
 
 namespace network_n
 {

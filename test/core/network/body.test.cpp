@@ -44,7 +44,7 @@ TYPED_TEST(BodyTest, SetParserWithNullptr_ThrowsException) {
 }
 
 TYPED_TEST(BodyTest, Parse_ParsesStringBodyCorrectly) {
-    const network_n::Headers headers(HeadersParserMock::get(false));
+    const network_n::Headers headers(HeadersParserMock::get());
     const auto EXPECTED_BODY = this->getTestBody();
     const std::string EXPECTED_STRING_BODY = this->getTestStringBody();
 

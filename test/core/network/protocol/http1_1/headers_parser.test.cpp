@@ -96,7 +96,7 @@ TEST_F(HeadersParserTest, IsContentChunkedWithoutChunkedInHeaders_ReturnsFalse) 
     using network_n::protocol_n::http1_1_n::HeadersParser;
     const std::string EXPECTED_HEADER = "Transfer-Encoding";
     const std::string EXPECTED_HEADER_VALUE = "chunked";
-    Headers h(HeadersParserMock::get(false));
+    Headers h(HeadersParserMock::get());
 
     const bool result = HeadersParser::isContentChunked(h);
 
@@ -146,7 +146,7 @@ TEST_F(HeadersParserTest, ParseWithoutValidHeader_ThrowsException) {
     EXPECT_THROW(parser->parse(std::format("{}\r\n{}", EXPECTED_STARTLINE, EXPECTED_HEADER)), InvalidArgument);
 }
 
-TEST_F(HeadersParserTest, ParseStartlineWithRequestStartline_ReturnsResponseMessageInformationMap) {
+TEST_F(HeadersParserTest, ParseStartlineWithRequestStartline_ReturnsResponseStartLineInformationMap) {
     using network_n::protocol_n::http1_1_n::HeadersParser;
     const std::string REQUEST_STARTLINE = "GET /test HTTP/1.1";
     const std::unordered_map<std::string, std::string> EXPECTED_REQUEST_INFORMATION = { { "method", "GET" }, { "APIEndpoint", "/test" }, { "protocol", "HTTP/1.1" } };
@@ -156,7 +156,7 @@ TEST_F(HeadersParserTest, ParseStartlineWithRequestStartline_ReturnsResponseMess
     EXPECT_EQ(EXPECTED_REQUEST_INFORMATION, result);
 }
 
-TEST_F(HeadersParserTest, ParseStartlineWithResponseStartline_ReturnsResponseMessageInformationMap) {
+TEST_F(HeadersParserTest, ParseStartlineWithResponseStartline_ReturnsResponseStartLineInformationMap) {
     using network_n::protocol_n::http1_1_n::HeadersParser;
     const std::string RESPONSE_STARTLINE = "HTTP/1.1 200 OK";
     const std::unordered_map<std::string, std::string> EXPECTED_RESPONSE_INFORMATION = { { "protocol", "HTTP/1.1" }, { "code", "200" }, { "reason", "OK" } };

@@ -44,7 +44,7 @@ TYPED_TEST(BodyParserTypedTest, BuildWithoutChunkedHeader_ReturnsBody) {
     using namespace network_n;
 
     const size_t EXPECTED_CHUNKS_COUNT = 1;
-    Headers headers(HeadersParserMock::get(false));
+    Headers headers(HeadersParserMock::get());
     headers.parse("Hello world");
     auto bodyContent = this->getTestBody();
     auto parser = TypeParam::instance();
@@ -61,7 +61,7 @@ TYPED_TEST(BodyParserTypedTest, ParseWithoutChunkedHeader_ReturnsBody) {
     using namespace network_n;
 
     const std::string EXPECTED_PARSED_RESULT = this->getTestStringBody();
-    Headers headers(HeadersParserMock::get(false));
+    Headers headers(HeadersParserMock::get());
     headers.parse("Hello world");
     const std::string result = TypeParam::instance()->parse(headers, EXPECTED_PARSED_RESULT);
 

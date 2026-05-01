@@ -6,7 +6,7 @@
 #include <core/network/detail/protocol/http1_1/headers_parser.h>
 #include <core/network/detail/headers.h>
 #include <string>
-#include <utility>
+#include <tuple>
 
 
 namespace network_n
@@ -23,8 +23,7 @@ namespace network_n
             virtual uint16_t defaultPort() const = 0;
             virtual std::shared_ptr<HeadersParser_i> headersParser() const = 0;
             virtual std::string name() const = 0;
-            virtual std::pair<network_n::Headers, network_n::Body<T>> parse(const std::string& raw) const = 0;
-            virtual std::unordered_map<std::string, std::string> parseStartLine(const std::string& startLine) const = 0;
+            virtual std::tuple<startLineInformation_t, Headers, Body<T>> parse(const std::string& raw) const = 0;
             virtual std::string messageToString(const network_n::Headers& headers, const network_n::Body<T>& body) const = 0;
         };
     }

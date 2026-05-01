@@ -42,10 +42,10 @@ void network_n::Headers::parse(const std::string& stringHeaders) {
     if (stringHeaders.empty())
         return;
 
-    const auto& [startline, headersUMap] = m_parser->parse(stringHeaders);
+    const auto& [startLine, headersUMap] = m_parser->parse(stringHeaders);
 
     m_headersMap = headersUMap;
-    m_startLine = startline;
+    m_startLine = startLine;
 }
 
 std::string network_n::Headers::startLine() const {

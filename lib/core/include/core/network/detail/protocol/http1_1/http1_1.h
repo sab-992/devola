@@ -7,7 +7,7 @@
 #include <format>
 #include <memory>
 #include <string>
-#include <utility>
+#include <tuple>
 
 
 namespace network_n
@@ -38,17 +38,14 @@ namespace network_n
             std::string name() const override { return http1_1_n::PROTOCOL_VERSION_NAME; }
 
             // Used when receiving request/response.
-            std::pair<Headers, Body<T>> parse(const std::string& raw) const override {
+            std::tuple<startLineInformation_t, Headers, Body<T>> parse(const std::string& raw) const override {
                 const auto& [rawHeaders, rawBody] = splitMessage(raw);
                 Headers headers = Headers(headersParser());
                 headers.parse(rawHeaders);
                 Body<T> body = Body<T>(bodyParser());
                 body.parse(headers, rawBody);
-                return std::make_pair(headers, body);
+                return  { headersParser()->parseStartLine(headers.startLine()), headers, body };
             }
-
-            // Used when receiving request/response.
-            std::unordered_map<std::string, std::string> parseStartLine(const std::string& startLine) const override { return http1_1_n::HeadersParser::parseStartLine(startLine); }
 
             // Used for debugging + tests purposes.
             std::string messageToString(const Headers& headers, const Body<T>& body) const override {

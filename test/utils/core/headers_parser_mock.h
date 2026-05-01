@@ -8,11 +8,11 @@
 
 class HeadersParserMock : public network_n::protocol_n::HeadersParser_i {
 public:
-    ~HeadersParserMock() {}
-
-    static std::unique_ptr<HeadersParserMock> get(bool isChunked, bool isDownload=false) { 
-        return std::unique_ptr<HeadersParserMock>(new HeadersParserMock(isChunked, isDownload));
+    static std::shared_ptr<HeadersParserMock> get(bool isChunked=false, bool isDownload=false) { 
+        return std::shared_ptr<HeadersParserMock>(new HeadersParserMock(isChunked, isDownload));
     }
+
+    bool operator==(const network_n::protocol_n::HeadersParser_i& other) const override { return dynamic_cast<const HeadersParserMock*>(&other) != nullptr; }
 
     std::string build(const network_n::Headers& headers) const override {
         std::string stringHeaders = "HTTP/1.1 200 OK\r\n"
@@ -31,7 +31,7 @@ public:
     }
 
     std::pair<std::string, std::unordered_map<std::string, std::string>> parse(const std::string& stringHeaders) const override {
-        const std::string startline = "HTTP/1.1 200 OK";
+        const std::string startLine = "HTTP/1.1 200 OK";
         std::unordered_map<std::string, std::string> headersUMap = { {"Content-Type",   "application/json"},
                                                                      {"Content-Length", "256"},
                                                                      {"Connection",     "keep-alive"},
@@ -43,8 +43,10 @@ public:
         if (m_isDownload)
             headersUMap.insert({ "X-IsDownload", "true" });
 
-        return { startline , headersUMap };
+        return { startLine , headersUMap };
     }
+
+    startLineInformation_t parseStartLine(const std::string& startLine) const override { return { { "protocol", "HTTP/1.1" }, { "code", "200" }, { "reason", "OK" } }; }
 
 private:
     HeadersParserMock(bool isChunked, bool isDownload) : m_chunked(isChunked), m_isDownload(isDownload) {}

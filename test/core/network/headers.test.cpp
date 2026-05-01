@@ -9,7 +9,7 @@
 
 class HeadersTest : public ::testing::Test {
 protected:
-    std::unique_ptr<HeadersParserMock> getHeaderParserMockPtr() { return HeadersParserMock::get(false); }
+    std::shared_ptr<HeadersParserMock> getHeaderParserMockPtr() { return HeadersParserMock::get(); }
 };
 
 TEST_F(HeadersTest, ConstructorWithNullptr_ThrowsException) {
