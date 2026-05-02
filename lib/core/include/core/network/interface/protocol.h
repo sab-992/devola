@@ -18,13 +18,14 @@ namespace network_n
         public:
             virtual ~Protocol_i() = default;
 
-            virtual std::vector<std::string> packetize(const network_n::Headers& headers, const network_n::Body<T>& body) const = 0;
+            virtual std::string alpn() const = 0;
             virtual std::shared_ptr<BodyParser_i<T>> bodyParser() const = 0;
             virtual uint16_t defaultPort() const = 0;
             virtual std::shared_ptr<HeadersParser_i> headersParser() const = 0;
-            virtual std::string name() const = 0;
-            virtual std::tuple<startLineInformation_t, Headers, Body<T>> parse(const std::string& raw) const = 0;
             virtual std::string messageToString(const network_n::Headers& headers, const network_n::Body<T>& body) const = 0;
+            virtual std::string name() const = 0;
+            virtual std::vector<std::string> packetize(const network_n::Headers& headers, const network_n::Body<T>& body) const = 0;
+            virtual std::tuple<startLineInformation_t, Headers, Body<T>> parse(const std::string& raw) const = 0;
         };
     }
 }

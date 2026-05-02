@@ -21,13 +21,7 @@ namespace network_n
 
             friend std::unique_ptr<HTTP1_1> std::make_unique<HTTP1_1>();
 
-            // Used to send request/response.
-            std::vector<std::string> packetize(const Headers& headers, const Body<T>& body) const override {
-                std::vector<std::string> packets { headers.build() };
-                const std::vector<std::string>& bodyPackets = body.build(headers);
-                packets.insert(packets.end(), bodyPackets.begin(), bodyPackets.end());
-                return packets;
-            }
+            std::string alpn() const override { return "http/1.1"; };
 
             std::shared_ptr<BodyParser_i<T>> bodyParser() const override { return http1_1_n::BodyParser<T>::instance(); }
 
@@ -35,7 +29,20 @@ namespace network_n
 
             std::shared_ptr<HeadersParser_i> headersParser() const override { return http1_1_n::HeadersParser::instance(); }
 
+            // Used for debugging + tests purposes.
+            std::string messageToString(const Headers& headers, const Body<T>& body) const override {
+                return std::format("{}\r\n\r\n{}", headers.toString(), body.toString());
+            }
+
             std::string name() const override { return http1_1_n::PROTOCOL_VERSION_NAME; }
+
+            // Used to send request/response.
+            std::vector<std::string> packetize(const Headers& headers, const Body<T>& body) const override {
+                std::vector<std::string> packets { headers.build() };
+                const std::vector<std::string>& bodyPackets = body.build(headers);
+                packets.insert(packets.end(), bodyPackets.begin(), bodyPackets.end());
+                return packets;
+            }
 
             // Used when receiving request/response.
             std::tuple<startLineInformation_t, Headers, Body<T>> parse(const std::string& raw) const override {
@@ -45,11 +52,6 @@ namespace network_n
                 Body<T> body = Body<T>(bodyParser());
                 body.parse(headers, rawBody);
                 return  { headersParser()->parseStartLine(headers.startLine()), headers, body };
-            }
-
-            // Used for debugging + tests purposes.
-            std::string messageToString(const Headers& headers, const Body<T>& body) const override {
-                return std::format("{}\r\n\r\n{}", headers.toString(), body.toString());
             }
 
         private:
