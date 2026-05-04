@@ -11,6 +11,7 @@
 #include <utility>
 
 
+// TODO: Rework to include SSL/TLS.
 // TODO: Find a way to detect protocol using SSL/TLS and change it in the HTTP message.
 namespace http_n
 {
