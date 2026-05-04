@@ -4,6 +4,7 @@
 #include <core/network/interface/headers_parser.h>
 #include <core/str/split.h>
 #include <core/str/trim.h>
+#include <core/utility/interface/singleton.h>
 #include <format>
 #include <string>
 #include <utility>
@@ -17,8 +18,10 @@ namespace network_n
         {
             const std::string PROTOCOL_VERSION_NAME = "HTTP/1.1";
 
-            class HeadersParser : public HeadersParser_i {
+            class HeadersParser : public HeadersParser_i, public Singleton<HeadersParser> {
             public:
+                HeadersParser(const Singleton<HeadersParser>::Creator_s&) {};
+
                 HeadersParser(const HeadersParser&) = delete;
                 HeadersParser& operator=(const HeadersParser&) = delete;
 
@@ -39,11 +42,6 @@ namespace network_n
                 }
 
                 static bool isContentChunked(const Headers& headers) { return headers.get(TRANSFER_ENCODING) == CHUNKED; }
-
-                static std::shared_ptr<HeadersParser> instance() {
-                    std::call_once(m_headerParserInitFlag, &HeadersParser::createInstance);
-                    return m_instance;
-                }
 
                 std::pair<std::string, headersUMap_t> parse(const std::string& stringHeaders) const override {
                     std::istringstream input(trim(stringHeaders));
@@ -85,15 +83,9 @@ namespace network_n
                 }
 
             private:
-                HeadersParser() {};
 
                 inline static const std::string CHUNKED = "chunked";
                 inline static const std::string TRANSFER_ENCODING = "Transfer-Encoding";
-
-                inline static std::once_flag m_headerParserInitFlag;
-                inline static std::shared_ptr<HeadersParser> m_instance;
-
-                static void createInstance() { m_instance = std::shared_ptr<HeadersParser>(new HeadersParser()); }
 
                 std::vector<std::string> splitStartLine(const std::string& startLine) const {
                     std::string startLineCopy(startLine);

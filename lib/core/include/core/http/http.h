@@ -4,6 +4,7 @@
 #include <core/exception.h>
 #include <core/http/request.h>
 #include <core/http/response.h>
+#include <core/utility/interface/singleton.h>
 #include <memory>
 #include <mutex>
 #include <nlohmann/json.hpp>
@@ -15,12 +16,14 @@
 // TODO: Find a way to detect protocol using SSL/TLS and change it in the HTTP message.
 namespace http_n
 {
-    class Http {
+    class Http : public Singleton<Http> {
     private:
         class Asynchronous;
         class Synchronous;
 
     public:
+        Http(const Singleton<Http>::Creator_s&) {}
+
         Http(const Http&) = delete;
         Http& operator=(const Http&) = delete;
 
@@ -66,14 +69,7 @@ namespace http_n
         std::unique_ptr<Http::Asynchronous> async = std::make_unique<Http::Asynchronous>();
         std::unique_ptr<Http::Synchronous> sync = std::make_unique<Http::Synchronous>();
 
-        static std::shared_ptr<Http> instance() {
-            std::call_once(m_httpInitFlag, &Http::createInstance);
-            return m_instance;
-        }
-
     private:
-        Http() {}
-
         class Asynchronous {
         public:
             Asynchronous() = default;
@@ -125,11 +121,7 @@ namespace http_n
             Response<T> receive(asio::ip::tcp::socket&& socket) const { return std::move(receive<T>(socket)); }
         };
 
-        inline static std::once_flag m_httpInitFlag;
-        inline static std::shared_ptr<Http> m_instance;
         inline static asio::io_context m_ioContext;
-
-        static void createInstance() { m_instance = std::shared_ptr<Http>(new Http()); }
     };
 
     template<>

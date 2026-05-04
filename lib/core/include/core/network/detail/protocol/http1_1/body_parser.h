@@ -6,6 +6,7 @@
 #include <core/network/network.h>
 #include <core/str/hex.h>
 #include <core/str/trim.h>
+#include <core/utility/interface/singleton.h>
 #include <mutex>
 #include <string>
 
@@ -17,8 +18,10 @@ namespace network_n
         namespace http1_1_n
         {
             template<typename T>
-            class BodyParser : public BodyParser_i<T> {
+            class BodyParser : public BodyParser_i<T>, public Singleton<BodyParser<T>> {
             public:
+                BodyParser(const Singleton<BodyParser<T>>::Creator_s&) {};
+
                 BodyParser(const BodyParser&) = delete;
                 BodyParser& operator=(const BodyParser&) = delete;
 
@@ -36,11 +39,6 @@ namespace network_n
                     return chunk(headers, body.toString());
                 }
 
-                static std::shared_ptr<BodyParser> instance() {
-                    std::call_once(m_bodyParserInitFlag, &BodyParser::createInstance);
-                    return m_instance;
-                }
-
                 std::string parse(const Headers& headers, const std::string& stringBody) const override {
                     if (not HeadersParser::isContentChunked(headers))
                         return stringBody;
@@ -49,13 +47,6 @@ namespace network_n
                 }
 
             private:
-                BodyParser() {};
-
-                inline static std::once_flag m_bodyParserInitFlag;
-                inline static std::shared_ptr<BodyParser> m_instance;
-
-                static void createInstance() { m_instance = std::shared_ptr<BodyParser>(new BodyParser()); }
-                
                 std::vector<std::string> chunk(const Headers& headers, const std::string& mergedBody) const {
                     const size_t chunkSize = headers.get("X-IsDownload") == "true" ? DOWNLOAD_BUFFER_MAX_SIZE : REQUEST_BUFFER_MAX_SIZE;
 
