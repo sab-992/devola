@@ -65,7 +65,7 @@ namespace http_n
     protected:
         void finalize() override {
             validateMembers();
-            this->setStartLine(std::format("{} {}", this->getProtocol()->name(), m_status.toString()));
+            this->setStartLine(std::format("{} {}", this->protocol()->name(), m_status.toString()));
         }
 
         bool hasChangedSinceLastBuild() const override {
@@ -93,7 +93,6 @@ namespace http_n
 
         void validateMembers() const {
             if (m_status.code() == network_n::Code::NONE)  throw InvalidArgument("Cannot be empty", "Status");
-            if (this->m_protocol == network_n::protocol_n::Protocol::NONE) throw InvalidArgument("Cannot be NONE", "Protocol");
         }
     };
 }

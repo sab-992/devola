@@ -4,6 +4,7 @@
 #include <core/network/detail/protocol/http1_1/body_parser.h>
 #include <core/network/detail/protocol/http1_1/headers_parser.h>
 #include <core/network/interface/protocol.h>
+#include <core/utility/interface/singleton.h>
 #include <format>
 #include <memory>
 #include <string>
@@ -15,11 +16,9 @@ namespace network_n
     namespace protocol_n
     {
         template<typename T>
-        class HTTP1_1 : public Protocol_i<T> {
+        class Http1_1 : public Protocol_i<T>, public Singleton<Http1_1<T>> {
         public:
-            HTTP1_1() {}
-
-            friend std::unique_ptr<HTTP1_1> std::make_unique<HTTP1_1>();
+            Http1_1(const Singleton<Http1_1<T>>::Creator_s&) {}
 
             std::string alpn() const override { return "http/1.1"; };
 

@@ -14,7 +14,7 @@ class ResponseTest : public ::testing::Test {};
 
 TEST_F(ResponseTest, Constructor_HasDefaultProtocol) {
     Response<xml_n::Document> response = Response<xml_n::Document>();
-    EXPECT_EQ(http_n::DEFAULT_PROTOCOL, response.protocol());
+    EXPECT_EQ(network_n::protocol_n::Factory::create<xml_n::Document>(http_n::DEFAULT_PROTOCOL), response.protocol());
 }
 
 TEST_F(ResponseTest, SetStatus_CreatesStatusWithCorrectCode) {
@@ -54,16 +54,6 @@ TEST_F(ResponseTest, BuildWithoutStatus_ThrowsException) {
     EXPECT_THROW(response.build(), InvalidArgument);
 }
 
-TEST_F(ResponseTest, BuildWithoutProtocol_ThrowsException) {
-    using network_n::Code;
-    using network_n::protocol_n::Protocol; 
-    Response<std::string> response = Response<std::string>().setStatus(Code::CREATED);
-
-    response.setProtocol(Protocol::NONE);
-
-    EXPECT_THROW(response.build(), InvalidArgument);
-}
-
 TEST_F(ResponseTest, Set_CreatesValidHTTPResponse) {
     using namespace http_n;
     using namespace network_n;
@@ -84,7 +74,7 @@ TEST_F(ResponseTest, Set_CreatesValidHTTPResponse) {
     EXPECT_NO_THROW(response.build());
 
     EXPECT_EQ(EXPECTED_STATUS, response.status());
-    EXPECT_EQ(EXPECTED_PROTOCOL, response.protocol());
+    EXPECT_EQ(protocol_n::Factory::create<std::string>(EXPECTED_PROTOCOL), response.protocol());
     EXPECT_EQ(headersUMap.size(), response.headersMap().size());
     for (const auto& [header, expected_value]: headersUMap)
         EXPECT_EQ(expected_value, response.header(header));

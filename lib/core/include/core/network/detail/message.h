@@ -36,12 +36,10 @@ namespace network_n
 
         std::vector<std::string> prepareTransmissionPackets() const {
             assert(not hasChangedSinceLastBuild() && "network_n::Message::build() needs to be called after making changes to the object");
-            return getProtocol()->packetize(*this->m_headers, *this->m_body);
+            return protocol()->packetize(*this->m_headers, *this->m_body);
         }
 
-        protocol_n::Protocol protocol() {
-            return m_protocol;
-        }
+        std::shared_ptr<protocol_n::Protocol_i<T>> protocol() const { return m_protocol; }
 
         Derived& setBody(const T& body) {
             m_body->set(body);
@@ -54,41 +52,46 @@ namespace network_n
         }
 
         Derived& setProtocol(protocol_n::Protocol protocol) {
+            return setProtocol(protocol_n::Factory::create<T>(protocol));
+        }
+
+        Derived& setProtocol(std::shared_ptr<protocol_n::Protocol_i<T>> protocol) {
+            if (protocol == nullptr)
+                throw InvalidArgument("No protocol given", "Message protocol");
+
             m_protocol = protocol;
             return DERIVED_REF_STATIC_CAST;
         }
 
-        std::string toString() const override { return getProtocol()->messageToString(*m_headers, *m_body); }
+        std::string toString() const override { return protocol()->messageToString(*m_headers, *m_body); }
 
     protected:
-        Message(protocol_n::Protocol protocol) : m_protocol(protocol) {
-            m_headers = std::make_shared<Headers>(getProtocol()->headersParser());
-            m_body = std::make_shared<Body<T>>(getProtocol()->bodyParser());
+        Message(protocol_n::Protocol protocol) {
+            setProtocol(protocol);
+
+            m_headers = std::make_shared<Headers>(this->protocol()->headersParser());
+            m_body = std::make_shared<Body<T>>(this->protocol()->bodyParser());
         }
 
         Message(const Message&) = default;
         Message& operator=(const Message<Derived, T>&) = default;
         Message(Message&&) = default;
 
-        std::shared_ptr<Body<T>> m_body = nullptr;
-        std::shared_ptr<Headers> m_headers = nullptr;
-        protocol_n::Protocol m_protocol;
+        std::shared_ptr<Body<T>> m_body;
+        std::shared_ptr<Headers> m_headers;
+        std::shared_ptr<protocol_n::Protocol_i<T>> m_protocol;
 
         virtual void finalize() = 0;
         virtual bool hasChangedSinceLastBuild() const = 0;
         virtual void updateLastBuild() = 0;
 
         startLineInformation_t processMessage(const std::string& message) {
-            const auto& [startLineInformation, headers, body] = this->getProtocol()->parse(message);
+            const auto& [startLineInformation, headers, body] = protocol()->parse(message);
 
             m_headers = std::make_shared<network_n::Headers>(std::move(headers));
             m_body = std::make_shared<network_n::Body<T>>(std::move(body));
 
             return startLineInformation;
-        }
-
-        std::unique_ptr<protocol_n::Protocol_i<T>> getProtocol() const {
-            return protocol_n::Factory::create<T>(m_protocol);
         }
 
         void setStartLine(const std::string& startLine) { m_headers->setStartLine(startLine); }

@@ -15,11 +15,13 @@ namespace network_n
         class Factory {
         public:
             template <typename T>
-            static std::unique_ptr<Protocol_i<T>> create(Protocol protocol) {
+            static std::shared_ptr<Protocol_i<T>> create(const Protocol& protocol) {
                 switch (protocol)
                 {
                 case Protocol::HTTP1_1:
-                    return std::make_unique<HTTP1_1<T>>();
+                    return Http1_1<T>::instance();
+                case Protocol::NONE:
+                    throw InvalidArgument("Cannot be NONE", "Protocol");
                 default:
                     throw Exception(std::format("Protocol #{}: Not Handled", to_underlying(protocol)));
                 }

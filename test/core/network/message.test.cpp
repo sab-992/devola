@@ -91,12 +91,18 @@ TYPED_TEST_P(MessageTest, SetHeader_OverwritesExistingHeader) {
     EXPECT_EQ(EXPECTED_HEADER_VALUE, message.header(EXPECTED_HEADER_NAME));
 }
 
+TYPED_TEST_P(MessageTest, SetProtocolWithoutProtocol_ThrowsException) {
+    TypeParam message;
+    EXPECT_THROW(message.setProtocol(network_n::protocol_n::Protocol::NONE), InvalidArgument);
+}
+
 REGISTER_TYPED_TEST_SUITE_P(MessageTest, SetBody_AddsNewBody,
                                          SetBody_OverwritesExistingBody,
                                          Body_IsConvertedCorrectly,
                                          SetHeader_AddsNewHeader,
                                          SetHeader_IncrementsSize,
-                                         SetHeader_OverwritesExistingHeader);
+                                         SetHeader_OverwritesExistingHeader,
+                                         SetProtocolWithoutProtocol_ThrowsException);
 
 INSTANTIATE_TYPED_TEST_SUITE_P(HTTPRequestTestSuite, MessageTest, networkInnerTypes_t<http_n::Request>);
 INSTANTIATE_TYPED_TEST_SUITE_P(HTTPResponseTestSuite, MessageTest, networkInnerTypes_t<http_n::Response>);

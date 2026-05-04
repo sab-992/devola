@@ -16,7 +16,7 @@ class RequestTest : public ::testing::Test {};
 
 TEST_F(RequestTest, Constructor_HasDefaultProtocol) {
     Request<xml_n::Document> request = Request<xml_n::Document>();
-    EXPECT_EQ(http_n::DEFAULT_PROTOCOL, request.protocol());
+    EXPECT_EQ(network_n::protocol_n::Factory::create<xml_n::Document>(http_n::DEFAULT_PROTOCOL), request.protocol());
 }
 
 TEST_F(RequestTest, BuildWithURL_AddsHostHeader) {
@@ -55,7 +55,7 @@ TEST_F(RequestTest, BuildWithMethodAndAPIEndpoint_CreatesValidStartline) {
 
     EXPECT_EQ(EXPECTED_METHOD, request.method());
     EXPECT_EQ(EXPECTED_API_ENDPOINT, request.APIEndpoint());
-    EXPECT_EQ(EXPECTED_PROTOCOL, request.protocol());
+    EXPECT_EQ(Factory::create<json>(EXPECTED_PROTOCOL), request.protocol());
     EXPECT_EQ(EXPECTED_STARTLINE, startLine);
 }
 
@@ -74,17 +74,6 @@ TEST_F(RequestTest, BuildWithoutMethod_ThrowsException) {
 TEST_F(RequestTest, BuildWithoutURL_ThrowsException) {
     Request<std::string> request = Request<std::string>().setMethod("GET")
                                                          .setAPIEndpoint("/");
-    EXPECT_THROW(request.build(), InvalidArgument);
-}
-
-TEST_F(RequestTest, BuildWithoutProtocol_ThrowsException) {
-    using network_n::protocol_n::Protocol; 
-    Request<std::string> request = Request<std::string>().setMethod("GET")
-                                                         .setAPIEndpoint("/")
-                                                         .setURL("www.test.com");
-
-    request.setProtocol(Protocol::NONE);
-
     EXPECT_THROW(request.build(), InvalidArgument);
 }
 
@@ -115,7 +104,7 @@ TEST_F(RequestTest, Set_CreatesValidHTTPRequest) {
 
     EXPECT_EQ(EXPECTED_METHOD, request.method());
     EXPECT_EQ(EXPECTED_API_ENDPOINT, request.APIEndpoint());
-    EXPECT_EQ(EXPECTED_PROTOCOL, request.protocol());
+    EXPECT_EQ(protocol_n::Factory::create<std::string>(EXPECTED_PROTOCOL), request.protocol());
     EXPECT_EQ(EXPECTED_URL, request.url());
     EXPECT_EQ(EXPECTED_PORT, request.port());
     EXPECT_EQ(headersUMap.size(), request.headersMap().size());

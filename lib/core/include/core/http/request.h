@@ -18,7 +18,7 @@ namespace http_n
     template <typename T>
     class Request : public network_n::Message<Request<T>, T> {
     public:
-        Request() : network_n::Message<Request<T>, T>(http_n::DEFAULT_PROTOCOL), m_port(this->getProtocol()->defaultPort()) { }
+        Request() : network_n::Message<Request<T>, T>(http_n::DEFAULT_PROTOCOL), m_port(this->protocol()->defaultPort()) { }
 
         Request(const Request<T>& other) : network_n::Message<Request<T>, T>(other) {
             m_APIEndpoint = other.m_APIEndpoint;
@@ -90,7 +90,7 @@ namespace http_n
     protected:
         void finalize() override {
             validateMembers();
-            this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->getProtocol()->name()));
+            this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->protocol()->name()));
             this->m_headers->setHeader("Host", std::format("{}:{}", m_URL, m_port));
         }
 
@@ -141,13 +141,10 @@ namespace http_n
         }
 
         void validateMembers() const {
-            using network_n::protocol_n::Protocol;
-
             if (m_APIEndpoint.empty()) throw InvalidArgument("Cannot be empty", "API endpoint");
             if (m_method.empty()) throw InvalidArgument("Cannot be empty", "HTTP method");
             if (m_port == 0) throw InvalidArgument("Cannot be '0'", "Host port");
             if (m_URL.empty()) throw InvalidArgument("Cannot be empty", "Host URL");
-            if (this->m_protocol == Protocol::NONE) throw InvalidArgument("Cannot be NONE", "Protocol");
         }
     };
 }

@@ -3,6 +3,7 @@
 #include <core/http/request.h>
 #include <core/network/detail/body.h>
 #include <core/network/detail/headers.h>
+#include <core/network/interface/protocol.h>
 #include <core/network/network.h>
 #include <core/utility/interface/memento.h>
 #include <core/utility/compare.h>
@@ -60,7 +61,7 @@ namespace http_n
             std::shared_ptr<network_n::Headers> m_headers = nullptr;
             std::string m_method;
             uint16_t m_port;
-            network_n::protocol_n::Protocol m_protocol;
+            std::shared_ptr<network_n::protocol_n::Protocol_i<T>> m_protocol;
             std::string m_URL;
         };
     }
