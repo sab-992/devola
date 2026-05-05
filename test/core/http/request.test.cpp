@@ -87,10 +87,10 @@ TEST_F(RequestTest, Set_CreatesValidHTTPRequest) {
     const std::string EXPECTED_URL = "www.test2.com";
     const uint16_t EXPECTED_PORT = 5503;
     const std::string EXPECTED_BODY = "Hello world!";
-    const std::unordered_map<std::string, std::string> headersUMap{ {"Host",              std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT) },
-                                                                    {"Transfer-encoding", "chunked" },
-                                                                    {"Accept",            "application/xml" },
-                                                                    {"Content-Length",    std::to_string(EXPECTED_BODY.size()) } };
+    const std::unordered_map<std::string, std::string> headersUMap{ { "Host",              std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT) },
+                                                                    { "Transfer-encoding", "chunked" },
+                                                                    { "Accept",            "application/xml" },
+                                                                    { "Content-Length",    std::to_string(EXPECTED_BODY.size()) } };
 
     const std::string EXPECTED_REQUEST = std::format("{} {} {}\r\n{}\r\n\r\n{}", EXPECTED_METHOD,
                                                                                  EXPECTED_API_ENDPOINT,

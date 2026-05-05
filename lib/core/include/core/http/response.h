@@ -87,8 +87,8 @@ namespace http_n
         friend class memento_n::Response<T>;
 
         void parse(const std::string& stringResponse) {
-            const std::unordered_map<std::string, std::string> responseInfo = this->processMessage(stringResponse);
-            m_status = network_n::Status_s(static_cast<network_n::Code>(std::stoi(responseInfo.at("code"))));
+            const startLineInformation_t responseInfo = this->processMessage(stringResponse);
+            m_status = network_n::Status_s(static_cast<network_n::Code>(std::stoi(responseInfo[1])));
         }
 
         void validateMembers() const {

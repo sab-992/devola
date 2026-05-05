@@ -149,9 +149,9 @@ TEST_F(HeadersParserTest, ParseWithoutValidHeader_ThrowsException) {
 TEST_F(HeadersParserTest, ParseStartlineWithRequestStartline_ReturnsResponseStartLineInformationMap) {
     using network_n::protocol_n::http1_1_n::HeadersParser;
     const std::string REQUEST_STARTLINE = "GET /test HTTP/1.1";
-    const std::unordered_map<std::string, std::string> EXPECTED_REQUEST_INFORMATION = { { "method", "GET" }, { "APIEndpoint", "/test" }, { "protocol", "HTTP/1.1" } };
+    const startLineInformation_t EXPECTED_REQUEST_INFORMATION = { "GET", "/test", "HTTP/1.1" };
 
-    const std::unordered_map<std::string, std::string> result = HeadersParser::instance()->parseStartLine(REQUEST_STARTLINE);
+    const startLineInformation_t result = HeadersParser::instance()->parseStartLine(REQUEST_STARTLINE);
 
     EXPECT_EQ(EXPECTED_REQUEST_INFORMATION, result);
 }
@@ -159,9 +159,9 @@ TEST_F(HeadersParserTest, ParseStartlineWithRequestStartline_ReturnsResponseStar
 TEST_F(HeadersParserTest, ParseStartlineWithResponseStartline_ReturnsResponseStartLineInformationMap) {
     using network_n::protocol_n::http1_1_n::HeadersParser;
     const std::string RESPONSE_STARTLINE = "HTTP/1.1 200 OK";
-    const std::unordered_map<std::string, std::string> EXPECTED_RESPONSE_INFORMATION = { { "protocol", "HTTP/1.1" }, { "code", "200" }, { "reason", "OK" } };
+    const startLineInformation_t EXPECTED_RESPONSE_INFORMATION = { "HTTP/1.1", "200", "OK" };
 
-    const std::unordered_map<std::string, std::string> result = HeadersParser::instance()->parseStartLine(RESPONSE_STARTLINE);
+    const startLineInformation_t result = HeadersParser::instance()->parseStartLine(RESPONSE_STARTLINE);
 
     EXPECT_EQ(EXPECTED_RESPONSE_INFORMATION, result);
 }

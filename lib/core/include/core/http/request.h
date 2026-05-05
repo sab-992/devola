@@ -116,10 +116,10 @@ namespace http_n
         friend class memento_n::Request<T>;
 
         void parse(const std::string& stringRequest) {
-            const std::unordered_map<std::string, std::string> requestInfo = this->processMessage(stringRequest);
+            const startLineInformation_t requestInfo = this->processMessage(stringRequest);
 
-            m_APIEndpoint = requestInfo.at("APIEndpoint");
-            m_method = requestInfo.at("method");
+            m_method = requestInfo[0];
+            m_APIEndpoint = requestInfo[1];
 
             const std::string host = this->header("Host");
 
