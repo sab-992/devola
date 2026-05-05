@@ -1,19 +1,12 @@
 #pragma once
 
+#include <core/utility/interface/singleton.h>
 #include <database/interface/database.h>
 #include <memory>
 
 
-// TODO: Make it singleton
-class PostgreSQL : public Database_i {
+class PostgreSQL : public Database_i, public Singleton<PostgreSQL> {
 public:
+    PostgreSQL(const Singleton<PostgreSQL>&);
     ~PostgreSQL() override;
-
-    static std::shared_ptr<Database_i> get();
-
-    bool connect() override;
-protected:
-    inline static std::shared_ptr<Database_i> m_instance;
-
-    PostgreSQL();
 };

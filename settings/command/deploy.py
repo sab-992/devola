@@ -11,7 +11,6 @@ from settings.command.detail.service_updater import ServiceUpdater
 from settings.command.detail.options import PROD_OPTION, OUTPUT_OPTION, MANUAL_OPTION
 
 
-# TODO: Fix deploy and docker files
 class Deploy(Command, ServiceUpdater):
     def __init__(self):
         Command.__init__(self)
