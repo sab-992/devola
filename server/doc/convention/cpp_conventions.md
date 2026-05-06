@@ -7,7 +7,6 @@
 
 ### Classes
 - **Concrete/Template classes**: `PascalCase`
-- **Components**: Same as concrete class with suffix `_c`
 - **Interfaces/Abstract classes**: Same as concrete class with suffix `_i`
 
 ### Variables
