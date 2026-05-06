@@ -1,3 +1,4 @@
+import os
 import platform
 from argparse import Namespace
 
@@ -20,7 +21,15 @@ class Test(Command, Directory, ServiceUpdater):
         return "test"
 
     def command_explicit(self, args: Namespace) -> list[list[str]]:
-        command: list[str] = [self.uniformizePath("test/Debug/tests.exe" if platform.system() == "Windows" else "./test/tests")]
+        if platform.system() == "Windows":
+            path = "test/Debug/tests.exe"
+            # Fallback case (might be GNU compiler on Windows)
+            if not os.path.isfile(path):
+                path = "test/tests.exe"
+        else:
+            path = "./test/tests"
+
+        command: list[str] = [self.uniformizePath(path)]
 
         if args.regex:
             command.append(f"--gtest_filter=\"{args.regex}\"")

@@ -1,3 +1,4 @@
+import os
 import platform
 from argparse import Namespace
 
@@ -17,11 +18,19 @@ class Launch(Command, Directory):
         return "launch"
 
     def command_explicit(self, args: Namespace) -> list[list[str]]:
-        return [[self.uniformizePath("server/Debug/dev_server.exe" if platform.system() == "Windows" else "./server/dev_server")]]
-    
+        if platform.system() == "Windows":
+            path = "server/Debug/dev_server.exe"
+            # Fallback case (might be GNU compiler on Windows)
+            if not os.path.isfile(path):
+                path = "server/dev_server.exe"
+        else:
+            path = "./server/dev_server"
+
+        return [[self.uniformizePath(path)]]
+
     def details(self) -> str:
         return "Starts the application."
-    
+
     def setup(self, args: Namespace) -> str:
         self.set_working_directory(self.build_directory())
 

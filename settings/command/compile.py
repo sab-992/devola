@@ -6,6 +6,7 @@ from settings.command.test import Test
 from settings.command.detail.command import Command
 from settings.command.detail.config import POSTGRE_INSTALLATION_PATH
 from settings.command.detail.directory import Directory
+from settings.command.detail.file_system import FileSystem
 from settings.command.detail.options import LAUNCH_OPTION, MANUAL_OPTION
 from settings.command.detail.service_updater import ServiceUpdater
 
@@ -14,6 +15,7 @@ class CMake(Command, Directory, ServiceUpdater):
     def __init__(self):
         Command.__init__(self)
         ServiceUpdater.__init__(self)
+        self.__fs = FileSystem()
 
     def arguments(self) -> dict[str, dict]:
         return { "manual": MANUAL_OPTION }
@@ -27,7 +29,7 @@ class CMake(Command, Directory, ServiceUpdater):
         if platform.system() == "Windows":
             cmake_command.append(f"-DPostgreSQL_ROOT={POSTGRE_INSTALLATION_PATH}")
 
-        return [cmake_command + [f"-DCMAKE_BUILD_TYPE={build_type}", ".."]]
+        return [cmake_command + [f"-DCMAKE_BUILD_TYPE={build_type}", ".."] + self.__fs.extra_build_options()]
 
     def details(self) -> str:
         return "Use the CMakeLists.txt to prepare the environment for the application.\n\n" \
@@ -47,7 +49,7 @@ class Make(Command, Directory, ServiceUpdater):
         ServiceUpdater.__init__(self)
 
     def arguments(self) -> dict[str, dict]:
-        return { "launch": LAUNCH_OPTION, "manual": MANUAL_OPTION } 
+        return { "launch": LAUNCH_OPTION, "manual": MANUAL_OPTION }
 
     def command(self) -> str:
         return "make"
@@ -77,7 +79,7 @@ class MakeAll(Command, Directory, ServiceUpdater):
         ServiceUpdater.__init__(self)
 
     def arguments(self) -> dict[str, dict]:
-        return { "launch": LAUNCH_OPTION, "manual": MANUAL_OPTION } 
+        return { "launch": LAUNCH_OPTION, "manual": MANUAL_OPTION }
 
     def command(self) -> str:
         return "makeall"
@@ -101,7 +103,7 @@ class MakeTest(Command, Directory, ServiceUpdater):
         ServiceUpdater.__init__(self)
 
     def arguments(self) -> dict[str, dict]:
-        return { "launch": LAUNCH_OPTION, "manual": MANUAL_OPTION } 
+        return { "launch": LAUNCH_OPTION, "manual": MANUAL_OPTION }
 
     def command(self) -> str:
         return "maketest"
