@@ -95,7 +95,7 @@ namespace http_n
             template<typename T>
             asio::ip::tcp::socket send(const Request<T>& request) const {
                 using namespace asio;
-                
+
                 ip::tcp::resolver resolver(m_ioContext);
                 ip::tcp::socket socket(m_ioContext);
                 connect(socket, resolver.resolve(request.url(), std::to_string(request.port())));

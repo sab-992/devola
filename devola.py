@@ -4,7 +4,7 @@ from settings.command import add_service, compile, deploy, install, launch, shut
 from settings.command.detail.command import Command
 from settings.command.detail.options import OptionsType
 
-COMMANDS: dict[str, Command] = { "cmake"       : compile.CMake(), 
+COMMANDS: dict[str, Command] = { "cmake"       : compile.CMake(),
                                  "make"        : compile.Make(),
                                  "makeall"     : compile.MakeAll(),
                                  "maketest"    : compile.MakeTest(),
@@ -31,7 +31,7 @@ def main():
 
             added_arguments.add(argument)
         program_help += f" {command_name} |"
-        
+
     program_help = program_help[:-1] + ">"
     parser.add_argument("command", help=program_help)
 
