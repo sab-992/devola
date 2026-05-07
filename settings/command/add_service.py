@@ -1,7 +1,7 @@
 from argparse import Namespace
 
+from settings.config import SERVICES_PATH
 from settings.command.detail.command import Command
-from settings.command.detail.config import SERVICES_PATH
 from settings.command.detail.file_system import FileSystem
 from settings.command.detail.log import log, Color
 from settings.command.detail.options import SERVICE_NAME_OPTION, SERVICE_PATH_OPTION, MANUAL_OPTION
@@ -21,10 +21,10 @@ class AddService(Command):
     def command_explicit(self, args: Namespace) -> list[list[str]]:
         self.__add_service(args.name, args.service_path)
         return [] # We return no command.
-    
+
     def details(self) -> str:
         return "Add a service and all the necessary start files."
-    
+
     def setup(self, args: Namespace) -> str:
         pass
 

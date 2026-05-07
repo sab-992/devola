@@ -2,9 +2,9 @@ import json
 import os
 from pathlib import Path
 
-from .config import EXTRA_BUILD_OPTIONS_FILENAME, DATABASE_LIB_NAME, ROOT_FOLDER_NAME
 from .errors import InvalidInputError
 from .log import log, Color
+from settings.config import EXTRA_BUILD_OPTIONS_FILENAME, DATABASE_LIB_NAME, ROOT_FOLDER_NAME
 
 
 class FileSystem():

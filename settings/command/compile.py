@@ -1,10 +1,10 @@
 import platform
 from argparse import Namespace
 
+from settings.config import POSTGRE_INSTALLATION_PATH
 from settings.command.launch import Launch
 from settings.command.test import Test
 from settings.command.detail.command import Command
-from settings.command.detail.config import POSTGRE_INSTALLATION_PATH
 from settings.command.detail.directory import Directory
 from settings.command.detail.file_system import FileSystem
 from settings.command.detail.options import LAUNCH_OPTION, MANUAL_OPTION
@@ -34,7 +34,7 @@ class CMake(Command, Directory, ServiceUpdater):
     def details(self) -> str:
         return "Use the CMakeLists.txt to prepare the environment for the application.\n\n" \
                "For windows, make sure you have postgres installed, and that the path in " \
-               "\"settings/helper/config.py\" for the POSTGRE_INSTALLATION_PATH matches your current installation path."
+               "\"settings/config.py\" for the POSTGRE_INSTALLATION_PATH matches your current installation path."
 
     def setup(self, args: Namespace) -> str:
         self.update_services()

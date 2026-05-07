@@ -1,8 +1,9 @@
 import os
 
-from .config import SERVICES_PATH
 from .log import log, Color
 from .file_system import FileSystem
+from settings.config import SERVICES_PATH
+
 
 class ServiceUpdater():
     def __init__(self):
@@ -20,7 +21,7 @@ class ServiceUpdater():
 
             self.__fs.write(folder_path=service_path, file_name="CMakeLists.txt", content=self.__fs.cmake(os.path.basename(service_path), libraries))
             self.__fs.write(folder_path=f"{service_path}/docker", file_name=f"docker-compose.{service_name}.yml", content=self.__fs.docker_compose(service_name=service_name, env_file_dir=f"{service_path}/settings", libraries=libraries))
-        
+
         log(f"Updated all services.", False, Color.GREEN)
 
     def get_services(self) -> list[str]:

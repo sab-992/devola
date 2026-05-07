@@ -2,9 +2,9 @@ import os
 import subprocess
 from argparse import Namespace
 
-from settings.command.detail import config
+from settings import config
+from settings.config import SERVICES_PATH
 from settings.command.detail.command import Command
-from settings.command.detail.config import SERVICES_PATH
 from settings.command.detail.file_system import FileSystem
 from settings.command.detail.log import log, Color
 from settings.command.detail.service_updater import ServiceUpdater
