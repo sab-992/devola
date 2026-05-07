@@ -17,3 +17,8 @@ PGADMIN_DOCKER_SERVICE_NAME   = "pgadmin"
 # Windows only:
 POSTGRE_INSTALLATION_PATH = "C:/Program Files/PostgreSQL/17"
 USE_VCPKG = False
+
+# Linux only:
+UPDATE_PACKAGE_REPOS_COMMAND = "sudo pacman -Syu"
+INSTALL_COMMAND = "sudo pacman -S"
+LIBPQXX_PACKAGE = "postgresql"
