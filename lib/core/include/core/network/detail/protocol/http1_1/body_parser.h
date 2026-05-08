@@ -7,14 +7,13 @@
 #include <core/str/hex.h>
 #include <core/str/trim.h>
 #include <core/utility/interface/singleton.h>
-#include <mutex>
 #include <string>
 
 
 namespace network_n
 {
     namespace protocol_n
-    {    
+    {
         namespace http1_1_n
         {
             template<typename T>
