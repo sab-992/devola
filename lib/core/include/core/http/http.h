@@ -6,7 +6,6 @@
 #include <core/http/response.h>
 #include <core/utility/interface/singleton.h>
 #include <memory>
-#include <mutex>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <utility>
