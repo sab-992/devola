@@ -43,7 +43,7 @@ namespace http_n
             parse(stringResponse);
             return *this;
         }
-        
+
         Response<T>& setStatus(network_n::Code code) {
             m_status = code;
             return *this;
