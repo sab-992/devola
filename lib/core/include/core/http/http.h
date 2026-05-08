@@ -62,7 +62,7 @@ namespace http_n
             inline static const std::string CLOSE_CONNECTION = "close";
             inline static const std::string USER_AGENT = "Devola/1.0";
 
-            static std::string accept() { throw Exception("Not Implemented"); }
+            inline static std::string accept() { throw Exception("Not Implemented"); }
             static Request<T> create() { return std::move(Request<T>().setProtocol(network_n::protocol_n::Protocol::HTTP1_1)); }
         };
 
@@ -125,8 +125,8 @@ namespace http_n
     };
 
     template<>
-    std::string Http::RequestPresets<nlohmann::json>::accept() { return "application/json"; }
+    inline std::string Http::RequestPresets<nlohmann::json>::accept() { return "application/json"; }
 
     template<>
-    std::string Http::RequestPresets<std::string>::accept() { return "text/html"; }
+    inline std::string Http::RequestPresets<std::string>::accept() { return "text/html"; }
 }
