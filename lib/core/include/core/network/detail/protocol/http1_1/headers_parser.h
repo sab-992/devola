@@ -4,7 +4,7 @@
 #include <core/network/interface/headers_parser.h>
 #include <core/str/split.h>
 #include <core/str/trim.h>
-#include <core/utility/interface/singleton.h>
+#include <core/utility/singleton.h>
 #include <format>
 #include <string>
 #include <utility>
@@ -13,7 +13,7 @@
 namespace network_n
 {
     namespace protocol_n
-    {    
+    {
         namespace http1_1_n
         {
             const std::string PROTOCOL_VERSION_NAME = "HTTP/1.1";

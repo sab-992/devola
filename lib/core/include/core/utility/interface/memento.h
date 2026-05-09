@@ -1,8 +1,6 @@
 #pragma once
 
 
-#include <memory>
-
 template <typename Derived>
 class Memento_i {
 public:

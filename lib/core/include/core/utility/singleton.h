@@ -3,6 +3,7 @@
 #include <memory>
 
 
+// Trick to have only one allocation while creating shared_ptr and still have a private constructor for Derived class.
 template <typename Derived>
 class Singleton {
 protected:

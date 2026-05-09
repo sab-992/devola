@@ -4,7 +4,7 @@
 #include <core/network/detail/protocol/http1_1/body_parser.h>
 #include <core/network/detail/protocol/http1_1/headers_parser.h>
 #include <core/network/interface/protocol.h>
-#include <core/utility/interface/singleton.h>
+#include <core/utility/singleton.h>
 #include <format>
 #include <memory>
 #include <string>

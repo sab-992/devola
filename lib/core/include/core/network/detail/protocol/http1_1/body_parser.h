@@ -6,7 +6,7 @@
 #include <core/network/network.h>
 #include <core/str/hex.h>
 #include <core/str/trim.h>
-#include <core/utility/interface/singleton.h>
+#include <core/utility/singleton.h>
 #include <string>
 
 
