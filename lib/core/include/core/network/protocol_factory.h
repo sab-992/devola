@@ -5,7 +5,6 @@
 #include <core/network/interface/protocol.h>
 #include <core/network/network.h>
 #include <memory>
-#include <stdexcept>
 
 
 namespace network_n
