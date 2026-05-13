@@ -4,7 +4,7 @@
 #include <core/exception.h>
 #include <core/http/request.h>
 #include <core/http/response.h>
-#include <core/utility/interface/singleton.h>
+#include <core/utility/singleton.h>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <string>
