@@ -2,13 +2,14 @@
 
 #include <core/network/detail/headers.h>
 #include <core/network/interface/headers_parser.h>
+#include <core/network/network.h>
 #include <string>
 #include <utility>
 
 
 class HeadersParserMock : public network_n::protocol_n::HeadersParser_i {
 public:
-    static std::shared_ptr<HeadersParserMock> get(bool isChunked=false, bool isDownload=false) { 
+    static std::shared_ptr<HeadersParserMock> get(bool isChunked=false, bool isDownload=false) {
         return std::shared_ptr<HeadersParserMock>(new HeadersParserMock(isChunked, isDownload));
     }
 

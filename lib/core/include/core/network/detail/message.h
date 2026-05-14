@@ -86,12 +86,14 @@ namespace network_n
         virtual void updateLastBuild() = 0;
 
         startLineInformation_t processMessage(const std::string& message) {
-            const auto& [startLineInformation, headers, body] = protocol()->parse(message);
+            auto [startLineInformation, headers, body] = protocol()->parse(message);
+            set(std::move(headers), std::move(body));
+            return startLineInformation;
+        }
 
+        void set(network_n::Headers&& headers, network_n::Body<T>&& body) {
             m_headers = std::make_shared<network_n::Headers>(std::move(headers));
             m_body = std::make_shared<network_n::Body<T>>(std::move(body));
-
-            return startLineInformation;
         }
 
         void setStartLine(const std::string& startLine) { m_headers->setStartLine(startLine); }

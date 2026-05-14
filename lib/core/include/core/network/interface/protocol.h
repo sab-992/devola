@@ -4,7 +4,9 @@
 #include <core/network/detail/headers.h>
 #include <core/network/detail/protocol/http1_1/body_parser.h>
 #include <core/network/detail/protocol/http1_1/headers_parser.h>
+#include <core/network/interface/networking.h>
 #include <core/network/detail/headers.h>
+#include <core/network/network.h>
 #include <string>
 #include <tuple>
 
@@ -14,7 +16,7 @@ namespace network_n
     namespace protocol_n
     {
         template <typename T>
-        class Protocol_i {
+        class Protocol_i : public Networking_i<T> {
         public:
             virtual ~Protocol_i() = default;
 
@@ -26,6 +28,7 @@ namespace network_n
             virtual std::string name() const = 0;
             virtual std::vector<std::string> packetize(const network_n::Headers& headers, const network_n::Body<T>& body) const = 0;
             virtual std::tuple<startLineInformation_t, Headers, Body<T>> parse(const std::string& raw) const = 0;
+            virtual std::tuple<startLineInformation_t, Headers, Body<T>> parse(const std::string& rawHeaders, const std::string& rawBody) const = 0;
         };
     }
 }

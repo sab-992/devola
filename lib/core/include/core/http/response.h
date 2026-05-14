@@ -19,11 +19,29 @@ namespace http_n
     template <typename T>
     class Response : public network_n::Message<Response<T>, T> {
     public:
-        Response() : network_n::Message<Response<T>, T>(http_n::DEFAULT_PROTOCOL) {}
+        Response()
+        : network_n::Message<Response<T>, T>(http_n::DEFAULT_PROTOCOL) {}
+
+        Response(network_n::Headers headers, network_n::Body<T> body)
+        : network_n::Message<Response<T>, T>(http_n::DEFAULT_PROTOCOL) {
+            network_n::Message<Response<T>, T>::set(std::move(headers), std::move(body));
+
+            const startLineInformation_t& responseInfo = this->protocol()->headersParser()->parseStartLine(this->m_headers->startLine());
+            initFromStartLineInformation(responseInfo);
+        }
+
+        Response(network_n::Headers&& headers, network_n::Body<T>&& body)
+        : network_n::Message<Response<T>, T>(http_n::DEFAULT_PROTOCOL) {
+            network_n::Message<Response<T>, T>::set(headers, body);
+
+            const startLineInformation_t& responseInfo = this->protocol()->headersParser()->parseStartLine(this->m_headers->startLine());
+            initFromStartLineInformation(responseInfo);
+        }
 
         Response(const Response<T>& other) : network_n::Message<Response<T>, T>(other) {
             if (other.m_lastBuild)
                 m_lastBuild = std::make_unique<memento_n::Response<T>>(*other.m_lastBuild);
+
             m_status = other.m_status;
         }
 
@@ -69,9 +87,9 @@ namespace http_n
         }
 
         bool hasChangedSinceLastBuild() const override {
-            // If it is nullptr, build() was never called.
-            // Since this is not a static function, we are guaranteed that an object has been created,
-            // therefore the object has changed.
+            // If m_lastBuild is nullptr, build() was never called and since this
+            // is not a static function, we are guaranteed that an object
+            // has been created, therefore the response has changed.
             if (not m_lastBuild)
                 return true;
 
@@ -86,9 +104,13 @@ namespace http_n
 
         friend class memento_n::Response<T>;
 
+        void initFromStartLineInformation(const startLineInformation_t& information) {
+            m_status = network_n::Status_s(static_cast<network_n::Code>(std::stoi(information[1])));
+        }
+
         void parse(const std::string& stringResponse) {
-            const startLineInformation_t responseInfo = this->processMessage(stringResponse);
-            m_status = network_n::Status_s(static_cast<network_n::Code>(std::stoi(responseInfo[1])));
+            const startLineInformation_t& responseInfo = this->processMessage(stringResponse);
+            initFromStartLineInformation(responseInfo);
         }
 
         void validateMembers() const {

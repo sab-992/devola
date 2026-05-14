@@ -4,6 +4,7 @@
 #include <core/http/detail/memento/request.h>
 #include <core/http/detail/settings.h>
 #include <core/network/detail/message.h>
+#include <core/network/network.h>
 #include <memory>
 
 
@@ -18,12 +19,30 @@ namespace http_n
     template <typename T>
     class Request : public network_n::Message<Request<T>, T> {
     public:
-        Request() : network_n::Message<Request<T>, T>(http_n::DEFAULT_PROTOCOL), m_port(this->protocol()->defaultPort()) { }
+        Request()
+        : network_n::Message<Request<T>, T>(http_n::DEFAULT_PROTOCOL), m_port(this->protocol()->defaultPort()) {}
+
+        Request(network_n::Headers headers, network_n::Body<T> body)
+        : network_n::Message<Request<T>, T>(http_n::DEFAULT_PROTOCOL), m_port(this->protocol()->defaultPort()) {
+            network_n::Message<Request<T>, T>::set(std::move(headers), std::move(body));
+
+            const startLineInformation_t& requestInfo = this->protocol()->headersParser()->parseStartLine(this->m_headers->startLine());
+            initFromStartLineInformation(requestInfo);
+        }
+
+        Request(network_n::Headers&& headers, network_n::Body<T>&& body)
+        : network_n::Message<Request<T>, T>(http_n::DEFAULT_PROTOCOL), m_port(this->protocol()->defaultPort()) {
+            network_n::Message<Request<T>, T>::set(headers, body);
+
+            const startLineInformation_t& requestInfo = this->protocol()->headersParser()->parseStartLine(this->m_headers->startLine());
+            initFromStartLineInformation(requestInfo);
+        }
 
         Request(const Request<T>& other) : network_n::Message<Request<T>, T>(other) {
-            m_APIEndpoint = other.m_APIEndpoint;
             if (other.m_lastBuild)
                 m_lastBuild = std::make_unique<memento_n::Request<T>>(*other.m_lastBuild);
+
+            m_APIEndpoint = other.m_APIEndpoint;
             m_method = other.m_method;
             m_port = other.m_port;
             m_URL = other.m_URL;
@@ -95,9 +114,9 @@ namespace http_n
         }
 
         bool hasChangedSinceLastBuild() const override {
-            // If it is nullptr, build() was never called.
-            // Since this is not a static function, we are guaranteed that an object has been created,
-            // therefore the object has changed.
+            // If m_lastBuild is nullptr, build() was never called and since this
+            // is not a static function, we are guaranteed that an object
+            // has been created, therefore the request has changed.
             if (not m_lastBuild)
                 return true;
 
@@ -115,20 +134,21 @@ namespace http_n
 
         friend class memento_n::Request<T>;
 
-        void parse(const std::string& stringRequest) {
-            const startLineInformation_t requestInfo = this->processMessage(stringRequest);
-
-            m_method = requestInfo[0];
-            m_APIEndpoint = requestInfo[1];
+        void initFromStartLineInformation(const startLineInformation_t& information) {
+            setMethod(information[0]);
+            setAPIEndpoint(information[1]);
 
             const std::string host = this->header("Host");
-
-            if (host.empty())
-                return;
-
+            if (host.empty()) return;
             const auto& [url, port] = parseHostURL(host);
-            m_URL = url;
-            m_port = port;
+
+            setURL(url);
+            setPort(port);
+        }
+
+        void parse(const std::string& stringRequest) {
+            const startLineInformation_t& requestInfo = this->processMessage(stringRequest);
+            initFromStartLineInformation(requestInfo);
         }
 
         std::pair<std::string, uint16_t> parseHostURL(const std::string& host) {

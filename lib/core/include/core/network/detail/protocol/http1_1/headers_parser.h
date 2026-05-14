@@ -2,6 +2,7 @@
 
 #include <core/exception.h>
 #include <core/network/interface/headers_parser.h>
+#include <core/network/network.h>
 #include <core/str/split.h>
 #include <core/str/trim.h>
 #include <core/utility/singleton.h>
