@@ -59,7 +59,7 @@ namespace network_n
                 return  { headersParser()->parseStartLine(headers.startLine()), headers, body };
             }
 
-            std::string async_receive() const override { return ""; }
+            std::string async_receive() const override { /* TODO */ return ""; }
 
             std::pair<Headers, Body<T>> receive(asio::ip::tcp::socket& socket) const override {
                 using namespace network_n;
@@ -90,8 +90,8 @@ namespace network_n
                 return { std::move(headers), std::move(body) };
             }
 
-            void async_send() const override {}
-            void send() const override {}
+            void async_send() const override { /* TODO */ }
+            void send() const override { /* TODO */ }
 
         private:
             const uint16_t DEFAULT_PORT = 80;
