@@ -49,7 +49,7 @@ namespace network_n
 
         T convert() const { return serializer()->deserialize(m_stringBody); }
 
-        void parse(const Headers& headers, const std::string& stringBody) {
+        void parse(const Headers& headers, std::string_view stringBody) {
             if (not stringBody.empty())
                 m_stringBody = m_parser->parse(headers, stringBody);
         }

@@ -85,7 +85,7 @@ namespace network_n
         virtual bool hasChangedSinceLastBuild() const = 0;
         virtual void updateLastBuild() = 0;
 
-        startLineInformation_t processMessage(const std::string& message) {
+        startLineInformation_t processMessage(std::string_view message) {
             auto [startLineInformation, headers, body] = protocol()->parse(message);
             set(std::move(headers), std::move(body));
             return startLineInformation;

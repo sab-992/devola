@@ -44,7 +44,7 @@ namespace network_n
 
                 static bool isContentChunked(const Headers& headers) { return headers.get(TRANSFER_ENCODING) == CHUNKED; }
 
-                std::pair<std::string, headersUMap_t> parse(const std::string& stringHeaders) const override {
+                std::pair<std::string, headersUMap_t> parse(std::string_view stringHeaders) const override {
                     std::istringstream input(trim(stringHeaders));
                     std::string line;
 

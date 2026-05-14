@@ -10,7 +10,8 @@
 #include <string>
 
 
-// Rename function
+// TODO: Rename function
+// TODO: Change for a std::string_view
 template<typename T, typename... Args>
 void trace(std::function<std::unique_ptr<DisplayColor_i>()> displayColorFunction, T firstArg, Args... otherArgs) {
     const std::string currentWord = Converter<T>::toString(firstArg);
@@ -22,7 +23,7 @@ void trace(std::function<std::unique_ptr<DisplayColor_i>()> displayColorFunction
     std::cout << displayColorFunction()->color() << currentWord;
     if constexpr (sizeof...(Args) > 0)
         trace<Args...>(displayColorFunction, otherArgs...);
-    else 
+    else
         trace<Args...>(displayColorFunction, otherArgs..., "");
 }
 

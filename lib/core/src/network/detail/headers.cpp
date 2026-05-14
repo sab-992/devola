@@ -38,7 +38,7 @@ std::string network_n::Headers::get(const std::string& name) const {
     return m_headersMap.contains(name) ? m_headersMap.at(name) : "";
 }
 
-void network_n::Headers::parse(const std::string& stringHeaders) {
+void network_n::Headers::parse(std::string_view stringHeaders) {
     if (stringHeaders.empty())
         return;
 

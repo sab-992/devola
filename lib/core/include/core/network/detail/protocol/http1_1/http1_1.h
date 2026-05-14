@@ -46,12 +46,12 @@ namespace network_n
             }
 
             // Used when receiving request/response.
-            std::tuple<startLineInformation_t, Headers, Body<T>> parse(const std::string& raw) const override {
+            std::tuple<startLineInformation_t, Headers, Body<T>> parse(std::string_view raw) const override {
                 const auto& [rawHeaders, rawBody] = splitMessage(raw);
                 return parse(rawHeaders, rawBody);
             }
 
-            std::tuple<startLineInformation_t, Headers, Body<T>> parse(const std::string& rawHeaders, const std::string& rawBody) const override {
+            std::tuple<startLineInformation_t, Headers, Body<T>> parse(std::string_view rawHeaders, std::string_view rawBody) const override {
                 Headers headers = Headers(headersParser());
                 headers.parse(rawHeaders);
                 Body<T> body = Body<T>(bodyParser());
@@ -96,7 +96,8 @@ namespace network_n
         private:
             const uint16_t DEFAULT_PORT = 80;
 
-            std::pair<std::string, std::string> splitMessage(const std::string& message) const {
+            // CAUTION: DO NOT call this function with a r-value.
+            std::pair<std::string_view, std::string_view> splitMessage(std::string_view message) const {
                 const std::string HEADER_END_TOKEN = "\r\n\r\n";
                 const size_t END_OF_HEADERS = message.find(HEADER_END_TOKEN);
 
@@ -104,7 +105,8 @@ namespace network_n
                     throw InvalidArgument("Ill-formed", "HTTP message");
 
                 // Returned pair = { Headers (string), Body (string) }.
-                return std::make_pair(message.substr(0, END_OF_HEADERS), message.substr(END_OF_HEADERS  + HEADER_END_TOKEN.size()));
+                return std::make_pair(message.substr(0, END_OF_HEADERS),
+                                      message.substr(END_OF_HEADERS  + HEADER_END_TOKEN.size()));
             }
         };
     }

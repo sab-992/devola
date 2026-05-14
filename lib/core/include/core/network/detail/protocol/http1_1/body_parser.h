@@ -38,9 +38,9 @@ namespace network_n
                     return chunk(headers, body.toString());
                 }
 
-                std::string parse(const Headers& headers, const std::string& stringBody) const override {
+                std::string parse(const Headers& headers, std::string_view stringBody) const override {
                     if (not HeadersParser::isContentChunked(headers))
-                        return stringBody;
+                        return std::string(stringBody);
 
                     return merge(stringBody);
                 }
@@ -87,7 +87,7 @@ namespace network_n
                     throw InvalidArgument("Couldn't extract body chunk sizes", "HTTP message body");
                 }
 
-                std::string merge(const std::string& rawBody) const {
+                std::string merge(std::string_view rawBody) const {
                     std::string chunkedBody = lTrim(rawBody);
 
                     if (chunkedBody.empty())

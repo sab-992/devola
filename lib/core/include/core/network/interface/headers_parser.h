@@ -20,7 +20,7 @@ namespace network_n
 
             virtual std::string build(const network_n::Headers& headers) const = 0;
             virtual startLineInformation_t parseStartLine(const std::string& startLine) const = 0;
-            virtual std::pair<std::string, std::unordered_map<std::string, std::string>> parse(const std::string& stringHeaders) const = 0;
+            virtual std::pair<std::string, std::unordered_map<std::string, std::string>> parse(std::string_view stringHeaders) const = 0;
         };
     }
 }

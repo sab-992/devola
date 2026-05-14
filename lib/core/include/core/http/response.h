@@ -57,7 +57,7 @@ namespace http_n
             return *this;
         }
 
-        Response<T>& set(const std::string& stringResponse) {
+        Response<T>& set(std::string_view stringResponse) {
             parse(stringResponse);
             return *this;
         }
@@ -108,7 +108,7 @@ namespace http_n
             m_status = network_n::Status_s(static_cast<network_n::Code>(std::stoi(information[1])));
         }
 
-        void parse(const std::string& stringResponse) {
+        void parse(std::string_view stringResponse) {
             const startLineInformation_t& responseInfo = this->processMessage(stringResponse);
             initFromStartLineInformation(responseInfo);
         }

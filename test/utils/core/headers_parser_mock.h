@@ -31,7 +31,7 @@ public:
         return stringHeaders;
     }
 
-    std::pair<std::string, std::unordered_map<std::string, std::string>> parse(const std::string& stringHeaders) const override {
+    std::pair<std::string, std::unordered_map<std::string, std::string>> parse(std::string_view stringHeaders) const override {
         const std::string startLine = "HTTP/1.1 200 OK";
         std::unordered_map<std::string, std::string> headersUMap = { {"Content-Type",   "application/json"},
                                                                      {"Content-Length", "256"},
