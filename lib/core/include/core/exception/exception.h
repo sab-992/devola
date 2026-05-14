@@ -4,7 +4,6 @@
 #include <core/network/network.h>
 #include <exception>
 #include <string>
-#include <sstream>
 
 
 class Exception : public std::exception, public StringConvertible {
