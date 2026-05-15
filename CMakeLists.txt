@@ -9,7 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/lib")
 
-if(CMAKE_BUILD_TYPE STREQUAL "test")
+if(ENABLE_TESTS)
     add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/test")
 else()
     add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/server")

@@ -23,13 +23,13 @@ class CMake(Command, Directory, ServiceUpdater):
     def command(self) -> str:
         return "cmake"
 
-    def command_explicit(self, args: Namespace, build_type: str="debug") -> list[list[str]]:
+    def command_explicit(self, args: Namespace, extra_args: list[str]=[]) -> list[list[str]]:
         cmake_command = ["cmake"]
 
         if platform.system() == "Windows":
             cmake_command.append(f"-DPostgreSQL_ROOT={POSTGRE_INSTALLATION_PATH}")
 
-        return [cmake_command + [f"-DCMAKE_BUILD_TYPE={build_type}", ".."] + self.__fs.extra_build_options()]
+        return [cmake_command + [f"-DCMAKE_BUILD_TYPE=Debug", *extra_args, ".."] + self.__fs.extra_build_options()]
 
     def details(self) -> str:
         return "Use the CMakeLists.txt to prepare the environment for the application.\n\n" \
@@ -54,11 +54,11 @@ class Make(Command, Directory, ServiceUpdater):
     def command(self) -> str:
         return "make"
 
-    def command_explicit(self, args: Namespace, build_type="debug") -> list[list[str]]:
+    def command_explicit(self, args: Namespace, build_type: bool=True) -> list[list[str]]:
         make_command = ["cmake", "--build", "."]
 
         commands = [make_command]
-        if args.launch and build_type == "debug":
+        if args.launch and build_type:
             commands += Launch().command_explicit(args)
 
         return commands
@@ -109,7 +109,7 @@ class MakeTest(Command, Directory, ServiceUpdater):
         return "maketest"
 
     def command_explicit(self, args: Namespace) -> list[list[str]]:
-        commands = CMake().command_explicit(args, "test") + Make().command_explicit(args, "test")
+        commands = CMake().command_explicit(args, ["-DENABLE_TESTS=ON"]) + Make().command_explicit(args, False)
 
         if args.launch:
             commands += Test().command_explicit(args)
