@@ -33,7 +33,7 @@ namespace network_n
             m_parser = other.m_parser;
         }
 
-        ~Body() {}
+        ~Body() = default;
 
         Body<T>& operator=(Body<T> other) {
             swap(*this, other);

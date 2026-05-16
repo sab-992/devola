@@ -50,7 +50,7 @@ namespace http_n
             m_status = std::move(other.m_status);
         }
 
-        ~Response() {}
+        ~Response() = default;
 
         Response<T>& operator=(Response<T> other) {
             swap(*this, other);

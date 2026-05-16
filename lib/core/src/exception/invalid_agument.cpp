@@ -6,5 +6,3 @@ InvalidArgument::InvalidArgument(const std::string& message, const std::string& 
     if (not argument.empty())
         this->m_message = std::format("{} - {}", argument, this->m_message);
 }
-
-InvalidArgument::~InvalidArgument() {}

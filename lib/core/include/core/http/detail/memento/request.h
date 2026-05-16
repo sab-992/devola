@@ -40,7 +40,7 @@ namespace http_n
                 m_URL = other.m_URL;
             }
 
-            ~Request() {}
+            ~Request() = default;
 
             friend std::unique_ptr<Request> std::make_unique<Request>();
 

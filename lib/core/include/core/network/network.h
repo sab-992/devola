@@ -67,7 +67,7 @@ namespace network_n
             m_reason = std::move(other.m_reason);
         }
 
-        ~Status_s() {}
+        ~Status_s() = default;
 
         Status_s& operator=(Status_s other) {
             swap(*this, other);

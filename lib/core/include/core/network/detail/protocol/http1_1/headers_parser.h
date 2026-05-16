@@ -29,7 +29,7 @@ namespace network_n
                 HeadersParser(HeadersParser&&) = delete;
                 HeadersParser& operator=(HeadersParser&&) = delete;
 
-                ~HeadersParser() {}
+                ~HeadersParser() = default;
 
                 bool operator==(const HeadersParser_i& other) const override { return dynamic_cast<const HeadersParser*>(&other) != nullptr; }
 

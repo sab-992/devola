@@ -2,4 +2,3 @@
 
 
 PostgreSQL::PostgreSQL(const Singleton<PostgreSQL>&) {};
-PostgreSQL::~PostgreSQL() {};

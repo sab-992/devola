@@ -7,5 +7,5 @@
 class PostgreSQL : public Database_i, public Singleton<PostgreSQL> {
 public:
     PostgreSQL(const Singleton<PostgreSQL>&);
-    ~PostgreSQL() override;
+    ~PostgreSQL() = default;
 };

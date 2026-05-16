@@ -31,7 +31,7 @@ namespace http_n
                 m_status = other.m_status;
             }
 
-            ~Response() {}
+            ~Response() = default;
 
             friend std::unique_ptr<Response> std::make_unique<Response>();
 

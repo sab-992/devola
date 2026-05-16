@@ -27,7 +27,7 @@ namespace network_n
                 BodyParser(BodyParser&&) = delete;
                 BodyParser& operator=(BodyParser&&) = delete;
 
-                ~BodyParser() {}
+                ~BodyParser() = default;
 
                 bool operator==(const BodyParser_i<T>& other) const override { return dynamic_cast<const BodyParser<T>*>(&other) != nullptr; }
 

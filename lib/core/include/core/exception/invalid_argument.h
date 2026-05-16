@@ -6,5 +6,5 @@
 class InvalidArgument : public Exception {
 public:
     InvalidArgument(const std::string& message, const std::string& argument="");
-    ~InvalidArgument();
+    ~InvalidArgument() = default;
 };

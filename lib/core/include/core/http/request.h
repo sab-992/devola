@@ -56,7 +56,7 @@ namespace http_n
             m_URL = std::move(other.m_URL);
         }
 
-        ~Request() {}
+        ~Request() = default;
 
         Request<T>& operator=(Request<T> other) {
             swap(*this, other);

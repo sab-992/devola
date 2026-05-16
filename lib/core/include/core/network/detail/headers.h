@@ -19,7 +19,7 @@ namespace network_n
         Headers(const Headers& other);
         Headers(Headers&& other);
 
-        ~Headers();
+        ~Headers() = default;
 
         Headers& operator=(Headers other);
 

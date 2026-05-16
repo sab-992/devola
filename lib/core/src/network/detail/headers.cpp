@@ -17,8 +17,6 @@ network_n::Headers::Headers(Headers&& other) {
     m_startLine = std::move(other.m_startLine);
 }
 
-network_n::Headers::~Headers() {}
-
 network_n::Headers& network_n::Headers::operator=(Headers other)  {
     swap(*this, other);
     return *this;

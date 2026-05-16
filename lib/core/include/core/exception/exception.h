@@ -9,7 +9,7 @@
 class Exception : public std::exception, public StringConvertible {
 public:
     Exception(const std::string& message);
-    ~Exception();
+    ~Exception() = default;
 
     const char* what() const noexcept override;
     constexpr const char* type() const noexcept { return m_type; };

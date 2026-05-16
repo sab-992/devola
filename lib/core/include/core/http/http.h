@@ -23,7 +23,7 @@ namespace http_n
         Http(Http&&) = delete;
         Http& operator=(Http&&) = delete;
 
-        ~Http() {}
+        ~Http() = default;
 
         template<typename T>
         Response<T> async_receive(asio::ip::tcp::socket& socket) const { return Response<T>(); }
