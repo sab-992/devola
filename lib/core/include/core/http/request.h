@@ -158,8 +158,6 @@ namespace http_n
             if (trim(host).empty() or separatorIndex == std::string::npos)
                 return { "", m_port };
 
-            const std::string strHost(host);
-
             return { host.substr(0, separatorIndex), static_cast<uint16_t>(std::stoi(std::string(host.substr(separatorIndex + 1)))) };
         }
 
