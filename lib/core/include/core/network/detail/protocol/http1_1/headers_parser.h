@@ -45,9 +45,10 @@ namespace network_n
                 static bool isContentChunked(const Headers& headers) { return headers.get(TRANSFER_ENCODING) == CHUNKED; }
 
                 std::pair<std::string, headersUMap_t> parse(std::string_view stringHeaders) const override {
-                    std::istringstream input(trim(stringHeaders));
-                    std::string line;
+                    std::stringstream input;
+                    input << trim(stringHeaders);
 
+                    std::string line;
                     std::getline(input, line);
 
                     validateStartline(splitStartLine(line));
@@ -56,6 +57,10 @@ namespace network_n
                     headersUMap_t headersUMap;
                     for (; std::getline(input, line);) {
                         line = trim(line);
+
+                        if (line.empty())
+                            continue;
+
                         size_t separator = line.find(":");
 
                         if (separator == std::string::npos)

@@ -46,14 +46,14 @@ namespace network_n
                 }
 
             private:
-                std::vector<std::string> chunk(const Headers& headers, const std::string& mergedBody) const {
+                std::vector<std::string> chunk(const Headers& headers, std::string_view mergedBody) const {
                     const size_t chunkSize = headers.get("X-IsDownload") == "true" ? DOWNLOAD_BUFFER_MAX_SIZE : REQUEST_BUFFER_MAX_SIZE;
 
                     std::vector<std::string> chunks;
                     size_t startOfChunk = 0;
 
                     auto addCurrentChunk = [&mergedBody, &chunks, &startOfChunk](size_t count=std::string::npos){
-                        const std::string chunk = mergedBody.substr(startOfChunk, count);
+                        std::string_view chunk = mergedBody.substr(startOfChunk, count);
                         chunks.emplace_back(std::format("{}\r\n{}", toHex(chunk.size()), chunk));
                     };
 
@@ -67,20 +67,14 @@ namespace network_n
                     return chunks;
                 }
 
-                std::string extractChunk(std::string& message, size_t size) const {
-                    const std::string chunk = message.substr(0, size);
-                    message = message.substr(size + 1);
-                    return chunk;
-                }
-
-                size_t getChunkSize(const std::string& message) const {
+                size_t getChunkSize(std::string_view message, size_t startPos=0) const {
                     const std::string nextLine = "\r\n";
                     const size_t EOL = message.find(nextLine);
 
                     if (EOL == std::string::npos)
                         throw InvalidArgument("One or more chunk sizes are ill-formed", "HTTP message body");
 
-                    const std::string hexLength = message.substr(0, EOL);
+                    const std::string_view hexLength = message.substr(startPos, EOL);
 
                     try { return fromHex(hexLength); } catch (...) {}
 
@@ -88,7 +82,7 @@ namespace network_n
                 }
 
                 std::string merge(std::string_view rawBody) const {
-                    std::string chunkedBody = lTrim(rawBody);
+                    std::string_view chunkedBody = lTrim(rawBody);
 
                     if (chunkedBody.empty())
                         return "";
@@ -97,7 +91,9 @@ namespace network_n
                     std::string merged;
                     while (const size_t nextChunkSize = BodyParser<T>::getChunkSize(chunkedBody)) {
                         chunkedBody = chunkedBody.substr(chunkedBody.find(nextLine) + nextLine.size());
-                        merged.append(extractChunk(chunkedBody, nextChunkSize));
+                        const std::string_view chunk = chunkedBody.substr(0, nextChunkSize);
+                        chunkedBody = chunkedBody.substr(nextChunkSize + 1);
+                        merged.append(std::string(chunk));
                     }
 
                     return rTrim(merged);

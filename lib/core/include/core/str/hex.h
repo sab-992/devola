@@ -11,6 +11,6 @@ inline std::string toHex(unsigned long num, bool uppercase=true) {
     return uppercase ? toUpper(ss.str()) : toLower(ss.str());
 }
 
-inline unsigned long fromHex(const std::string& num) {
-    return std::stoul(num, nullptr, 16);
+inline unsigned long fromHex(std::string_view num) {
+    return std::stoul(std::string(num), nullptr, 16);
 }
