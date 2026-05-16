@@ -44,10 +44,11 @@ namespace network_n
 
                 static bool isContentChunked(const Headers& headers) { return headers.get(TRANSFER_ENCODING) == CHUNKED; }
 
-                std::pair<std::string, headersUMap_t> parse(const std::string& stringHeaders) const override {
-                    std::istringstream input(trim(stringHeaders));
-                    std::string line;
+                std::pair<std::string, headersUMap_t> parse(std::string_view stringHeaders) const override {
+                    std::stringstream input;
+                    input << trim(stringHeaders);
 
+                    std::string line;
                     std::getline(input, line);
 
                     validateStartline(splitStartLine(line));
@@ -56,6 +57,10 @@ namespace network_n
                     headersUMap_t headersUMap;
                     for (; std::getline(input, line);) {
                         line = trim(line);
+
+                        if (line.empty())
+                            continue;
+
                         size_t separator = line.find(":");
 
                         if (separator == std::string::npos)
@@ -70,7 +75,7 @@ namespace network_n
                     return { rTrim(startLine), headersUMap };
                 }
 
-                startLineInformation_t parseStartLine(const std::string& startLine) const override {
+                startLineInformation_t parseStartLine(std::string_view startLine) const override {
                     const startLineInformation_t& startLineParts = splitStartLine(startLine);
 
                     validateStartline(startLineParts);
@@ -85,26 +90,24 @@ namespace network_n
                 inline static const std::string CHUNKED = "chunked";
                 inline static const std::string TRANSFER_ENCODING = "Transfer-Encoding";
 
-                startLineInformation_t splitStartLine(const std::string& startLine) const {
-                    std::string startLineCopy(startLine);
-
+                startLineInformation_t splitStartLine(std::string_view startLine) const {
                     uint8_t index = 0;
                     startLineInformation_t startLineInformation;
                     for (; index < 2; ++index) {
-                        size_t endOfWord = startLineCopy.find(" ");
+                        size_t endOfWord = startLine.find(" ");
 
                         if (endOfWord == std::string::npos)
                             break;
 
-                        const std::string word = startLineCopy.substr(0, endOfWord);
+                        const std::string_view word = startLine.substr(0, endOfWord);
                         if (word.empty())
                             continue;
 
                         startLineInformation[index] = word;
-                        startLineCopy = startLineCopy.substr(endOfWord + 1);
+                        startLine = startLine.substr(endOfWord + 1);
                     }
 
-                    const std::string lastWord = startLineCopy.substr(0);
+                    const std::string_view lastWord = startLine.substr(0);
                     if (not lastWord.empty())
                         startLineInformation[index] = lastWord;
 

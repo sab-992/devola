@@ -38,7 +38,7 @@ std::string network_n::Headers::get(const std::string& name) const {
     return m_headersMap.contains(name) ? m_headersMap.at(name) : "";
 }
 
-void network_n::Headers::parse(const std::string& stringHeaders) {
+void network_n::Headers::parse(std::string_view stringHeaders) {
     if (stringHeaders.empty())
         return;
 
@@ -52,7 +52,7 @@ std::string network_n::Headers::startLine() const {
     return m_startLine;
 }
 
-void network_n::Headers::setHeader(const std::string& name, const std::string& value) {
+void network_n::Headers::setHeader(const std::string& name, std::string_view value) {
     m_headersMap[name] = value;
 }
 
@@ -63,7 +63,7 @@ void network_n::Headers::setParser(std::shared_ptr<protocol_n::HeadersParser_i> 
     m_parser = parser;
 }
 
-void network_n::Headers::setStartLine(const std::string& startLine) {
+void network_n::Headers::setStartLine(std::string_view startLine) {
     m_startLine = trim(startLine);
 }
 

@@ -6,7 +6,7 @@
 
 inline namespace
 {
-    std::string changeCase(std::function<int(int)> caseFunction, const std::string& string) {
+    std::string changeCase(std::function<int(int)> caseFunction, std::string_view string) {
         std::string result;
 
         for (char character : string)
@@ -16,10 +16,10 @@ inline namespace
     }
 };
 
-inline std::string toUpper(const std::string& string) {
+inline std::string toUpper(std::string_view string) {
     return changeCase([](char c){ return std::toupper(c); }, string);
 }
 
-inline std::string toLower(const std::string& string) {
+inline std::string toLower(std::string_view string) {
     return changeCase([](char c){ return std::tolower(c); }, string);
 }

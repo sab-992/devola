@@ -31,7 +31,7 @@ public:
         return stringHeaders;
     }
 
-    std::pair<std::string, std::unordered_map<std::string, std::string>> parse(const std::string& stringHeaders) const override {
+    std::pair<std::string, std::unordered_map<std::string, std::string>> parse(std::string_view stringHeaders) const override {
         const std::string startLine = "HTTP/1.1 200 OK";
         std::unordered_map<std::string, std::string> headersUMap = { {"Content-Type",   "application/json"},
                                                                      {"Content-Length", "256"},
@@ -47,7 +47,7 @@ public:
         return { startLine , headersUMap };
     }
 
-    startLineInformation_t parseStartLine(const std::string& startLine) const override { return { "HTTP/1.1", "200", "OK" }; }
+    startLineInformation_t parseStartLine(std::string_view startLine) const override { return { "HTTP/1.1", "200", "OK" }; }
 
 private:
     HeadersParserMock(bool isChunked, bool isDownload) : m_chunked(isChunked), m_isDownload(isDownload) {}

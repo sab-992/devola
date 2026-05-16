@@ -67,17 +67,17 @@ namespace http_n
         std::string method() const { return m_method; }
         uint16_t port() const { return m_port; }
 
-        Request<T>& set(const std::string& stringRequest) {
+        Request<T>& set(std::string_view stringRequest) {
             parse(stringRequest);
             return *this;
         }
 
-        Request<T>& setAPIEndpoint(const std::string& endpoint) {
+        Request<T>& setAPIEndpoint(std::string_view endpoint) {
             m_APIEndpoint = endpoint;
             return *this;
         }
 
-        Request<T>& setMethod(const std::string& method) {
+        Request<T>& setMethod(std::string_view method) {
             m_method = method;
             return *this;
         }
@@ -87,7 +87,7 @@ namespace http_n
             return *this;
         }
 
-        Request<T>& setURL(const std::string& url) {
+        Request<T>& setURL(std::string_view url) {
             m_URL = url;
             return *this;
         }
@@ -138,7 +138,7 @@ namespace http_n
             setMethod(information[0]);
             setAPIEndpoint(information[1]);
 
-            const std::string host = this->header("Host");
+            const std::string& host = this->header("Host");
             if (host.empty()) return;
             const auto& [url, port] = parseHostURL(host);
 
@@ -146,18 +146,19 @@ namespace http_n
             setPort(port);
         }
 
-        void parse(const std::string& stringRequest) {
+        void parse(std::string_view stringRequest) {
             const startLineInformation_t& requestInfo = this->processMessage(stringRequest);
             initFromStartLineInformation(requestInfo);
         }
 
-        std::pair<std::string, uint16_t> parseHostURL(const std::string& host) {
+        // CAUTION: DO NOT call this function with a r-value.
+        std::pair<std::string_view, uint16_t> parseHostURL(std::string_view host) {
             size_t separatorIndex = host.find(':');
 
-            if (host.empty() or separatorIndex == std::string::npos)
-                return { host, m_port };
+            if (trim(host).empty() or separatorIndex == std::string::npos)
+                return { "", m_port };
 
-            return { host.substr(0, separatorIndex), static_cast<uint16_t>(std::stoi(host.substr(separatorIndex + 1))) };
+            return { host.substr(0, separatorIndex), static_cast<uint16_t>(std::stoi(std::string(host.substr(separatorIndex + 1)))) };
         }
 
         void validateMembers() const {

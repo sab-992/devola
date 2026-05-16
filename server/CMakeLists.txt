@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(cmake_modules_path "${CMAKE_CURRENT_LIST_DIR}/../cmake")
 
-if(CMAKE_BUILD_TYPE STREQUAL "release" AND DEFINED SERVICE_NAME)
+if(CMAKE_BUILD_TYPE STREQUAL "Release" AND DEFINED SERVICE_NAME)
     # This block will be run for each services in its own Docker container (ONLY for Docker).
     include("${CMAKE_CURRENT_LIST_DIR}/service/${SERVICE_NAME}/CMakeLists.txt")
 else()

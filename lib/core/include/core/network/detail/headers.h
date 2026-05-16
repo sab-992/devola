@@ -29,11 +29,11 @@ namespace network_n
 
         std::string get(const std::string& name) const;
 
-        void parse(const std::string& stringHeaders);
+        void parse(std::string_view stringHeaders);
 
-        void setHeader(const std::string& name, const std::string& value);
+        void setHeader(const std::string& name, std::string_view value);
         void setParser(std::shared_ptr<protocol_n::HeadersParser_i> parser);
-        void setStartLine(const std::string& startLine);
+        void setStartLine(std::string_view startLine);
 
         std::string startLine() const;
 

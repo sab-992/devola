@@ -46,7 +46,7 @@ namespace network_n
             return DERIVED_REF_STATIC_CAST;
         }
 
-        Derived& setHeader(const std::string& name, const std::string& value) {
+        Derived& setHeader(const std::string& name, std::string_view value) {
             m_headers->setHeader(name, value);
             return DERIVED_REF_STATIC_CAST;
         }
@@ -85,7 +85,7 @@ namespace network_n
         virtual bool hasChangedSinceLastBuild() const = 0;
         virtual void updateLastBuild() = 0;
 
-        startLineInformation_t processMessage(const std::string& message) {
+        startLineInformation_t processMessage(std::string_view message) {
             auto [startLineInformation, headers, body] = protocol()->parse(message);
             set(std::move(headers), std::move(body));
             return startLineInformation;
@@ -96,6 +96,6 @@ namespace network_n
             m_body = std::make_shared<network_n::Body<T>>(std::move(body));
         }
 
-        void setStartLine(const std::string& startLine) { m_headers->setStartLine(startLine); }
+        void setStartLine(std::string_view startLine) { m_headers->setStartLine(startLine); }
     };
 }

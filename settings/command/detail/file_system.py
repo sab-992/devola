@@ -89,7 +89,7 @@ services:
         rm -rf build/
         mkdir -p build;
         cd build;
-        cmake -DCMAKE_BUILD_TYPE=release -DSERVICE_NAME={service_name} ..;
+        cmake -DCMAKE_BUILD_TYPE=Release -DSERVICE_NAME={service_name} ..;
         cmake --build . --parallel $$(nproc);
         ./server/{service_name}
 networks:

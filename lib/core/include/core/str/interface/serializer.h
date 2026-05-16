@@ -11,7 +11,7 @@ namespace serializer_n
     public:
         virtual ~Serializer_i() = default;
 
-        virtual T deserialize(const std::string& content) const = 0;
+        virtual T deserialize(const std::string_view content) const = 0;
         virtual std::string serialize(const T& object) const = 0;
     };
 }
