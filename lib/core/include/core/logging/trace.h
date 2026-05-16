@@ -12,6 +12,7 @@
 
 // TODO: Rename function
 // TODO: Change for a std::string_view
+// TODO: Rework the way tracing work.
 template<typename T, typename... Args>
 void trace(std::function<std::unique_ptr<DisplayColor_i>()> displayColorFunction, T firstArg, Args... otherArgs) {
     const std::string currentWord = Converter<T>::toString(firstArg);
