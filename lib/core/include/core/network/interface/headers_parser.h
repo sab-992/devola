@@ -19,7 +19,7 @@ namespace network_n
             virtual bool operator==(const HeadersParser_i& other) const = 0;
 
             virtual std::string build(const network_n::Headers& headers) const = 0;
-            virtual startLineInformation_t parseStartLine(const std::string& startLine) const = 0;
+            virtual startLineInformation_t parseStartLine(std::string_view startLine) const = 0;
             virtual std::pair<std::string, std::unordered_map<std::string, std::string>> parse(std::string_view stringHeaders) const = 0;
         };
     }

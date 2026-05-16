@@ -1,9 +1,9 @@
 #include <core/xml/xml.h>
 
 
-xml_n::Document::Document(const std::string& document) {
+xml_n::Document::Document(std::string_view document) {
     if (not document.empty())
-        this->load_string(document.c_str());
+        this->load_string(std::string(document).c_str());
 }
 
 bool xml_n::Document::operator==(const Document& other) {

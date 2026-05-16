@@ -96,17 +96,18 @@ namespace network_n
         private:
             const uint16_t DEFAULT_PORT = 80;
 
+            // TODO: Change "END_OF_HEADERS_TOKEN" to be a const member variable if used more than once in the same class.
             // CAUTION: DO NOT call this function with a r-value.
             std::pair<std::string_view, std::string_view> splitMessage(std::string_view message) const {
-                const std::string HEADER_END_TOKEN = "\r\n\r\n";
-                const size_t END_OF_HEADERS = message.find(HEADER_END_TOKEN);
+                const std::string END_OF_HEADERS_TOKEN = "\r\n\r\n";
+                const size_t END_OF_HEADERS = message.find(END_OF_HEADERS_TOKEN);
 
                 if (END_OF_HEADERS == std::string::npos)
                     throw InvalidArgument("Ill-formed", "HTTP message");
 
                 // Returned pair = { Headers (string), Body (string) }.
                 return std::make_pair(message.substr(0, END_OF_HEADERS),
-                                      message.substr(END_OF_HEADERS  + HEADER_END_TOKEN.size()));
+                                      message.substr(END_OF_HEADERS  + END_OF_HEADERS_TOKEN.size()));
             }
         };
     }

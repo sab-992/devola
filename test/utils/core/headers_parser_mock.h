@@ -47,7 +47,7 @@ public:
         return { startLine , headersUMap };
     }
 
-    startLineInformation_t parseStartLine(const std::string& startLine) const override { return { "HTTP/1.1", "200", "OK" }; }
+    startLineInformation_t parseStartLine(std::string_view startLine) const override { return { "HTTP/1.1", "200", "OK" }; }
 
 private:
     HeadersParserMock(bool isChunked, bool isDownload) : m_chunked(isChunked), m_isDownload(isDownload) {}

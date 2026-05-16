@@ -14,7 +14,7 @@ namespace serializer_n
 
         friend std::unique_ptr<String> std::make_unique<String>();
 
-        std::string deserialize(const std::string& content) const override { return content; }
+        std::string deserialize(std::string_view content) const override { return std::string(content); }
         std::string serialize(const std::string& object) const override { return object; }
     };
 }

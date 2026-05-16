@@ -75,7 +75,7 @@ namespace network_n
                     return { rTrim(startLine), headersUMap };
                 }
 
-                startLineInformation_t parseStartLine(const std::string& startLine) const override {
+                startLineInformation_t parseStartLine(std::string_view startLine) const override {
                     const startLineInformation_t& startLineParts = splitStartLine(startLine);
 
                     validateStartline(startLineParts);
