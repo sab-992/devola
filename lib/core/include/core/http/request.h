@@ -39,29 +39,19 @@ namespace http_n
         }
 
         Request(const Request<T>& other) : network_n::Message<Request<T>, T>(other) {
-            if (other.m_lastBuild)
-                m_lastBuild = std::make_unique<memento_n::Request<T>>(*other.m_lastBuild);
-
+            m_lastBuild = other.m_lastBuild ? std::make_unique<memento_n::Request<T>>(*other.m_lastBuild) : nullptr;
             m_APIEndpoint = other.m_APIEndpoint;
             m_method = other.m_method;
             m_port = other.m_port;
             m_URL = other.m_URL;
         }
 
-        Request(Request<T>&& other) : network_n::Message<Request<T>, T>(std::move(other)) {
-            m_APIEndpoint = std::move(other.m_APIEndpoint);
-            m_lastBuild = std::move(other.m_lastBuild);
-            m_method = std::move(other.m_method);
-            m_port = std::move(other.m_port);
-            m_URL = std::move(other.m_URL);
-        }
+        Request(Request<T>&& other) = default;
 
         ~Request() = default;
 
-        Request<T>& operator=(Request<T> other) {
-            swap(*this, other);
-            return *this;
-        }
+        Request<T>& operator=(Request<T> other) { swap(*this, other); return *this; }
+        Request<T>& operator=(Request<T>&& other) = default;
 
         std::string APIEndpoint() const { return m_APIEndpoint; }
         std::string method() const { return m_method; }

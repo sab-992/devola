@@ -21,9 +21,11 @@ namespace http_n
         class Request : public Memento_i<Request<T>> {
         public:
             Request(const http_n::Request<T>& toSave) {
+                using namespace network_n;
+
                 m_APIEndpoint = toSave.m_APIEndpoint;
-                m_body = toSave.m_body;
-                m_headers = toSave.m_headers;
+                m_body = std::make_unique<Body<T>>(*toSave.m_body);
+                m_headers = std::make_unique<Headers>(*toSave.m_headers);
                 m_method = toSave.m_method;
                 m_port = toSave.m_port;
                 m_protocol = toSave.m_protocol;
@@ -31,10 +33,11 @@ namespace http_n
             }
 
             Request(const Request<T>& other) {
+                using namespace network_n;
+
                 m_APIEndpoint = other.m_APIEndpoint;
-                m_body = other.m_body;
-                m_headers = other.m_headers;
-                m_method = other.m_method;
+                m_body = std::make_unique<Body<T>>(*other.m_body);
+                m_headers = std::make_unique<Headers>(*other.m_headers);
                 m_port = other.m_port;
                 m_protocol = other.m_protocol;
                 m_URL = other.m_URL;
@@ -57,8 +60,8 @@ namespace http_n
 
         private:
             std::string m_APIEndpoint;
-            std::shared_ptr<network_n::Body<T>> m_body = nullptr;
-            std::shared_ptr<network_n::Headers> m_headers = nullptr;
+            std::unique_ptr<network_n::Body<T>> m_body;
+            std::unique_ptr<network_n::Headers> m_headers;
             std::string m_method;
             uint16_t m_port;
             std::shared_ptr<network_n::protocol_n::Protocol_i<T>> m_protocol;

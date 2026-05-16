@@ -22,6 +22,9 @@ else()
         set_property(TARGET dev_server PROPERTY CXX_STANDARD 20)
     endif()
 
+    target_compile_options(dev_server PRIVATE -fsanitize=address,undefined -g -O0)
+    target_link_options(dev_server PRIVATE -fsanitize=address,undefined)
+
     include_services("${CMAKE_CURRENT_LIST_DIR}/service")
     link_all_libraries(dev_server "${CMAKE_CURRENT_LIST_DIR}/../lib")
 endif()

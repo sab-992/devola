@@ -23,22 +23,13 @@ namespace network_n
     public:
         Body(std::shared_ptr<protocol_n::BodyParser_i<T>> parser) { setParser(parser); }
 
-        Body(const Body<T>& other) {
-            m_stringBody = other.m_stringBody;
-            m_parser = other.m_parser;
-        }
-
-        Body(Body<T>&& other) {
-            m_stringBody = std::move(other.m_stringBody);
-            m_parser = other.m_parser;
-        }
+        Body(const Body<T>& other) = default;
+        Body(Body<T>&& other) = default;
 
         ~Body() = default;
 
-        Body<T>& operator=(Body<T> other) {
-            swap(*this, other);
-            return *this;
-        }
+        Body<T>& operator=(Body<T> other) { swap(*this, other); return *this; }
+        Body<T>& operator=(Body<T>&& other) = default;
 
         bool operator==(const Body<T>& other) const {
             return pointersEqual(m_parser, other.m_parser) and

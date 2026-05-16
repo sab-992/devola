@@ -16,12 +16,13 @@ namespace network_n
     class Headers : public StringConvertible {
     public:
         Headers(std::shared_ptr<protocol_n::HeadersParser_i> parser);
-        Headers(const Headers& other);
-        Headers(Headers&& other);
+        Headers(const Headers& other) = default;
+        Headers(Headers&& other) = default;
 
         ~Headers() = default;
 
         Headers& operator=(Headers other);
+        Headers& operator=(Headers&& other) = default;
 
         bool operator==(const Headers& other) const;
 
