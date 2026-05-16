@@ -67,6 +67,7 @@ namespace network_n
                     return chunks;
                 }
 
+                // TODO: Change all "const std::string nextLine" to const member variables if multiple references.
                 size_t getChunkSize(std::string_view message, size_t startPos=0) const {
                     const std::string nextLine = "\r\n";
                     const size_t EOL = message.find(nextLine);
