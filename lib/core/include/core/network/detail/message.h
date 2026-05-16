@@ -69,16 +69,28 @@ namespace network_n
         Message(protocol_n::Protocol protocol) {
             setProtocol(protocol);
 
-            m_headers = std::make_shared<Headers>(this->protocol()->headersParser());
-            m_body = std::make_shared<Body<T>>(this->protocol()->bodyParser());
+            set(Headers(this->protocol()->headersParser()),
+                   Body<T>(this->protocol()->bodyParser()));
         }
 
-        Message(const Message&) = default;
-        Message& operator=(const Message<Derived, T>&) = default;
+        Message(const Message& other) {
+            m_body = other.m_body ? std::make_unique<Body<T>>(*other.m_body) : nullptr;
+            m_headers = other.m_headers ? std::make_unique<Headers>(*other.m_headers) : nullptr;
+            m_protocol = other.m_protocol;
+        }
+
+        // Can't use the copy-swap idom because Message cannot be instantiated
+        Message& operator=(const Message<Derived, T>& other) {
+            m_body = other.m_body ? std::make_unique<Body<T>>(*other.m_body) : nullptr;
+            m_headers = other.m_headers ? std::make_unique<Headers>(*other.m_headers) : nullptr;
+            m_protocol = other.m_protocol;
+        };
+
+        Message& operator=(Message<Derived, T>&&) = default;
         Message(Message&&) = default;
 
-        std::shared_ptr<Body<T>> m_body;
-        std::shared_ptr<Headers> m_headers;
+        std::unique_ptr<Body<T>> m_body;
+        std::unique_ptr<Headers> m_headers;
         std::shared_ptr<protocol_n::Protocol_i<T>> m_protocol;
 
         virtual void finalize() = 0;
@@ -92,8 +104,8 @@ namespace network_n
         }
 
         void set(network_n::Headers&& headers, network_n::Body<T>&& body) {
-            m_headers = std::make_shared<network_n::Headers>(std::move(headers));
-            m_body = std::make_shared<network_n::Body<T>>(std::move(body));
+            m_headers = std::make_unique<network_n::Headers>(std::move(headers));
+            m_body = std::make_unique<network_n::Body<T>>(std::move(body));
         }
 
         void setStartLine(std::string_view startLine) { m_headers->setStartLine(startLine); }

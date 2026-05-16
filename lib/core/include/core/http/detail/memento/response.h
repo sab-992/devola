@@ -3,6 +3,7 @@
 #include <core/http/response.h>
 #include <core/network/detail/body.h>
 #include <core/network/detail/headers.h>
+#include <core/network/interface/protocol.h>
 #include <core/network/network.h>
 #include <core/utility/interface/memento.h>
 #include <core/utility/compare.h>
@@ -20,18 +21,24 @@ namespace http_n
         class Response : public Memento_i<Response<T>> {
         public:
             Response(http_n::Response<T> toSave) {
-                m_body = toSave.m_body;
-                m_headers = toSave.m_headers;
+                using namespace network_n;
+
+                m_body = std::make_unique<Body<T>>(*toSave.m_body);
+                m_headers = std::make_unique<Headers>(*toSave.m_headers);
+                m_protocol = toSave.m_protocol;
                 m_status = toSave.m_status;
             }
 
             Response(const Response<T>& other) {
-                m_body = other.m_body;
-                m_headers = other.m_headers;
+                using namespace network_n;
+
+                m_body = std::make_unique<Body<T>>(*other.m_body);
+                m_headers = std::make_unique<Headers>(*other.m_headers);
+                m_protocol = other.m_protocol;
                 m_status = other.m_status;
             }
 
-            ~Response() {}
+            ~Response() = default;
 
             friend std::unique_ptr<Response> std::make_unique<Response>();
 
@@ -42,8 +49,9 @@ namespace http_n
             }
 
         private:
-            std::shared_ptr<network_n::Body<T>> m_body = nullptr;
-            std::shared_ptr<network_n::Headers> m_headers = nullptr;
+            std::unique_ptr<network_n::Body<T>> m_body;
+            std::unique_ptr<network_n::Headers> m_headers;
+            std::shared_ptr<network_n::protocol_n::Protocol_i<T>> m_protocol;
             network_n::Status_s m_status;
         };
     }

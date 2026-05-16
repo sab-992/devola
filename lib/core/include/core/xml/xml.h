@@ -11,6 +11,7 @@ namespace xml_n
     class Document : public pugi::xml_document, public StringConvertible {
     public:
         Document(std::string_view document="");
+        ~Document() = default;
 
         bool operator==(const Document& other);
         bool operator!=(const Document& other);

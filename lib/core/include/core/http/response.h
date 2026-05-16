@@ -39,23 +39,16 @@ namespace http_n
         }
 
         Response(const Response<T>& other) : network_n::Message<Response<T>, T>(other) {
-            if (other.m_lastBuild)
-                m_lastBuild = std::make_unique<memento_n::Response<T>>(*other.m_lastBuild);
-
+            m_lastBuild = other.m_lastBuild ? std::make_unique<memento_n::Response<T>>(*other.m_lastBuild) : nullptr;
             m_status = other.m_status;
         }
 
-        Response(Response<T>&& other) : network_n::Message<Response<T>, T>(std::move(other)) {
-            m_lastBuild = std::move(other.m_lastBuild);
-            m_status = std::move(other.m_status);
-        }
+        Response(Response<T>&& other) = default;
 
-        ~Response() {}
+        ~Response() = default;
 
-        Response<T>& operator=(Response<T> other) {
-            swap(*this, other);
-            return *this;
-        }
+        Response<T>& operator=(Response<T> other) { swap(*this, other); return *this; }
+        Response<T>& operator=(Response<T>&& other) = default;
 
         Response<T>& set(std::string_view stringResponse) {
             parse(stringResponse);
