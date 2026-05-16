@@ -12,5 +12,5 @@ TEST_F(StatusTest, Constructor_AddsReason) {
     Status_s status(EXPECTED_STATUS_CODE);
 
     EXPECT_EQ(EXPECTED_STATUS_CODE, status.code());
-    EXPECT_EQ(STATUS_REASONS.at(EXPECTED_STATUS_CODE), status.reason());
+    EXPECT_EQ(getReasonFromStatus(EXPECTED_STATUS_CODE), status.reason());
 }
