@@ -90,26 +90,24 @@ namespace network_n
                 inline static const std::string CHUNKED = "chunked";
                 inline static const std::string TRANSFER_ENCODING = "Transfer-Encoding";
 
-                startLineInformation_t splitStartLine(const std::string& startLine) const {
-                    std::string startLineCopy(startLine);
-
+                startLineInformation_t splitStartLine(std::string_view startLine) const {
                     uint8_t index = 0;
                     startLineInformation_t startLineInformation;
                     for (; index < 2; ++index) {
-                        size_t endOfWord = startLineCopy.find(" ");
+                        size_t endOfWord = startLine.find(" ");
 
                         if (endOfWord == std::string::npos)
                             break;
 
-                        const std::string word = startLineCopy.substr(0, endOfWord);
+                        const std::string_view word = startLine.substr(0, endOfWord);
                         if (word.empty())
                             continue;
 
                         startLineInformation[index] = word;
-                        startLineCopy = startLineCopy.substr(endOfWord + 1);
+                        startLine = startLine.substr(endOfWord + 1);
                     }
 
-                    const std::string lastWord = startLineCopy.substr(0);
+                    const std::string_view lastWord = startLine.substr(0);
                     if (not lastWord.empty())
                         startLineInformation[index] = lastWord;
 
