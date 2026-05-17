@@ -34,8 +34,10 @@ namespace network_n
                 bool operator==(const HeadersParser_i& other) const override { return dynamic_cast<const HeadersParser*>(&other) != nullptr; }
 
                 std::string build(const Headers& headers) const override {
-                    std::string stringHeaders = headers.startLine();
+                    const std::string& startLine = headers.startLine();
+                    if (startLine.empty()) throw InvalidArgument("Cannot be empty", "Start line");
 
+                    std::string stringHeaders = startLine;
                     for (const auto& [header, value] : headers.toMap())
                         stringHeaders += std::format("\r\n{}: {}", header, value);
 
