@@ -20,6 +20,24 @@ TEST_F(HeadersTest, SetParserWithNullptr_ThrowsException) {
     EXPECT_THROW(network_n::Headers(this->getHeaderParserMockPtr()).setParser(nullptr), InvalidArgument);
 }
 
+TEST_F(HeadersTest, Build_ReturnsValidHeaders) {
+    using namespace network_n;
+
+    const std::string EXPECTED_STARTLINE = "HTTP/1.1 200 OK";
+    const std::string EXPECTED_HEADER = "Transfer-Encoding";
+    const std::string EXPECTED_HEADER_VALUE = "chunked";
+    Headers hs(this->getHeaderParserMockPtr());
+    const std::string EXPECTED_RESULT = this->getHeaderParserMockPtr()->build(hs);
+
+    Headers h(this->getHeaderParserMockPtr());
+    h.setStartLine(EXPECTED_STARTLINE);
+    h.setHeader(EXPECTED_HEADER, EXPECTED_HEADER_VALUE);
+
+    const std::string result = h.build();
+
+    EXPECT_EQ(EXPECTED_RESULT, result);
+}
+
 TEST_F(HeadersTest, Parse_ParsesHeadersCorrectly) {
     using namespace network_n;
     const auto& [EXPECTED_STARTLINE, EXPECTED_HEADERS_UMAP] = this->getHeaderParserMockPtr()->parse("");

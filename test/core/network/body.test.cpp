@@ -3,10 +3,12 @@
 #include <core/exception.h>
 #include <core/network/detail/body.h>
 #include <core/network/detail/headers.h>
+#include <core/str/hex.h>
 #include <sstream>
 #include <utils/core/body_parser_mock.h>
 #include <utils/core/headers_parser_mock.h>
 #include <utils/core/inner_types.h>
+#include <vector>
 
 
 template<typename T>
@@ -27,7 +29,7 @@ protected:
     std::string getTestStringBody(bool alt=false) {
         return Inner::getTestStringObject(alt);
     }
-    
+
     auto getParserMock(bool alt=false) {
         return Inner::getBodyParserMock(alt);
     }
@@ -41,6 +43,19 @@ TYPED_TEST(BodyTest, ConstructorWithNullptr_ThrowsException) {
 
 TYPED_TEST(BodyTest, SetParserWithNullptr_ThrowsException) {
     EXPECT_THROW(TypeParam(this->getParserMock()).setParser(nullptr), InvalidArgument);
+}
+
+TYPED_TEST(BodyTest, Build_ReturnsChunkedBodyVector) {
+    using namespace network_n;
+
+    std::vector<std::string> EXPECTED_RESULT { this->getTestStringBody() };
+    Headers headers(HeadersParserMock::get(false));
+    headers.parse("test");
+    TypeParam body(this->getParserMock());
+
+    body.parse(headers, this->getTestStringBody());
+
+    EXPECT_EQ(EXPECTED_RESULT, body.build(headers));
 }
 
 TYPED_TEST(BodyTest, Parse_ParsesStringBodyCorrectly) {
