@@ -8,103 +8,131 @@
 #include <format>
 #include <string>
 #include <utils/core/build_headers.h>
+#include <utils/core/inner_types.h>
 
 
 using http_n::Request;
 
-class RequestTest : public ::testing::Test {};
+template<typename T>
+class RequestTest : public ::testing::Test {
+public:
+    template <typename ContentType>
+    struct TemplatedRequest {
+        using type = http_n::Request<ContentType>;
+    };
 
-TEST_F(RequestTest, Constructor_HasDefaultProtocol) {
-    Request<xml_n::Document> request = Request<xml_n::Document>();
-    EXPECT_EQ(network_n::protocol_n::Factory::create<xml_n::Document>(http_n::DEFAULT_PROTOCOL), request.protocol());
+    using Inner = InnerTypes<T, RequestTest<T>::template TemplatedRequest>;
+
+protected:
+    auto getTestBody(bool alt=false) {
+        return Inner::getTestObject(getTestStringBody(alt));
+    }
+
+    std::string getTestStringBody(bool alt=false) {
+        return Inner::getTestStringObject(alt);
+    }
+};
+
+TYPED_TEST_SUITE(RequestTest, networkInnerTypes_t<http_n::Request>);
+
+TYPED_TEST(RequestTest, Constructor_HasDefaultProtocol) {
+    TypeParam request;
+    EXPECT_EQ(network_n::protocol_n::Factory::create<decltype(this->getTestBody())>(http_n::DEFAULT_PROTOCOL), request.protocol());
 }
 
-TEST_F(RequestTest, BuildWithURL_AddsHostHeader) {
+TYPED_TEST(RequestTest, BuildWithURL_AddsHostHeader) {
     const std::string EXPECTED_URL = "www.test.com";
     const uint16_t EXPECTED_PORT = 4992;
     const std::string EXPECTED_FULL_HOST_URL = std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT);
+    TypeParam request;
+    request.setMethod("GET")
+           .setAPIEndpoint("/");
 
-    Request<std::string> request = Request<std::string>().setMethod("GET")
-                                                         .setAPIEndpoint("/");
-
-    request.setURL(EXPECTED_URL);
-    request.setPort(EXPECTED_PORT);
-    request.build();
+    request.setURL(EXPECTED_URL)
+           .setPort(EXPECTED_PORT)
+           .build();
 
     EXPECT_EQ(EXPECTED_FULL_HOST_URL, request.header("Host"));
 }
 
-TEST_F(RequestTest, BuildWithMethodAndAPIEndpoint_CreatesValidStartline) {
+TYPED_TEST(RequestTest, BuildWithMethodAndAPIEndpoint_CreatesValidStartline) {
     using nlohmann::json;
     using namespace network_n::protocol_n;
 
     const std::string EXPECTED_METHOD = "POST";
     const std::string EXPECTED_API_ENDPOINT = "/test";
     const Protocol EXPECTED_PROTOCOL = Protocol::HTTP1_1;
+    const auto protocol = Factory::create<decltype(this->getTestBody())>(EXPECTED_PROTOCOL);
     const std::string EXPECTED_STARTLINE = std::format("{} {} {}", EXPECTED_METHOD,
                                                                    EXPECTED_API_ENDPOINT,
-                                                                   Factory::create<json>(EXPECTED_PROTOCOL)->name());
-
-    Request<json> request = Request<json>().setMethod(EXPECTED_METHOD)
-                                           .setAPIEndpoint(EXPECTED_API_ENDPOINT)
-                                           .setProtocol(EXPECTED_PROTOCOL)
-                                           .setURL("www.test.com").build();
+                                                                   protocol->name());
+    TypeParam request;
+    request.setMethod(EXPECTED_METHOD)
+           .setAPIEndpoint(EXPECTED_API_ENDPOINT)
+           .setProtocol(EXPECTED_PROTOCOL)
+           .setURL("www.test.com").build();
 
     const std::string stringRequest = request.toString();
-    std::string startLine = stringRequest.substr(0, stringRequest.find("\r\n"));
+    const std::string startLine = stringRequest.substr(0, stringRequest.find("\r\n"));
 
-    EXPECT_EQ(EXPECTED_METHOD, request.method());
-    EXPECT_EQ(EXPECTED_API_ENDPOINT, request.APIEndpoint());
-    EXPECT_EQ(Factory::create<json>(EXPECTED_PROTOCOL), request.protocol());
     EXPECT_EQ(EXPECTED_STARTLINE, startLine);
 }
 
-TEST_F(RequestTest, BuildWithoutAPIEndpoint_ThrowsException) {
-    Request<std::string> request = Request<std::string>().setMethod("GET")
-                                                         .setURL("www.test.com");
+TYPED_TEST(RequestTest, BuildWithoutAPIEndpoint_ThrowsException) {
+    TypeParam request;
+
+    request.setMethod("GET")
+           .setURL("www.test.com");
+
     EXPECT_THROW(request.build(), InvalidArgument);
 }
 
-TEST_F(RequestTest, BuildWithoutMethod_ThrowsException) {
-    Request<std::string> request = Request<std::string>().setAPIEndpoint("/")
-                                                         .setURL("www.test.com");
+TYPED_TEST(RequestTest, BuildWithoutMethod_ThrowsException) {
+    TypeParam request;
+
+    request.setAPIEndpoint("/")
+           .setURL("www.test.com");
+
     EXPECT_THROW(request.build(), InvalidArgument);
 }
 
-TEST_F(RequestTest, BuildWithoutURL_ThrowsException) {
-    Request<std::string> request = Request<std::string>().setMethod("GET")
-                                                         .setAPIEndpoint("/");
+TYPED_TEST(RequestTest, BuildWithoutURL_ThrowsException) {
+    TypeParam request;
+
+    request.setMethod("GET")
+           .setAPIEndpoint("/");
+
     EXPECT_THROW(request.build(), InvalidArgument);
 }
 
-TEST_F(RequestTest, Set_CreatesValidHTTPRequest) {
+TYPED_TEST(RequestTest, Set_CreatesValidHTTPRequest) {
     using namespace http_n;
     using namespace network_n;
 
     const std::string EXPECTED_METHOD = "DELETE";
     const std::string EXPECTED_API_ENDPOINT = "/resource/1";
-    const protocol_n::Protocol EXPECTED_PROTOCOL = protocol_n::Protocol::HTTP1_1;
     const std::string EXPECTED_URL = "www.test2.com";
     const uint16_t EXPECTED_PORT = 5503;
-    const std::string EXPECTED_BODY = "Hello world!";
+    const auto EXPECTED_BODY = this->getTestBody();
+    const auto EXPECTED_STRING_BODY = this->getTestStringBody();
+    const auto EXPECTED_PROTOCOL = protocol_n::Factory::create<decltype(this->getTestBody())>(http_n::DEFAULT_PROTOCOL);
     const std::unordered_map<std::string, std::string> headersUMap{ { "Host",              std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT) },
                                                                     { "Transfer-encoding", "chunked" },
                                                                     { "Accept",            "application/xml" },
-                                                                    { "Content-Length",    std::to_string(EXPECTED_BODY.size()) } };
-
+                                                                    { "Content-Length",    std::to_string(EXPECTED_STRING_BODY.size()) } };
     const std::string EXPECTED_REQUEST = std::format("{} {} {}\r\n{}\r\n\r\n{}", EXPECTED_METHOD,
                                                                                  EXPECTED_API_ENDPOINT,
-                                                                                 protocol_n::Factory::create<std::string>(EXPECTED_PROTOCOL)->name(),
+                                                                                 EXPECTED_PROTOCOL->name(),
                                                                                  buildHeaders(headersUMap),
-                                                                                 EXPECTED_BODY);
+                                                                                 EXPECTED_STRING_BODY);
+    TypeParam request;
 
-    Request<std::string> request = Request<std::string>().set(EXPECTED_REQUEST);
+    request.set(EXPECTED_REQUEST);
 
     EXPECT_NO_THROW(request.build());
-
     EXPECT_EQ(EXPECTED_METHOD, request.method());
     EXPECT_EQ(EXPECTED_API_ENDPOINT, request.APIEndpoint());
-    EXPECT_EQ(protocol_n::Factory::create<std::string>(EXPECTED_PROTOCOL), request.protocol());
+    EXPECT_EQ(EXPECTED_PROTOCOL, request.protocol());
     EXPECT_EQ(EXPECTED_URL, request.url());
     EXPECT_EQ(EXPECTED_PORT, request.port());
     EXPECT_EQ(headersUMap.size(), request.headersMap().size());
