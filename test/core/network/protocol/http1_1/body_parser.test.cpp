@@ -57,7 +57,7 @@ TYPED_TEST(BodyParserTypedTest, BuildWithoutChunkedHeader_ReturnsBody) {
     EXPECT_EQ(this->getTestStringBody(), result[0]);
 }
 
-TYPED_TEST(BodyParserTypedTest, ParseWithoutChunkedHeader_ReturnsBody) {
+TYPED_TEST(BodyParserTypedTest, ParseWithoutChunkedHeader_ReturnsStringBody) {
     using namespace network_n;
 
     const std::string EXPECTED_PARSED_RESULT = this->getTestStringBody();
@@ -74,7 +74,7 @@ protected:
     std::string getBodyToChunk(size_t sizeOfChunk) { return std::string(sizeOfChunk + 1, '*'); }
 };
 
-TEST_F(BodyParserTest, BuildWithChunkedHeaderAndBodySmallerThanChunkSize_ReturnsSingleBodyChunk) {
+TEST_F(BodyParserTest, BuildWithChunkedHeaderAndBodySmallerThanChunkSize_ReturnsChunkedBodyAsSingleChunk) {
     using namespace network_n;
     using protocol_n::http1_1_n::BodyParser;
 
@@ -93,7 +93,7 @@ TEST_F(BodyParserTest, BuildWithChunkedHeaderAndBodySmallerThanChunkSize_Returns
     EXPECT_EQ(EXPECTED_CHUNKS, result);
 }
 
-TEST_F(BodyParserTest, BuildWithChunkedHeaderAndDownloadAndBodySmallerThanChunkSize_ReturnsSingleBodyChunk) {
+TEST_F(BodyParserTest, BuildWithChunkedHeaderAndDownloadAndBodySmallerThanChunkSize_ReturnsChunkedBodyAsSingleChunk) {
     using namespace network_n;
     using protocol_n::http1_1_n::BodyParser;
 
@@ -118,7 +118,7 @@ TEST_F(BodyParserTest, BuildWithChunkedHeader_ReturnsMultipleBodyChunks) {
 
     const std::string EXPECTED_FIRST_CHUNK = std::string(REQUEST_BUFFER_MAX_SIZE, '*');
     const std::string EXPECTED_SECOND_CHUNK = "*";
-    const std::vector<std::string> EXPECTED_CHUNKS { std::format("{}\r\n{}", toHex(EXPECTED_FIRST_CHUNK.size()), EXPECTED_FIRST_CHUNK), 
+    const std::vector<std::string> EXPECTED_CHUNKS { std::format("{}\r\n{}", toHex(EXPECTED_FIRST_CHUNK.size()), EXPECTED_FIRST_CHUNK),
                                                      std::format("{}\r\n{}", toHex(EXPECTED_SECOND_CHUNK.size()), EXPECTED_SECOND_CHUNK),
                                                      "0\r\n\r\n" };
 
@@ -140,7 +140,7 @@ TEST_F(BodyParserTest, BuildWithChunkedHeaderAndDownload_ReturnsMultipleBiggerBo
 
     const std::string EXPECTED_FIRST_CHUNK = std::string(DOWNLOAD_BUFFER_MAX_SIZE, '*');
     const std::string EXPECTED_SECOND_CHUNK = "*";
-    const std::vector<std::string> EXPECTED_CHUNKS { std::format("{}\r\n{}", toHex(EXPECTED_FIRST_CHUNK.size()), EXPECTED_FIRST_CHUNK), 
+    const std::vector<std::string> EXPECTED_CHUNKS { std::format("{}\r\n{}", toHex(EXPECTED_FIRST_CHUNK.size()), EXPECTED_FIRST_CHUNK),
                                                      std::format("{}\r\n{}", toHex(EXPECTED_SECOND_CHUNK.size()), EXPECTED_SECOND_CHUNK),
                                                      "0\r\n\r\n" };
 
