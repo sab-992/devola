@@ -48,14 +48,13 @@ namespace http_n
             friend std::unique_ptr<Request> std::make_unique<Request>();
 
             bool operator==(const Request<T>& other) const override {
-                return m_APIEndpoint !=  other.m_APIEndpoint   or
-                       not pointersEqual(m_body, other.m_body)       or
-                       not pointersEqual(m_headers, other.m_headers) or
-                       m_headers     !=  other.m_headers       or
-                       m_method      !=  other.m_method        or
-                       m_port        !=  other.m_port          or
-                       m_protocol    !=  other.m_protocol      or
-                       m_URL         !=  other.m_URL;
+                return m_APIEndpoint ==  other.m_APIEndpoint     and
+                       pointersEqual(m_body, other.m_body)       and
+                       pointersEqual(m_headers, other.m_headers) and
+                       m_method      ==  other.m_method          and
+                       m_port        ==  other.m_port            and
+                       m_protocol    ==  other.m_protocol        and
+                       m_URL         ==  other.m_URL;
             }
 
         private:

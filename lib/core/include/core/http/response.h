@@ -86,7 +86,7 @@ namespace http_n
             if (not m_lastBuild)
                 return true;
 
-            return *m_lastBuild == memento_n::Response<T>(*this);
+            return *m_lastBuild != memento_n::Response<T>(*this);
         }
 
         void updateLastBuild() override { m_lastBuild = std::make_unique<memento_n::Response<T>>(*this); }

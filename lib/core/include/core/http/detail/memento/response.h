@@ -43,9 +43,10 @@ namespace http_n
             friend std::unique_ptr<Response> std::make_unique<Response>();
 
             bool operator==(const Response<T>& other) const override {
-                return not pointersEqual(m_body, other.m_body)       or
-                       not pointersEqual(m_headers, other.m_headers) or
-                       m_status !=  other.m_status;
+                return pointersEqual(m_body, other.m_body)       and
+                       pointersEqual(m_headers, other.m_headers) and
+                       m_protocol == other.m_protocol            and
+                       m_status   == other.m_status;
             }
 
         private:
