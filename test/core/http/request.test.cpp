@@ -78,6 +78,24 @@ TYPED_TEST(RequestTest, BuildWithMethodAndAPIEndpoint_CreatesValidStartline) {
     EXPECT_EQ(EXPECTED_STARTLINE, startLine);
 }
 
+TYPED_TEST(RequestTest, PrepareTransmissionPackets_ReturnsPacketsToSend) {
+    using namespace http_n;
+    using namespace network_n;
+    using network_n::Code;
+
+    const std::vector<std::string> EXPECTED_PACKETS = { "POST / HTTP/1.1\r\nHost: www.test.com:80", this->getTestStringBody() };
+    TypeParam request;
+    request.setMethod("POST")
+           .setAPIEndpoint("/")
+           .setProtocol(http_n::DEFAULT_PROTOCOL)
+           .setURL("www.test.com")
+           .setBody(this->getTestBody()).build();
+
+    const auto result = request.prepareTransmissionPackets();
+
+    EXPECT_EQ(EXPECTED_PACKETS, result);
+}
+
 TYPED_TEST(RequestTest, BuildWithoutAPIEndpoint_ThrowsException) {
     TypeParam request;
 

@@ -69,6 +69,21 @@ TYPED_TEST(ResponseTest, BuildWithStatus_CreatesValidStartline) {
     EXPECT_EQ(EXPECTED_STARTLINE, startLine);
 }
 
+TYPED_TEST(ResponseTest, PrepareTransmissionPackets_ReturnsPacketsToSend) {
+    using namespace http_n;
+    using network_n::Code;
+
+    const std::vector<std::string> EXPECTED_PACKETS = { "HTTP/1.1 200 OK\r\nAccept: text/html", this->getTestStringBody() };
+    TypeParam response;
+    response.setStatus(Code::OK)
+            .setHeader("Accept", "text/html")
+            .setBody(this->getTestBody()).build();
+
+    const auto result = response.prepareTransmissionPackets();
+
+    EXPECT_EQ(EXPECTED_PACKETS, result);
+}
+
 TYPED_TEST(ResponseTest, BuildWithoutStatus_ThrowsException) {
     TypeParam response;
 
