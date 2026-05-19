@@ -20,14 +20,14 @@ namespace network_n
         T body() const { return m_body->convert(); }
 
         Derived& build() & override {
-            updateLastBuild();
             finalize();
+            updateLastBuild();
             return DERIVED_REF_STATIC_CAST;
         }
 
         Derived build() && override {
-            updateLastBuild();
             finalize();
+            updateLastBuild();
             return std::move(DERIVED_REF_STATIC_CAST);
         }
 
