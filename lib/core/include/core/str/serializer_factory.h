@@ -16,7 +16,6 @@ namespace serializer_n
     template<typename T>
     class Factory {
     public:
-       // TODO: maybe add overload that is not templated so that create() will automatically assume std::string
         inline static std::unique_ptr<Serializer_i<T>> create() { throw Exception("Not Implemented"); }
     };
 
