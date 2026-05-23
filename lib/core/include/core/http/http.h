@@ -1,6 +1,7 @@
 #pragma once
 
 #include <asio.hpp>
+#include <asio/ssl.hpp>
 #include <core/exception.h>
 #include <core/http/request.h>
 #include <core/http/response.h>
@@ -36,18 +37,29 @@ namespace http_n
 
 
         template<typename T>
-        asio::ip::tcp::socket send(const Request<T>& request) const {
+        asio::ssl::stream<asio::ip::tcp::socket> send(const Request<T>& request) const {
             using namespace asio;
+            using namespace asio::ip;
 
-            ip::tcp::resolver resolver(m_ioContext);
-            ip::tcp::socket socket(m_ioContext);
-            connect(socket, resolver.resolve(request.url(), std::to_string(request.port())));
-            write(socket, buffer(request.toString()));
+            asio::ssl::context sslContext(asio::ssl::context::tls_client);
+            sslContext.set_verify_mode(asio::ssl::verify_peer);
+            sslContext.set_default_verify_paths();
+
+            tcp::resolver resolver(m_ioContext);
+
+            asio::ssl::stream<tcp::socket> socket(m_ioContext, sslContext);
+            SSL_set_tlsext_host_name(socket.native_handle(), request.url().c_str());
+            connect(socket.lowest_layer(), resolver.resolve(request.url(), std::to_string(request.port())));
+
+            socket.handshake(asio::ssl::stream_base::client);
+
+            request.protocol()->send(socket, request.toString());
+
             return std::move(socket);
         }
 
         template<typename T>
-        Response<T> receive(asio::ip::tcp::socket& socket) const {
+        Response<T> receive(asio::ssl::stream<asio::ip::tcp::socket>& socket) const {
             auto protocol = network_n::protocol_n::Factory::create<T>(http_n::DEFAULT_PROTOCOL);
 
             const auto& [headers, body] = protocol->receive(socket);
@@ -56,7 +68,7 @@ namespace http_n
         }
 
         template<typename T>
-        Response<T> receive(asio::ip::tcp::socket&& socket) const { return receive<T>(socket); }
+        Response<T> receive(asio::ssl::stream<asio::ip::tcp::socket>&& socket) const { return receive<T>(socket); }
 
     private:
         inline static asio::io_context m_ioContext;

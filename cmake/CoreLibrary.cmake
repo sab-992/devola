@@ -12,4 +12,6 @@ else()
 endif()
 
 target_include_directories(core_lib PUBLIC ${asio_SOURCE_DIR}/asio/include)
-target_link_libraries(core_lib PUBLIC nlohmann_json::nlohmann_json pugixml)
+
+find_package(OpenSSL REQUIRED)
+target_link_libraries(core_lib PUBLIC nlohmann_json::nlohmann_json pugixml OpenSSL::SSL OpenSSL::Crypto)

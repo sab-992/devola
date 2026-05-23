@@ -1,6 +1,7 @@
 #pragma once
 
 #include <asio.hpp>
+#include <asio/ssl.hpp>
 #include <core/exception.h>
 #include <core/network/detail/protocol/http1_1/body_parser.h>
 #include <core/network/detail/protocol/http1_1/headers_parser.h>
@@ -61,7 +62,7 @@ namespace network_n
 
             std::string async_receive() const override { /* TODO */ return ""; }
 
-            std::pair<Headers, Body<T>> receive(asio::ip::tcp::socket& socket) const override {
+            std::pair<Headers, Body<T>> receive(asio::ssl::stream<asio::ip::tcp::socket>& socket) const override {
                 using namespace network_n;
                 using namespace asio;
 
@@ -91,10 +92,14 @@ namespace network_n
             }
 
             void async_send() const override { /* TODO */ }
-            void send() const override { /* TODO */ }
+
+            void send(asio::ssl::stream<asio::ip::tcp::socket>& socket, const std::string& stringRequest) const override {
+                using namespace asio;
+                write(socket, buffer(stringRequest));
+            }
 
         private:
-            const uint16_t DEFAULT_PORT = 80;
+            const uint16_t DEFAULT_PORT = 443;
 
             // TODO: Change "END_OF_HEADERS_TOKEN" to be a const member variable if used more than once in the same class.
             // CAUTION: DO NOT call this function with a r-value.
