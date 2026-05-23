@@ -5,25 +5,54 @@
 #include <core/network/interface/protocol.h>
 #include <core/network/network.h>
 #include <memory>
+#include <unordered_map>
 
 
 namespace network_n
 {
     namespace protocol_n
     {
+        template <typename T>
         class Factory {
         public:
-            template <typename T>
             static std::shared_ptr<Protocol_i<T>> create(const Protocol& protocol) {
-                switch (protocol)
-                {
-                case Protocol::HTTP1_1:
-                    return Http1_1<T>::instance();
-                case Protocol::NONE:
+                const auto& protocols = getProtocols();
+
+                if (protocol == Protocol::NONE)
                     throw InvalidArgument("Cannot be NONE", "Protocol");
-                default:
+                else if (not protocols.contains(protocol))
                     throw Exception(std::format("Protocol #{}: Not Handled", to_underlying(protocol)));
-                }
+
+                return protocols.at(protocol);
+            }
+
+            static std::shared_ptr<Protocol_i<T>> create(const std::string& alpnExtension) {
+                const auto& alpnExtensions = getALPNExtensions();
+
+                if (not alpnExtensions.contains(alpnExtension))
+                    throw Exception(std::format("ALPN extension \"{}\": Not Handled", alpnExtension));
+
+                return create(alpnExtensions.at(alpnExtension));
+            }
+
+        private:
+            static const std::unordered_map<Protocol, std::shared_ptr<Protocol_i<T>>>& getProtocols() {
+                static const std::unordered_map<Protocol, std::shared_ptr<Protocol_i<T>>> PROTOCOLS = { { Protocol::HTTP1_1, Http1_1<T>::instance() } };
+                return PROTOCOLS;
+            }
+
+            static std::unordered_map<std::string, Protocol> getALPNExtensions() {
+                static const std::unordered_map<std::string, Protocol> ALPN_EXTENSIONS = buildExtensionToProtocolUmap();
+                return ALPN_EXTENSIONS;
+            }
+
+            static std::unordered_map<std::string, Protocol> buildExtensionToProtocolUmap() {
+                std::unordered_map<std::string, Protocol> extensionsToProtocol;
+
+                for (const auto& [protocolEnum, pointer] : getProtocols())
+                    extensionsToProtocol[pointer->alpnExtension()] = protocolEnum;
+
+                return extensionsToProtocol;
             }
         };
     }

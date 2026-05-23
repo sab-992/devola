@@ -30,14 +30,6 @@ namespace http_n
             initFromStartLineInformation(requestInfo);
         }
 
-        Request(network_n::Headers&& headers, network_n::Body<T>&& body)
-        : network_n::Message<Request<T>, T>(http_n::DEFAULT_PROTOCOL), m_port(this->protocol()->defaultPort()) {
-            network_n::Message<Request<T>, T>::set(headers, body);
-
-            const startLineInformation_t& requestInfo = this->protocol()->headersParser()->parseStartLine(this->m_headers->startLine());
-            initFromStartLineInformation(requestInfo);
-        }
-
         Request(const Request<T>& other) : network_n::Message<Request<T>, T>(other) {
             m_lastBuild = other.m_lastBuild ? std::make_unique<memento_n::Request<T>>(*other.m_lastBuild) : nullptr;
             m_APIEndpoint = other.m_APIEndpoint;

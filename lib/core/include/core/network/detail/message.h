@@ -52,7 +52,7 @@ namespace network_n
         }
 
         Derived& setProtocol(protocol_n::Protocol protocol) {
-            return setProtocol(protocol_n::Factory::create<T>(protocol));
+            return setProtocol(protocol_n::Factory<T>::create(protocol));
         }
 
         Derived& setProtocol(std::shared_ptr<protocol_n::Protocol_i<T>> protocol) {

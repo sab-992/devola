@@ -23,7 +23,7 @@ namespace network_n
         public:
             Http1_1(const Singleton<Http1_1<T>>::Creator_s&) {}
 
-            std::string alpn() const override { return "http/1.1"; };
+            std::string alpnExtension() const override { return "http/1.1"; };
 
             std::shared_ptr<BodyParser_i<T>> bodyParser() const override { return http1_1_n::BodyParser<T>::instance(); }
 

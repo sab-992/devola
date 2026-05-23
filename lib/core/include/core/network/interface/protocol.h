@@ -20,7 +20,7 @@ namespace network_n
         public:
             virtual ~Protocol_i() = default;
 
-            virtual std::string alpn() const = 0;
+            virtual std::string alpnExtension() const = 0;
             virtual std::shared_ptr<BodyParser_i<T>> bodyParser() const = 0;
             virtual uint16_t defaultPort() const = 0;
             virtual std::shared_ptr<HeadersParser_i> headersParser() const = 0;
