@@ -46,6 +46,8 @@ namespace network_n
                 }
 
             private:
+                const std::string nextLine = "\r\n";
+
                 std::vector<std::string> chunk(const Headers& headers, std::string_view mergedBody) const {
                     const size_t chunkSize = headers.get("X-IsDownload") == "true" ? DOWNLOAD_BUFFER_MAX_SIZE : REQUEST_BUFFER_MAX_SIZE;
 
@@ -67,9 +69,7 @@ namespace network_n
                     return chunks;
                 }
 
-                // TODO: Change all "const std::string nextLine" to const member variables if multiple references.
                 size_t getChunkSize(std::string_view message, size_t startPos=0) const {
-                    const std::string nextLine = "\r\n";
                     const size_t EOL = message.find(nextLine);
 
                     if (EOL == std::string::npos)
@@ -88,7 +88,6 @@ namespace network_n
                     if (chunkedBody.empty())
                         return "";
 
-                    const std::string nextLine = "\r\n";
                     std::string merged;
                     while (const size_t nextChunkSize = BodyParser<T>::getChunkSize(chunkedBody)) {
                         chunkedBody = chunkedBody.substr(chunkedBody.find(nextLine) + nextLine.size());

@@ -66,8 +66,6 @@ namespace network_n
                 using namespace network_n;
                 using namespace asio;
 
-                const std::string END_OF_HEADERS_TOKEN = "\r\n\r\n";
-
                 std::string rawHeaders;
                 read_until(socket,  dynamic_buffer(rawHeaders), std::string_view(END_OF_HEADERS_TOKEN));
 
@@ -99,12 +97,11 @@ namespace network_n
             }
 
         private:
+            const std::string END_OF_HEADERS_TOKEN = "\r\n\r\n";
             const uint16_t DEFAULT_PORT = 443;
 
-            // TODO: Change "END_OF_HEADERS_TOKEN" to be a const member variable if used more than once in the same class.
             // CAUTION: DO NOT call this function with a r-value.
             std::pair<std::string_view, std::string_view> splitMessage(std::string_view message) const {
-                const std::string END_OF_HEADERS_TOKEN = "\r\n\r\n";
                 const size_t END_OF_HEADERS = message.find(END_OF_HEADERS_TOKEN);
 
                 if (END_OF_HEADERS == std::string::npos)
