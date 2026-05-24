@@ -30,14 +30,6 @@ namespace http_n
             initFromStartLineInformation(responseInfo);
         }
 
-        Response(network_n::Headers&& headers, network_n::Body<T>&& body)
-        : network_n::Message<Response<T>, T>(http_n::DEFAULT_PROTOCOL) {
-            network_n::Message<Response<T>, T>::set(headers, body);
-
-            const startLineInformation_t& responseInfo = this->protocol()->headersParser()->parseStartLine(this->m_headers->startLine());
-            initFromStartLineInformation(responseInfo);
-        }
-
         Response(const Response<T>& other) : network_n::Message<Response<T>, T>(other) {
             m_lastBuild = other.m_lastBuild ? std::make_unique<memento_n::Response<T>>(*other.m_lastBuild) : nullptr;
             m_status = other.m_status;

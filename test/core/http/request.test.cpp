@@ -37,7 +37,7 @@ TYPED_TEST_SUITE(RequestTest, networkInnerTypes_t<http_n::Request>);
 
 TYPED_TEST(RequestTest, Constructor_HasDefaultProtocol) {
     TypeParam request;
-    EXPECT_EQ(network_n::protocol_n::Factory::create<decltype(this->getTestBody())>(http_n::DEFAULT_PROTOCOL), request.protocol());
+    EXPECT_EQ(network_n::protocol_n::Factory<decltype(this->getTestBody())>::create(http_n::DEFAULT_PROTOCOL), request.protocol());
 }
 
 TYPED_TEST(RequestTest, BuildWithURL_AddsHostHeader) {
@@ -62,7 +62,7 @@ TYPED_TEST(RequestTest, BuildWithMethodAndAPIEndpoint_CreatesValidStartline) {
     const std::string EXPECTED_METHOD = "POST";
     const std::string EXPECTED_API_ENDPOINT = "/test";
     const Protocol EXPECTED_PROTOCOL = Protocol::HTTP1_1;
-    const auto protocol = Factory::create<decltype(this->getTestBody())>(EXPECTED_PROTOCOL);
+    const auto protocol = Factory<decltype(this->getTestBody())>::create(EXPECTED_PROTOCOL);
     const std::string EXPECTED_STARTLINE = std::format("{} {} {}", EXPECTED_METHOD,
                                                                    EXPECTED_API_ENDPOINT,
                                                                    protocol->name());
@@ -83,7 +83,7 @@ TYPED_TEST(RequestTest, PrepareTransmissionPackets_ReturnsPacketsToSend) {
     using namespace network_n;
     using network_n::Code;
 
-    const std::vector<std::string> EXPECTED_PACKETS = { "POST / HTTP/1.1\r\nHost: www.test.com:80", this->getTestStringBody() };
+    const std::vector<std::string> EXPECTED_PACKETS = { "POST / HTTP/1.1\r\nHost: www.test.com:443", this->getTestStringBody() };
     TypeParam request;
     request.setMethod("POST")
            .setAPIEndpoint("/")
@@ -133,7 +133,7 @@ TYPED_TEST(RequestTest, Set_CreatesValidHTTPRequest) {
     const uint16_t EXPECTED_PORT = 5503;
     const auto EXPECTED_BODY = this->getTestBody();
     const auto EXPECTED_STRING_BODY = this->getTestStringBody();
-    const auto EXPECTED_PROTOCOL = protocol_n::Factory::create<decltype(this->getTestBody())>(http_n::DEFAULT_PROTOCOL);
+    const auto EXPECTED_PROTOCOL = protocol_n::Factory<decltype(this->getTestBody())>::create(http_n::DEFAULT_PROTOCOL);
     const std::unordered_map<std::string, std::string> headersUMap{ { "Host",              std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT) },
                                                                     { "Transfer-encoding", "chunked" },
                                                                     { "Accept",            "application/xml" },

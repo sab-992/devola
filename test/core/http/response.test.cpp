@@ -36,7 +36,7 @@ TYPED_TEST_SUITE(ResponseTest, networkInnerTypes_t<http_n::Response>);
 TYPED_TEST(ResponseTest, Constructor_HasDefaultProtocol) {
     TypeParam response;
 
-    EXPECT_EQ(network_n::protocol_n::Factory::create<decltype(this->getTestBody())>(http_n::DEFAULT_PROTOCOL), response.protocol());
+    EXPECT_EQ(network_n::protocol_n::Factory<decltype(this->getTestBody())>::create(http_n::DEFAULT_PROTOCOL), response.protocol());
 }
 
 TYPED_TEST(ResponseTest, SetStatus_CreatesStatusWithCorrectCode) {
@@ -58,7 +58,7 @@ TYPED_TEST(ResponseTest, BuildWithStatus_CreatesValidStartline) {
 
     const Status_s EXPECTED_STATUS(Code::NOT_FOUND);
     const protocol_n::Protocol EXPECTED_PROTOCOL = protocol_n::Protocol::HTTP1_1;
-    const std::string EXPECTED_STARTLINE = std::format("{} {} {}", Factory::create<json>(EXPECTED_PROTOCOL)->name(), to_underlying(EXPECTED_STATUS.code()), EXPECTED_STATUS.reason());
+    const std::string EXPECTED_STARTLINE = std::format("{} {} {}", Factory<decltype(this->getTestBody())>::create(EXPECTED_PROTOCOL)->name(), to_underlying(EXPECTED_STATUS.code()), EXPECTED_STATUS.reason());
 
     TypeParam response;
     response.setStatus(EXPECTED_STATUS.code()).build();
@@ -98,7 +98,7 @@ TYPED_TEST(ResponseTest, Set_CreatesValidHTTPResponse) {
     const protocol_n::Protocol EXPECTED_PROTOCOL = protocol_n::Protocol::HTTP1_1;
     const auto EXPECTED_BODY = this->getTestBody();
     const auto EXPECTED_STRING_BODY = this->getTestStringBody();
-    const auto protocol = protocol_n::Factory::create<decltype(this->getTestBody())>(EXPECTED_PROTOCOL);
+    const auto protocol = protocol_n::Factory<decltype(this->getTestBody())>::create(EXPECTED_PROTOCOL);
     const std::unordered_map<std::string, std::string> headersUMap{ {"Transfer-encoding", "chunked"}, {"Content-Length", std::to_string(EXPECTED_STRING_BODY.size())}};
 
     const std::string EXPECTED_RESPONSE = std::format("{} {} {}\r\n{}\r\n\r\n{}", protocol->name(),
