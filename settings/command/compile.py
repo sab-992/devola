@@ -29,7 +29,7 @@ class CMake(Command, Directory, ServiceUpdater):
         if platform.system() == "Windows":
             cmake_command.append(f"-DPostgreSQL_ROOT={POSTGRE_INSTALLATION_PATH}")
 
-        return [cmake_command + [f"-DCMAKE_BUILD_TYPE=Debug", *extra_args, ".."] + self.__fs.extra_build_options()]
+        return [cmake_command + [f"-DCMAKE_BUILD_TYPE=Debug", *extra_args, "..", "--fresh"] + self.__fs.extra_build_options()]
 
     def details(self) -> str:
         return "Use the CMakeLists.txt to prepare the environment for the application.\n\n" \
