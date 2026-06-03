@@ -60,7 +60,33 @@ namespace network_n
                 return  { headersParser()->parseStartLine(headers.startLine()), headers, body };
             }
 
-            std::string async_receive() const override { /* TODO */ return ""; }
+            asio::awaitable<std::pair<Headers, Body<T>>> async_receive(asio::ssl::stream<asio::ip::tcp::socket>& socket) const override {
+                using namespace network_n;
+                using namespace asio;
+
+                std::string rawHeaders;
+                co_await async_read_until(socket,  dynamic_buffer(rawHeaders), std::string_view(END_OF_HEADERS_TOKEN), use_awaitable);
+
+                size_t endOfHeadersPos = rawHeaders.find(END_OF_HEADERS_TOKEN);
+                const std::string extractedPartOfBody = rawHeaders.substr(endOfHeadersPos + END_OF_HEADERS_TOKEN.size());
+
+                std::string rawBody;
+                auto parser = headersParser();
+                Headers headers(parser);
+                headers.parse(rawHeaders.substr(0, endOfHeadersPos));
+                if (http1_1_n::HeadersParser::isContentChunked(headers))
+                    co_await async_read_until(socket,  dynamic_buffer(rawBody), std::string_view(std::format("0{}", END_OF_HEADERS_TOKEN)), use_awaitable);
+                else if (not headers.get("Content-Length").empty()) {
+                    unsigned long contentLength = std::stoul(headers.get("Content-Length"));
+                    co_await async_read(socket, dynamic_buffer(rawBody), transfer_exactly(contentLength - extractedPartOfBody.size()), use_awaitable);
+                }
+
+                Body<T> body(bodyParser());
+                body.parse(headers, extractedPartOfBody + rawBody);
+
+                std::pair<network_n::Headers, network_n::Body<T>> result = { std::move(headers), std::move(body)};
+                co_return result;
+            }
 
             std::pair<Headers, Body<T>> receive(asio::ssl::stream<asio::ip::tcp::socket>& socket) const override {
                 using namespace network_n;
@@ -89,7 +115,10 @@ namespace network_n
                 return { std::move(headers), std::move(body) };
             }
 
-            void async_send() const override { /* TODO */ }
+            asio::awaitable<void> async_send(asio::ssl::stream<asio::ip::tcp::socket>& socket, const std::string& stringRequest) const override {
+                using namespace asio;
+                co_await async_write(socket, buffer(stringRequest));
+            }
 
             void send(asio::ssl::stream<asio::ip::tcp::socket>& socket, const std::string& stringRequest) const override {
                 using namespace asio;
