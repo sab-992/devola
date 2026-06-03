@@ -30,7 +30,7 @@ namespace http_n
         }
 
         template<typename T>
-        asio::awaitable<Response<T>> async_receive(asio::ssl::stream<asio::ip::tcp::socket>&& socket) const { return receive<T>(socket); }
+        asio::awaitable<Response<T>> async_receive(asio::ssl::stream<asio::ip::tcp::socket>&& socket) const { return async_receive<T>(socket); }
 
         template<typename T>
         asio::awaitable<asio::ssl::stream<asio::ip::tcp::socket>> async_send(const Request<T>& request) {
