@@ -23,22 +23,13 @@ namespace process_n
         }
 
         #ifdef __linux__
-        Process& launch(const std::string& command) {
+        Process& launch(std::string_view command) {
             processId_t pid = fork();
 
-            if (pid < 0) throw Exception("Error while creating process");
-            if (pid == 0) { std::system(command.c_str()); std::exit(0); }
-
-            auto [it, inserted] = m_processes.emplace(pid, pid);
-            return it->second;
-        }
-
-        template <typename F, typename... Args> requires std::invocable<F, Args...>
-        Process& launch(F&& function, Args&&... args) {
-            processId_t pid = fork();
+            const std::string background_process_cmd = std::format("{} &", command);
 
             if (pid < 0) throw Exception("Error while creating process");
-            if (pid == 0) { std::invoke(std::forward<F>(function), std::forward<Args>(args)...); std::exit(0); }
+            if (pid == 0) { std::system(background_process_cmd.c_str()); std::exit(0); }
 
             auto [it, inserted] = m_processes.emplace(pid, pid);
             return it->second;
