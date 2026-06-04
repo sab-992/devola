@@ -26,7 +26,6 @@
             int status = 0;
             waitpid(m_pid, &status, 0);
             m_status = Status_en::TERMINATED;
-            std::cout << "done after waiting: " << m_pid << std::endl;
             return WEXITSTATUS(status);
         }
 
@@ -35,7 +34,6 @@
 
             ::kill(m_pid, SIGTERM);
             m_status = Status_en::TERMINATED;
-            std::cout << "terminated: " << m_pid << std::endl;
         }
 
     private:
