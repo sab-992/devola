@@ -18,6 +18,10 @@ namespace http_n
         Http(asio::io_context* ctx) : m_ioContext(ctx) {}
         ~Http() = default;
 
+        #ifdef DEBUG_MODE_ENABLED
+            void disablePeerVerification() { m_sslMode = asio::ssl::verify_none; }
+        #endif
+
         template<typename T>
         asio::awaitable<Response<T>> async_receive(asio::ssl::stream<asio::ip::tcp::socket>& socket) const {
             const std::string& alpnExtension = readALPNExtension(socket);
@@ -100,6 +104,7 @@ namespace http_n
 
     private:
         asio::io_context* m_ioContext;
+        int m_sslMode = asio::ssl::verify_peer;
 
         void negotiateAlpnExtension(asio::ssl::context& context, std::string_view extension) const {
             const std::string& prefixedProtos = std::format("{}{}", static_cast<char>(extension.size()), extension);
@@ -119,7 +124,7 @@ namespace http_n
 
             negotiateAlpnExtension(sslContext, protocol->alpnExtension());
 
-            sslContext.set_verify_mode(ssl::verify_peer);
+            sslContext.set_verify_mode(m_sslMode);
             sslContext.set_default_verify_paths();
 
             asio::ssl::stream<tcp::socket> socket(*m_ioContext, sslContext);
