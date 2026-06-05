@@ -141,7 +141,7 @@ namespace http_n
             SSL_get0_alpn_selected(ssl, &alpn, &alpn_len);
 
             if (not alpn or alpn_len <= 0)
-                throw Exception("No ALPN extension negotiiated");
+                throw Exception("No ALPN extension negotiated");
 
             return std::string(reinterpret_cast<const char*>(alpn), alpn_len);
         }
