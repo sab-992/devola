@@ -18,3 +18,9 @@ inline void split(std::string_view element, std::vector<std::string>& resultVect
     }
     resultVector.push_back(std::string(string));
 }
+
+inline std::vector<std::string> split(std::string_view element, std::string_view splittingToken=" ", size_t start=0, size_t end=std::string::npos) {
+    std::vector<std::string> result;
+    split(element, result, splittingToken, start, end);
+    return result;
+}

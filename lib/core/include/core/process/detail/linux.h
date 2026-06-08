@@ -21,8 +21,6 @@
         bool valid() const { return m_pid > 0; }
 
         int wait() {
-            if (m_status != Status_en::RUNNING) return -1;
-
             int status = 0;
             waitpid(m_pid, &status, 0);
             m_status = Status_en::TERMINATED;
