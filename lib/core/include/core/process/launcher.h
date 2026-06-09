@@ -30,10 +30,6 @@ namespace process_n
 
             using pipeFds_t = std::array<int, 2>;
 
-            Process& launch(const std::string& executable, const std::string& mergedArgs, bool waitUntilReady=false) {
-                return launch(executable, split(mergedArgs), waitUntilReady);
-            }
-
             Process& launch(const std::string& executable, std::vector<std::string> stringArgs, bool waitUntilReady=false) {
                 stringArgs.insert(stringArgs.begin(), executable);
 
