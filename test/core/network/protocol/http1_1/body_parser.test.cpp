@@ -17,7 +17,7 @@ public:
         using type = network_n::protocol_n::http1_1_n::BodyParser<ContentType>;
     };
 
-    using Inner = InnerTypes<T, BodyParserTypedTest<T>::template TemplatedBodyParser>;
+    using Inner = InnerTemplatedTypes<T, BodyParserTypedTest<T>::template TemplatedBodyParser>;
 
 protected:
     auto getTestBody(bool alt=false) {
@@ -29,7 +29,7 @@ protected:
     }
 };
 
-TYPED_TEST_SUITE(BodyParserTypedTest, networkInnerTypes_t<network_n::protocol_n::http1_1_n::BodyParser>);
+TYPED_TEST_SUITE(BodyParserTypedTest, networkTemplatedInnerTypes_t<network_n::protocol_n::http1_1_n::BodyParser>);
 
 TYPED_TEST(BodyParserTypedTest, Instance_ReturnsValidPointer) {
     EXPECT_NE(nullptr, TypeParam::instance());

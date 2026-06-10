@@ -19,7 +19,7 @@ public:
         using type = http_n::Response<ContentType>;
     };
 
-    using Inner = InnerTypes<T, ResponseTest<T>::template TemplatedResponse>;
+    using Inner = InnerTemplatedTypes<T, ResponseTest<T>::template TemplatedResponse>;
 
 protected:
     auto getTestBody(bool alt=false) {
@@ -31,7 +31,7 @@ protected:
     }
 };
 
-TYPED_TEST_SUITE(ResponseTest, networkInnerTypes_t<http_n::Response>);
+TYPED_TEST_SUITE(ResponseTest, networkTemplatedInnerTypes_t<http_n::Response>);
 
 TYPED_TEST(ResponseTest, Constructor_HasDefaultProtocol) {
     TypeParam response;

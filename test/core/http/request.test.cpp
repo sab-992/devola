@@ -21,7 +21,7 @@ public:
         using type = http_n::Request<ContentType>;
     };
 
-    using Inner = InnerTypes<T, RequestTest<T>::template TemplatedRequest>;
+    using Inner = InnerTemplatedTypes<T, RequestTest<T>::template TemplatedRequest>;
 
 protected:
     auto getTestBody(bool alt=false) {
@@ -33,7 +33,7 @@ protected:
     }
 };
 
-TYPED_TEST_SUITE(RequestTest, networkInnerTypes_t<http_n::Request>);
+TYPED_TEST_SUITE(RequestTest, networkTemplatedInnerTypes_t<http_n::Request>);
 
 TYPED_TEST(RequestTest, Constructor_HasDefaultProtocol) {
     TypeParam request;

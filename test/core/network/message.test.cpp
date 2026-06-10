@@ -18,7 +18,7 @@ public:
 
 protected:
     auto getTestBody(bool alt=false) {
-        using Inner = InnerTypes<MessageType, MessageTest<MessageType>::template TemplatedMessage>;
+        using Inner = InnerTemplatedTypes<MessageType, MessageTest<MessageType>::template TemplatedMessage>;
         return Inner::getTestObject(Inner::getTestStringObject(alt));
     }
 };
@@ -104,5 +104,5 @@ REGISTER_TYPED_TEST_SUITE_P(MessageTest, SetBody_AddsNewBody,
                                          SetHeader_OverwritesExistingHeader,
                                          SetProtocolWithoutProtocol_ThrowsException);
 
-INSTANTIATE_TYPED_TEST_SUITE_P(HTTPRequestTestSuite, MessageTest, networkInnerTypes_t<http_n::Request>);
-INSTANTIATE_TYPED_TEST_SUITE_P(HTTPResponseTestSuite, MessageTest, networkInnerTypes_t<http_n::Response>);
+INSTANTIATE_TYPED_TEST_SUITE_P(HTTPRequestTestSuite, MessageTest, networkTemplatedInnerTypes_t<http_n::Request>);
+INSTANTIATE_TYPED_TEST_SUITE_P(HTTPResponseTestSuite, MessageTest, networkTemplatedInnerTypes_t<http_n::Response>);

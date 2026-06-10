@@ -16,7 +16,7 @@ class SerializerTest : public ::testing::Test {
     };
 
 public:
-    using Inner = InnerTypes<Serializer, SerializerTest<Serializer>::template TemplatedSerializer>;
+    using Inner = InnerTemplatedTypes<Serializer, SerializerTest<Serializer>::template TemplatedSerializer>;
 
     auto getTestObject(bool alt=false) {
         return Inner::getTestObject(Inner::getTestStringObject(alt));

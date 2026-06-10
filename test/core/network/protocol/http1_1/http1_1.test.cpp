@@ -15,7 +15,7 @@ public:
         using type = network_n::protocol_n::Http1_1<ContentType>;
     };
 
-    using Inner = InnerTypes<T, Http1_1Test<T>::template TemplatedBody>;
+    using Inner = InnerTemplatedTypes<T, Http1_1Test<T>::template TemplatedBody>;
 
 protected:
     auto getTestObject(bool alt=false) {
@@ -31,7 +31,7 @@ protected:
     }
 };
 
-TYPED_TEST_SUITE(Http1_1Test, networkInnerTypes_t<network_n::protocol_n::Http1_1>);
+TYPED_TEST_SUITE(Http1_1Test, networkTemplatedInnerTypes_t<network_n::protocol_n::Http1_1>);
 
 TYPED_TEST(Http1_1Test, Packetize_ReturnsVectorContainingPacketsToSend) {
     using namespace network_n;

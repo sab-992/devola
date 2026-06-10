@@ -19,7 +19,7 @@ public:
         using type = network_n::Body<ContentType>;
     };
 
-    using Inner = InnerTypes<T, BodyTest<T>::template TemplatedBody>;
+    using Inner = InnerTemplatedTypes<T, BodyTest<T>::template TemplatedBody>;
 
 protected:
     auto getTestBody(bool alt=false) {
@@ -35,7 +35,7 @@ protected:
     }
 };
 
-TYPED_TEST_SUITE(BodyTest, networkInnerTypes_t<network_n::Body>);
+TYPED_TEST_SUITE(BodyTest, networkTemplatedInnerTypes_t<network_n::Body>);
 
 TYPED_TEST(BodyTest, ConstructorWithNullptr_ThrowsException) {
     EXPECT_THROW(TypeParam(nullptr), InvalidArgument);
