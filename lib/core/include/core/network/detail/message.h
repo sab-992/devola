@@ -86,6 +86,14 @@ namespace network_n
             m_protocol = other.m_protocol;
         };
 
+        static void swap(Message<Derived, T>* lhs, Message<Derived, T>* rhs) {
+            using std::swap;
+
+            swap(lhs->m_body, rhs->m_body);
+            swap(lhs->m_headers, rhs->m_headers);
+            swap(lhs->m_protocol, rhs->m_protocol);
+        }
+
         Message& operator=(Message<Derived, T>&&) = default;
         Message(Message&&) = default;
 

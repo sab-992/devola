@@ -59,7 +59,7 @@ namespace http_n
         friend void swap(Response<T>& lhs, Response<T>& rhs) {
             using std::swap;
 
-            swap(static_cast<network_n::Message<Response<T>, T>&>(lhs), static_cast<network_n::Message<Response<T>, T>&>(rhs));
+            network_n::Message<Response<T>, T>::swap(&lhs, &rhs);
 
             swap(lhs.m_lastBuild, rhs.m_lastBuild);
             swap(lhs.m_status, rhs.m_status);

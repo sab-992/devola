@@ -77,7 +77,7 @@ namespace http_n
         friend void swap(Request<T>& lhs, Request<T>& rhs) {
             using std::swap;
 
-            swap(static_cast<network_n::Message<Request<T>, T>&>(lhs), static_cast<network_n::Message<Request<T>, T>&>(rhs));
+            network_n::Message<Request<T>, T>::swap(&lhs, &rhs);
 
             swap(lhs.m_APIEndpoint, rhs.m_APIEndpoint);
             swap(lhs.m_lastBuild, rhs.m_lastBuild);
