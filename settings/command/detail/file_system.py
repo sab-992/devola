@@ -1,9 +1,11 @@
+import json
 import os
 from pathlib import Path
 
-from .config import ROOT_FOLDER_NAME, DATABASE_LIB_NAME
 from .errors import InvalidInputError
 from .log import log, Color
+from settings.config import EXTRA_BUILD_OPTIONS_FILENAME, DATABASE_LIB_NAME, ROOT_FOLDER_NAME
+
 
 class FileSystem():
     def __init__(self):
@@ -26,9 +28,6 @@ include("${'{'}cmake_modules_path{'}'}/FindCppFiles.cmake")
 {f"""include("${'{'}cmake_modules_path{'}'}/DatabaseLibrary.cmake")""" if DATABASE_LIB_NAME in libraries else ""}
 
 project({service_name_lower} VERSION 1.0)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_cpp_files("${'{'}{service_name_lower}_path{'}'}/src" {service_name_lower}_sources)
 
@@ -90,13 +89,18 @@ services:
         rm -rf build/
         mkdir -p build;
         cd build;
-        cmake -DCMAKE_BUILD_TYPE=release -DSERVICE_NAME={service_name} ..;
+        cmake -DCMAKE_BUILD_TYPE=Release -DSERVICE_NAME={service_name} ..;
         cmake --build . --parallel $$(nproc);
         ./server/{service_name}
 networks:
   app-network:
     external: true
 """
+
+    def extra_build_options(self) -> list[str]:
+        path = str(self.find_root_folder() / "settings" / EXTRA_BUILD_OPTIONS_FILENAME)
+        extra_options: dict[str, str] = json.loads(self.read(path))
+        return [*sum(extra_options.items(), ())]
 
     def find_root_folder(self):
         current_path = Path.cwd()
@@ -105,7 +109,7 @@ networks:
             current_path = parent / ROOT_FOLDER_NAME
             if current_path.exists():
                 return current_path
-            
+
         raise Exception("Root folder not found!")
 
     def git_ignore(self, name: str) -> str:

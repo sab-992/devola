@@ -3,6 +3,8 @@
 */build/*
 build
 *.pyc
+.clangd
+CMakePresets.json
 
 ## Ignore environment files
 *.env

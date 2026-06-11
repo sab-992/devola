@@ -1,34 +1,42 @@
+import platform
+import subprocess
 from argparse import Namespace
 
 from settings.command.detail.command import Command
-from settings.command.detail.options import CLEAN_OPTION, MANUAL_OPTION
+from settings.command.detail.options import CLEAN_OPTION, MANUAL_OPTION, VOLUMES_OPTION
 
-
-REMOVE_DOCKER_CONTAINERS_CMD = "docker rm -f $(docker ps -aq)"
-REMOVE_DOCKER_IMAGES_CMD = "docker rmi -f $(docker images -q)"
-REMOVE_DOCKER_NETWORK_CMD = "docker network rm app-network"
-CLEAN_ALL_CMD = "docker system prune -a --volumes"
 
 class Shutdown(Command):
     def __init__(self):
         Command.__init__(self)
 
     def arguments(self) -> dict[str, dict]:
-        return { "clean": CLEAN_OPTION, "manual": MANUAL_OPTION }
+        return { "clean": CLEAN_OPTION, "volumes": VOLUMES_OPTION, "manual": MANUAL_OPTION }
 
     def command(self) -> str:
         return "shutdown"
 
-    def command_explicit(self, args: Namespace) -> str:
-        return f"{REMOVE_DOCKER_CONTAINERS_CMD};\
-                 {REMOVE_DOCKER_IMAGES_CMD};\
-                 {REMOVE_DOCKER_NETWORK_CMD}{f"; {CLEAN_ALL_CMD}" if args.clean else ""}"
+    def command_explicit(self, args: Namespace) -> list[list[str]]:
+        commands = [["docker", "ps"]]
+
+        if args.clean:
+            clean_command = ["docker", "system", "prune", "-a"]
+
+            if args.volumes:
+                clean_command.append("--volumes")
+
+            commands.insert(0, clean_command)
+
+        return commands
 
     def details(self) -> str:
-        return "Stops and removes ALL locally running containers."
+        return "Stops ALL locally running containers."
     
     def setup(self, args: Namespace) -> str:
-        pass
+        ids = subprocess.check_output(["docker", "ps", "-q"]).decode().split()
+
+        if ids:
+            subprocess.run(["docker", "stop"] + ids)
 
     def teardown(self, args: Namespace) -> str:
         pass

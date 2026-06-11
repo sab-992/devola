@@ -1,8 +1,5 @@
 cmake_policy(SET CMP0135 NEW)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(cmake_modules_path "${CMAKE_CURRENT_LIST_DIR}/../cmake")
 
 include("${cmake_modules_path}/FindCppFiles.cmake")
@@ -19,13 +16,9 @@ enable_testing()
 find_cpp_files("${CMAKE_CURRENT_LIST_DIR}" test_sources)
 add_executable(tests ${test_sources})
 
+target_include_directories(tests PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
 target_link_libraries(tests PRIVATE gtest_main gtest)
 link_all_libraries(tests "${CMAKE_CURRENT_LIST_DIR}/../lib")
-
-if(WIN32)
-    # Windows might need additional libraries
-    target_link_libraries(tests PRIVATE ws2_32)
-endif()
 
 include(GoogleTest)
 gtest_discover_tests(tests)

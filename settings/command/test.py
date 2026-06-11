@@ -1,3 +1,5 @@
+import os
+import platform
 from argparse import Namespace
 
 from settings.command.detail.command import Command
@@ -18,15 +20,27 @@ class Test(Command, Directory, ServiceUpdater):
     def command(self) -> str:
         return "test"
 
-    def command_explicit(self, args: Namespace) -> str:
-        return f"cmake -DCMAKE_BUILD_TYPE=test ..  && cmake --build . {f"--target run_all_tests" if not args.regex else ""}{f"&& ./tests/tests --gtest_filter=\"{args.regex}\"" if args.regex else ""}"
-    
+    def command_explicit(self, args: Namespace) -> list[list[str]]:
+        if platform.system() == "Windows":
+            path = "test/Debug/tests.exe"
+            # Fallback case (might be GNU compiler on Windows)
+            if not os.path.isfile(path):
+                path = "test/tests.exe"
+        else:
+            path = "./test/tests"
+
+        command: list[str] = [self.uniformizePath(path)]
+
+        if args.regex:
+            command.append(f"--gtest_filter=\"{args.regex}\"")
+
+        return [command]
+
     def details(self) -> str:
         return "Launches automated tests."
-    
+
     def setup(self, args: Namespace) -> str:
-        self.update_services()
         self.set_working_directory(self.build_directory())
 
     def teardown(self, args: Namespace) -> str:
-        pass
+        self.reset_working_directory()

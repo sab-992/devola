@@ -1,5 +1,6 @@
 #include <core/logging/log_type.h>
 
+
 rang::fg LogType::m_color;
 
 LogType::LogType(rang::fg color) {

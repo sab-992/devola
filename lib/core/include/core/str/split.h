@@ -1,33 +1,26 @@
 #pragma once
 
+#include <core/conversion/converter.h>
 #include <string>
 #include <vector>
 
 
-// TODO: Add interval start/finish to specify on what to apply the split
-template<typename T>
-void split(T element, std::vector<std::string>& resultVector, char splittingToken = ' ') {
-    if(not std::is_convertible_v<T, std::string>)
-        return;
+// Splits the string at the given range [start, end) using the specified delimiter and stores the results in the provided vector.
+inline void split(std::string_view element, std::vector<std::string>& resultVector, std::string_view splittingToken=" ", size_t start=0, size_t end=std::string::npos) {
+    size_t countFromStart = end == std::string::npos ? end : end - start;
+    std::string_view string = element.substr(start, countFromStart);
 
-    std::string string = static_cast<std::string>(element);
-    if (string.empty())
-        return;
-
-    size_t startOfPart = 0;
-    std::string::iterator it = string.begin();
-    while (true) {
-        size_t currentIndex = it - string.begin();
-        if (it == string.end()) {
-            resultVector.push_back(string.substr(startOfPart, currentIndex - startOfPart));
-            break;
-        }
-
-        ++it;
-        if(string[currentIndex] != splittingToken)
-            continue;
-
-        resultVector.push_back(string.substr(startOfPart, currentIndex - startOfPart));
-        startOfPart = currentIndex + 1;
+    size_t indexSplitToken;
+    while((indexSplitToken = string.find(splittingToken)) != std::string::npos) {
+        const std::string_view part = string.substr(0, indexSplitToken);
+        resultVector.push_back(std::string(part));
+        string = string.substr(indexSplitToken + splittingToken.size());
     }
+    resultVector.push_back(std::string(string));
+}
+
+inline std::vector<std::string> split(std::string_view element, std::string_view splittingToken=" ", size_t start=0, size_t end=std::string::npos) {
+    std::vector<std::string> result;
+    split(element, result, splittingToken, start, end);
+    return result;
 }

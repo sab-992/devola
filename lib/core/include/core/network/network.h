@@ -1,105 +1,94 @@
 #pragma once
 
-#include <core/str/string_formattable.h>
+#include <cmath>
+#include <core/conversion/enum.h>
+#include <core/conversion/string_convertible.h>
 #include <format>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <unordered_map>
 
+using headersUMap_t = std::unordered_map<std::string, std::string>;
+using startLineInformation_t = std::array<std::string, 3>;
 
-using HeadersUMap_t = std::unordered_map<std::string, std::string>;
-using json = nlohmann::json;
 
 namespace network_n
-{   
+{
+    const int KiB = std::pow(2, 10);
+    const size_t DOWNLOAD_BUFFER_MAX_SIZE = 64 * KiB;
+    const size_t REQUEST_BUFFER_MAX_SIZE = 32 * KiB;
+
+    namespace protocol_n
+    {
+        enum class Protocol {
+            HTTP1_1,
+            NONE // For error handling
+        };
+    }
+
     enum class Code : uint16_t {
-        /* --------- 200 --------- */
-        OK = 200,
-        CREATED = 201,
-        ACCEPTED = 202,
-        NO_CONTENT = 204,
-        /* --------- 400 --------- */
-        BAD_REQUEST = 400,
-        UNAUTHORIZED = 401,
-        FORBIDDEN = 403,
-        NOT_FOUND = 404,
-        METHOD_NOT_ALLOWED = 405,
-        CONFLICT = 409,
-        GONE = 410,
-        UNPROCESSABLE_ENTITY = 422,
-        TOO_MANY_REQUESTS = 429,
-        /* --------- 500 --------- */
-        INTERNAL_SERVER_ERROR = 500,
-        NOT_IMPLEMENTED = 501,
-        BAD_GATEWAY = 502,
-        SERVICE_UNAVAILABLE = 503,
-        GATEWAY_TIMEOUT = 504
+        OK                 = 200,
+        CREATED            = 201,
+        NO_CONTENT         = 204,
+        MOVED_PERMANENTLY  = 301,
+        BAD_REQUEST        = 400,
+        UNAUTHORIZED       = 401,
+        FORBIDDEN          = 403,
+        NOT_FOUND          = 404,
+        NOT_ALLOWED        = 405,
+        SERVER_ERROR       = 500,
+
+        NONE = 0 // For error handling
     };
 
-    const std::unordered_map<network_n::Code, std::string> STATUS_REASONS = {
-        /* --------- 200 --------- */
-        { network_n::Code::OK,                      "OK" },
-        { network_n::Code::CREATED,                 "Created" },
-        { network_n::Code::ACCEPTED,                "Accepted" },
-        { network_n::Code::NO_CONTENT,              "No Content" },
-        /* --------- 400 --------- */
-        { network_n::Code::BAD_REQUEST,             "Bad Request" },
-        { network_n::Code::UNAUTHORIZED,            "Unauthorized" },
-        { network_n::Code::FORBIDDEN,               "Forbidden" },
-        { network_n::Code::NOT_FOUND,               "Not Found" },
-        { network_n::Code::METHOD_NOT_ALLOWED,      "Method Not Allowed" },
-        { network_n::Code::CONFLICT,                "Conflict" },
-        { network_n::Code::GONE,                    "Gone" },
-        { network_n::Code::UNPROCESSABLE_ENTITY,    "Unprocessable Entity" },
-        { network_n::Code::TOO_MANY_REQUESTS,       "Too Many Requests" },
-        /* --------- 500 --------- */
-        { network_n::Code::INTERNAL_SERVER_ERROR,   "Internal Server Error" },
-        { network_n::Code::NOT_IMPLEMENTED,         "Not Implemented" },
-        { network_n::Code::BAD_GATEWAY,             "Bad Gateway" },
-        { network_n::Code::SERVICE_UNAVAILABLE,     "Service Unavailable" },
-        { network_n::Code::GATEWAY_TIMEOUT,         "Gateway Timeout"}
-    };
 
-    // TODO: Overload operator==.
-    struct Endpoint : virtual public StringFormattable_i {
+    constexpr std::string getReasonFromStatus(Code code) {
+        switch (code) {
+            case Code::OK:                return "OK";
+            case Code::CREATED:           return "Created";
+            case Code::NO_CONTENT:        return "No Content";
+            case Code::MOVED_PERMANENTLY: return "Moved ";
+            case Code::BAD_REQUEST:       return "Bad Request";
+            case Code::UNAUTHORIZED:      return "Unauthorized";
+            case Code::FORBIDDEN:         return "Forbidden";
+            case Code::NOT_FOUND:         return "Not Found";
+            case Code::NOT_ALLOWED:       return "Method Not Allowed";
+            case Code::SERVER_ERROR:      return "Internal Server Error";
+            case Code::NONE:              return "N/A";
+            default:                      return "Unknown";
+        }
+    }
+
+    struct Status_s : public StringConvertible {
     public:
-        Endpoint() {}
-        Endpoint(std::string host, uint16_t port)
-        : m_host(host), m_port(port) {}
+        Status_s(Code code = Code::NONE) : m_code(code), m_reason(getReasonFromStatus(code)) {}
 
-        std::string host() const { return m_host; }
-        uint16_t port() const { return m_port; }
+        Status_s(const Status_s& other) = default;
+        Status_s(Status_s&& other) = default;
 
-        void setHost(std::string host) { m_host = host; }
-        void setPort(uint16_t port) { m_port = port; }
+        ~Status_s() = default;
 
-    protected:
-        std::string toString() const override { return std::format("{}:{}", m_host, m_port); }
+        Status_s& operator=(const Status_s& other) = default;
+        Status_s& operator=(Status_s&& other) = default;
+
+        bool operator==(const Status_s& other) const { return m_code == other.m_code; }
+        bool operator==(const Code& code) const { return m_code == code; }
+        bool operator==(uint16_t code) const { return to_underlying(m_code) == code; }
+
+        bool operator!=(const Status_s& other) const { return !(*this == other); }
+        bool operator!=(const Code& code) const { return !(*this == code); }
+        bool operator!=(uint16_t code) const { return !(*this == code); }
+
+        friend bool operator==(const Code& lhs, const Status_s& rhs) { return rhs == lhs; }
+        friend bool operator==(uint16_t lhs, const Status_s& rhs) { return rhs == lhs; }
+
+        Code code() const { return m_code; }
+        std::string reason() const { return m_reason; }
+
+        std::string toString() const override { return std::format("{} {}", to_underlying(m_code), m_reason); }
 
     private:
-        std::string m_host;
-        uint16_t m_port;
-    };
-
-    // TODO: Overload operator==, for int and for network_n::Code.
-    class Status : virtual public StringFormattable_i {
-    public:
-        Status() {}
-
-        Status(network_n::Code code)
-        : m_code(static_cast<uint16_t>(code)), m_reason(STATUS_REASONS.at(code)) {}
-
-        uint16_t code() { return m_code; }
-
-        std::string reason() { return m_reason; }
-
-        void updateStatus(network_n::Code code) { m_code = static_cast<uint16_t>(code); m_reason = STATUS_REASONS.at(code); }
-    
-    protected:
-        std::string toString() const override { return std::format("{} {}", m_code, m_reason); }
-
-    private:
-        uint16_t m_code;
+        Code m_code;
         std::string m_reason;
     };
 }

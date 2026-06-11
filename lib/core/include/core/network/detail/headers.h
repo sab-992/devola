@@ -1,74 +1,57 @@
 #pragma once
 
-#include <core/network/interface/headers.h>
+#include <core/conversion/string_convertible.h>
+#include <core/exception.h>
+#include <core/network/interface/headers_parser.h>
 #include <core/network/network.h>
-#include <core/str/string_formattable.h>
+#include <core/str/trim.h>
+#include <core/utility/compare.h>
 #include <string>
-#include <unordered_map>
 
 
 namespace network_n
 {
-    class Headers_c : public network_n::Headers_i {
+    namespace protocol_n { class HeadersParser_i; }
+
+    class Headers : public StringConvertible {
     public:
-        ~Headers_c() = default;
+        Headers(std::shared_ptr<protocol_n::HeadersParser_i> parser);
+        Headers(const Headers& other) = default;
+        Headers(Headers&& other) = default;
 
-        std::string apiEndpoint() const override { return m_apiEndpoint; }
+        ~Headers() = default;
 
-        std::string get() const override { return m_headers; }
+        Headers& operator=(Headers other);
+        Headers& operator=(Headers&& other) = default;
 
-        std::string getHeader(std::string header) const override { return m_headersMap.contains(header) ? m_headersMap.at(header) : ""; }
+        bool operator==(const Headers& other) const;
 
-        HeadersUMap_t map() const override { return m_headersMap; }
+        std::string build() const; // To match the structure of network_n::Body
 
-        network_n::Status status() const override { return m_status; }
+        std::string get(const std::string& name) const;
 
-    protected:
-        std::string m_apiEndpoint;
-        std::string m_headers;
-        HeadersUMap_t m_headersMap;
-        network_n::Status m_status;
+        void parse(std::string_view stringHeaders);
 
-        Headers_c() {}
+        void setHeader(const std::string& name, std::string_view value);
+        void setParser(std::shared_ptr<protocol_n::HeadersParser_i> parser);
+        void setStartLine(std::string_view startLine);
 
-        Headers_c(std::string headers) : m_headers(headers) {}
+        std::string startLine() const;
 
-        Headers_c(std::string apiEndpoint, const HeadersUMap_t& headersMap) : m_apiEndpoint(apiEndpoint), m_headersMap(headersMap) {}
+        friend void swap(Headers& lhs, Headers& rhs) {
+            using std::swap;
 
-        Headers_c(network_n::Code statusCode, const HeadersUMap_t& headersMap) : m_status(network_n::Status(statusCode)), m_headersMap(headersMap) {}
-    
-        void parse(std::string rawHeaders) {
-            if (rawHeaders.empty())
-                return;
-
-
-            std::string headers = extractMessageInformation(rawHeaders);
-
-            const std::string returnToken = "\r\n";          
-            size_t endOfLine = headers.find(returnToken);
-            while(endOfLine != std::string::npos) {
-                if (trim(headers).empty())
-                    break;
-
-                const std::string line = headers.substr(0, endOfLine);
-                size_t startOfNextLine = endOfLine + returnToken.size();
-                if (startOfNextLine >= headers.size() and endOfLine < headers.size())
-                    startOfNextLine = endOfLine;
-
-                headers = headers.substr(startOfNextLine);
-                endOfLine = headers.find(returnToken);
-
-                const size_t valueStartPosition = line.find(':');
-                if (valueStartPosition == std::string::npos)
-                    continue;
-
-                const std::string header = line.substr(0, valueStartPosition);
-                const std::string value = line.substr(valueStartPosition + 1);
-
-                m_headersMap[trim(header)] = trim(value);
-            }
+            swap(lhs.m_headersMap, rhs.m_headersMap);
+            swap(lhs.m_parser, rhs.m_parser);
+            swap(lhs.m_startLine, rhs.m_startLine);
         }
 
-        std::string toString() const override { return m_headers; }
+        headersUMap_t toMap() const;
+        std::string toString() const override;
+
+    private:
+        headersUMap_t m_headersMap;
+        std::shared_ptr<protocol_n::HeadersParser_i> m_parser;
+        std::string m_startLine;
     };
 }
