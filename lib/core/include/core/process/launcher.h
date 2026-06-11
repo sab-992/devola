@@ -16,8 +16,6 @@ namespace process_n
     public:
         Launcher() {}
 
-        friend std::unique_ptr<Launcher> std::make_unique<Launcher>();
-
         ~Launcher() {
             for (auto& [key, process] : m_processes)
                 process.terminate();
@@ -25,6 +23,14 @@ namespace process_n
             for (auto& [key, process] : m_processes)
                 process.wait();
         }
+
+        Launcher(const Launcher&) = delete;
+        Launcher& operator=(const Launcher&) = delete;
+
+        Launcher(Launcher&&) = delete;
+        Launcher& operator=(Launcher&&) = delete;
+
+        friend std::unique_ptr<Launcher> std::make_unique<Launcher>();
 
         #ifdef __linux__
             #include <unistd.h>
