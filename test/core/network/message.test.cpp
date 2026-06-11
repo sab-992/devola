@@ -3,7 +3,7 @@
 #include <core/exception.h>
 #include <core/http/request.h>
 #include <core/http/response.h>
-#include <core/xml/xml.h>
+#include <core/xml/document.h>
 #include <nlohmann/json.hpp>
 #include <utils/core/inner_types.h>
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/exception.h>
-#include <core/xml/xml.h>
+#include <core/xml/document.h>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <utils/core/body_parser_mock.h>

@@ -1,3 +1,3 @@
 #pragma once
 
-#include <core/xml/xml.h>
+#include <core/xml/document.h>

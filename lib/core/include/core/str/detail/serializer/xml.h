@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/str/interface/serializer.h>
-#include <core/xml/xml.h>
+#include <core/xml/document.h>
 #include <memory>
 #include <string>
 

@@ -1,4 +1,4 @@
-#include <core/xml/xml.h>
+#include <core/xml/document.h>
 
 
 xml_n::Document::Document(std::string_view document) {
