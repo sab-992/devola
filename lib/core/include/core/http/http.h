@@ -13,6 +13,8 @@
 
 namespace http_n
 {
+    using sslSocket_t = asio::ssl::stream<asio::ip::tcp::socket>;
+
     class Http {
     public:
         Http(asio::io_context* ctx) : m_ioContext(ctx) {}
@@ -25,7 +27,7 @@ namespace http_n
         #endif
 
         template<typename T>
-        asio::awaitable<Response<T>> async_receive(asio::ssl::stream<asio::ip::tcp::socket>& socket) const {
+        asio::awaitable<Response<T>> async_receive(sslSocket_t& socket) const {
             const std::string& alpnExtension = readALPNExtension(socket);
 
             auto protocol = network_n::protocol_n::Factory<T>::create(alpnExtension);
@@ -36,10 +38,10 @@ namespace http_n
         }
 
         template<typename T>
-        asio::awaitable<Response<T>> async_receive(asio::ssl::stream<asio::ip::tcp::socket>&& socket) const { return async_receive<T>(socket); }
+        asio::awaitable<Response<T>> async_receive(sslSocket_t&& socket) const { return async_receive<T>(socket); }
 
         template<typename T>
-        asio::awaitable<asio::ssl::stream<asio::ip::tcp::socket>> async_send(const Request<T>& request) const {
+        asio::awaitable<sslSocket_t> async_send(const Request<T>& request) const {
             if (not m_ioContext)
                 throw Exception("m_ioContext is nullptr");
 
@@ -48,7 +50,7 @@ namespace http_n
 
             auto protocol = request.protocol();
 
-            asio::ssl::stream<asio::ip::tcp::socket> socket = prepareSSLHandshake(protocol, request.url());
+            sslSocket_t socket = prepareSSLHandshake(protocol, request.url());
 
             tcp::resolver resolver(*m_ioContext);
             co_await async_connect(socket.lowest_layer(), resolver.resolve(request.url(), std::to_string(request.port())));
@@ -61,7 +63,7 @@ namespace http_n
         }
 
         template<typename T>
-        asio::ssl::stream<asio::ip::tcp::socket> send(const Request<T>& request) const {
+        sslSocket_t send(const Request<T>& request) const {
             if (not m_ioContext)
                 throw Exception("m_ioContext is nullptr");
 
@@ -70,7 +72,7 @@ namespace http_n
 
             auto protocol = request.protocol();
 
-            asio::ssl::stream<asio::ip::tcp::socket> socket = prepareSSLHandshake(protocol, request.url());
+            sslSocket_t socket = prepareSSLHandshake(protocol, request.url());
 
             tcp::resolver resolver(*m_ioContext);
             connect(socket.lowest_layer(), resolver.resolve(request.url(), std::to_string(request.port())));
@@ -93,7 +95,7 @@ namespace http_n
         }
 
         template<typename T>
-        Response<T> receive(asio::ssl::stream<asio::ip::tcp::socket>& socket) const {
+        Response<T> receive(sslSocket_t& socket) const {
             const std::string& alpnExtension = readALPNExtension(socket);
 
             auto protocol = network_n::protocol_n::Factory<T>::create(alpnExtension);
@@ -104,7 +106,7 @@ namespace http_n
         }
 
         template<typename T>
-        Response<T> receive(asio::ssl::stream<asio::ip::tcp::socket>&& socket) const { return receive<T>(socket); }
+        Response<T> receive(sslSocket_t&& socket) const { return receive<T>(socket); }
 
     private:
         asio::io_context* m_ioContext;
@@ -117,7 +119,7 @@ namespace http_n
         }
 
         template<typename T>
-        asio::ssl::stream<asio::ip::tcp::socket> prepareSSLHandshake(std::shared_ptr<network_n::protocol_n::Protocol_i<T>> protocol, const std::string& hostName) const {
+        sslSocket_t prepareSSLHandshake(std::shared_ptr<network_n::protocol_n::Protocol_i<T>> protocol, const std::string& hostName) const {
             if (not m_ioContext)
                 throw Exception("m_ioContext is nullptr");
 
@@ -137,7 +139,7 @@ namespace http_n
             return std::move(socket);
         }
 
-        std::string readALPNExtension(asio::ssl::stream<asio::ip::tcp::socket>& socket) const {
+        std::string readALPNExtension(sslSocket_t& socket) const {
             const unsigned char* alpn;
             unsigned int alpn_len;
 
