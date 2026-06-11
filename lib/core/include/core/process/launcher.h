@@ -16,6 +16,8 @@ namespace process_n
     public:
         Launcher() {}
 
+        friend std::unique_ptr<Launcher> std::make_unique<Launcher>();
+
         ~Launcher() {
             for (auto& [key, process] : m_processes)
                 process.terminate();

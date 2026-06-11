@@ -18,6 +18,8 @@ namespace http_n
         Http(asio::io_context* ctx) : m_ioContext(ctx) {}
         ~Http() = default;
 
+        friend std::unique_ptr<Http> std::make_unique<Http>();
+
         #ifdef DEBUG_MODE_ENABLED
             void disablePeerVerification() { m_sslMode = asio::ssl::verify_none; }
         #endif
