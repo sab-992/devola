@@ -1,7 +1,10 @@
 #pragma once
 
 
-enum class Status_en {
-    RUNNING,
-    TERMINATED
-};
+namespace process_n
+{
+    enum class Status_en {
+        RUNNING,
+        TERMINATED
+    };
+}
