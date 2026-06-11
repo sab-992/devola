@@ -9,7 +9,7 @@
 
 class SplitTest : public ::testing::TestWithParam<SPLIT_STRING_PARAM_TYPES> {};
 
-TEST_P(SplitTest, SplitStrings) {
+TEST_P(SplitTest, SplitWithValidParameters_ReturnCorrectlySplitParts) {
     const auto [input, expected] = GetParam();
 
     std::vector<std::string> result;

@@ -12,7 +12,7 @@ const unsigned long FFFFFF = std::pow(2, 24) - 1;
 
 class HexToLongTest : public ::testing::TestWithParam<HEX_TO_LONG_PARAM_TYPES> {};
 
-TEST_P(HexToLongTest, HexToLong) {
+TEST_P(HexToLongTest, FromHexWithValidParameters_ReturnsTheCorrectULongValue) {
     auto [input, expected] = GetParam();
     EXPECT_EQ(fromHex(input), expected);
 }
@@ -22,7 +22,7 @@ INSTANTIATE_TEST_SUITE_P(HexTestSuite, HexToLongTest, ::testing::Values(HEX_TO_L
                                                                         HEX_TO_LONG_PARAM_TYPES{ "000000", 0UL }));
 
 class LongToHex : public ::testing::TestWithParam<LONG_TO_HEX_PARAM_TYPES> {};
-TEST_P(LongToHex, LongToHex) {
+TEST_P(LongToHex, ToHexWithValidParameters_ReturnsTheCorrectHexStringValue) {
     auto [input, expected] = GetParam();
     EXPECT_EQ(toHex(input.first, input.second), expected);
 }
