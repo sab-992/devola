@@ -62,7 +62,7 @@ namespace process_n
             const uint8_t WRITE = 1;
             const uint8_t READ = 0;
 
-            processId_t createProcess(const std::vector<const char*> args, pipeFds_t fds) {
+            processId_t createProcess(const std::vector<const char*> args, pipeFds_t fds) const {
                 processId_t pid = fork();
                 if (pid < 0)
                     throw Exception("Error while creating process");
@@ -81,7 +81,7 @@ namespace process_n
                 vector.push_back(std::to_string(fds[WRITE]));
             }
 
-            std::vector<const char*> convertToCharVector(const std::vector<std::string>& vector) {
+            std::vector<const char*> convertToCharVector(const std::vector<std::string>& vector) const {
                 std::vector<const char*> result(vector.size() + 1);
                 for (size_t i = 0; i < vector.size(); i++)
                     result[i] = vector[i].c_str();

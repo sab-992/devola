@@ -59,7 +59,7 @@ namespace http_n
         }
 
         template<typename T>
-        asio::ssl::stream<asio::ip::tcp::socket> send(const Request<T>& request) {
+        asio::ssl::stream<asio::ip::tcp::socket> send(const Request<T>& request) const {
             if (not m_ioContext)
                 throw Exception("m_ioContext is nullptr");
 
@@ -80,8 +80,10 @@ namespace http_n
             return std::move(socket);
         }
 
+        // The function "function" needs to take its parameters by value. Otherwise, it is possible
+        // that the object would be dangling by the time the async function would run.
         template<typename Function, typename Callback>
-        auto spawn(Function&& function, Callback&& callback) {
+        auto spawn(Function&& function, Callback&& callback) const {
             if (not m_ioContext)
                 throw Exception("m_ioContext is nullptr");
 
