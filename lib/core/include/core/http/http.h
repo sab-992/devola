@@ -37,7 +37,7 @@ namespace http_n
         asio::awaitable<Response<T>> async_receive(asio::ssl::stream<asio::ip::tcp::socket>&& socket) const { return async_receive<T>(socket); }
 
         template<typename T>
-        asio::awaitable<asio::ssl::stream<asio::ip::tcp::socket>> async_send(const Request<T>& request) {
+        asio::awaitable<asio::ssl::stream<asio::ip::tcp::socket>> async_send(const Request<T>& request) const {
             if (not m_ioContext)
                 throw Exception("m_ioContext is nullptr");
 
@@ -113,7 +113,7 @@ namespace http_n
         }
 
         template<typename T>
-        asio::ssl::stream<asio::ip::tcp::socket> prepareSSLHandshake(std::shared_ptr<network_n::protocol_n::Protocol_i<T>> protocol, const std::string& hostName) {
+        asio::ssl::stream<asio::ip::tcp::socket> prepareSSLHandshake(std::shared_ptr<network_n::protocol_n::Protocol_i<T>> protocol, const std::string& hostName) const {
             if (not m_ioContext)
                 throw Exception("m_ioContext is nullptr");
 
