@@ -4,11 +4,13 @@
 #include <string>
 
 
-template <typename T>
 class Converter {
 public:
-    static std::string toString(const T& param) {
+    static std::string toString(const auto& param) {
         try {
+            if constexpr (std::is_same_v<std::decay_t<decltype(param)>, bool>)
+                return param ? "true" : "false";
+
             std::ostringstream oss;
             oss << param;
             return oss.str();
