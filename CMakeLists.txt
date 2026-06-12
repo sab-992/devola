@@ -10,8 +10,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(RUN_TESTS "Build tests" OFF)
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/lib")
-add_compile_definitions(ROOT_DIRECTORY="${CMAKE_CURRENT_LIST_DIR}")
-add_compile_definitions($<$<CONFIG:Debug>:DEBUG_MODE_ENABLED>)
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/CompileDefinitions.cmake")
 
 if(ENABLE_TESTS)
     add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/test")
