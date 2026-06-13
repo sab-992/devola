@@ -21,7 +21,7 @@ public:
 
 private:
     asio::io_context* m_ioCtx;
-    inline static std::unordered_map<time_n::timerId_t, std::shared_ptr<time_n::Timer>> m_timers;
+    std::unordered_map<time_n::timerId_t, std::shared_ptr<time_n::Timer>> m_timers;
 
     static time_n::timerId_t nextID();
 
