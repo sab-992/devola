@@ -13,8 +13,14 @@ public:
     Time(asio::io_context* ioCtx);
     ~Time();
 
+    template<typename Duration=std::chrono::milliseconds>
+    static std::string format(std::string_view specification, const std::chrono::time_point<std::chrono::system_clock>& time) {
+        auto flooredDuration = std::chrono::floor<Duration>(time);
+        return std::vformat(specification, std::make_format_args(flooredDuration));
+    }
+
     static std::chrono::time_point<std::chrono::system_clock> now();
-    static std::string toUTC(std::chrono::time_point<std::chrono::system_clock> time);
+    static std::string toUTC(const std::chrono::time_point<std::chrono::system_clock>& time);
 
     time_n::timerId_t startTimer(const time_n::TimerOptions& options);
     void stopTimer(time_n::timerId_t identifier);

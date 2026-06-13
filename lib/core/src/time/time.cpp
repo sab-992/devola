@@ -43,8 +43,8 @@ std::shared_ptr<time_n::Timer> Time::timer(time_n::timerId_t identifier) {
     return m_timers.at(identifier);
 }
 
-std::string Time::toUTC(std::chrono::time_point<std::chrono::system_clock> time) {
-    return std::format("{:%a, %d %b %Y %H:%M:%S GMT}", std::chrono::floor<std::chrono::seconds>(time));;
+std::string Time::toUTC(const std::chrono::time_point<std::chrono::system_clock>& time) {
+    return format<std::chrono::seconds>("{:%a, %d %b %Y %H:%M:%S GMT}", time);
 }
 
 void Time::validateTimer(time_n::timerId_t identifier) {
