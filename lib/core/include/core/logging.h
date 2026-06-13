@@ -1,4 +1,4 @@
 #pragma once
 
-#include <core/logging/log_type.h>
-#include <core/logging/trace.h>
+#include <core/logging/heavy.h>
+#include <core/logging/light.h>
