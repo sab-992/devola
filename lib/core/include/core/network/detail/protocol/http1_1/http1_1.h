@@ -21,13 +21,8 @@ namespace network_n
         template<typename T>
         class Http1_1 : public Protocol_i<T>, public Singleton<Http1_1<T>> {
         public:
-            Http1_1(const Singleton<Http1_1<T>>::Creator_s&) {}
-
-            Http1_1(const Http1_1&) = delete;
-            Http1_1& operator=(const Http1_1&) = delete;
-
-            Http1_1(Http1_1&&) = delete;
-            Http1_1& operator=(Http1_1&&) = delete;
+            Http1_1(const Singleton<Http1_1<T>>::Private_s&) {}
+            ~Http1_1() = default;
 
             std::string alpnExtension() const override { return "http/1.1"; };
 

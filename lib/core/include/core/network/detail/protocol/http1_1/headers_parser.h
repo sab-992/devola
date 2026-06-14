@@ -21,14 +21,7 @@ namespace network_n
 
             class HeadersParser : public HeadersParser_i, public Singleton<HeadersParser> {
             public:
-                HeadersParser(const Singleton<HeadersParser>::Creator_s&) {};
-
-                HeadersParser(const HeadersParser&) = delete;
-                HeadersParser& operator=(const HeadersParser&) = delete;
-
-                HeadersParser(HeadersParser&&) = delete;
-                HeadersParser& operator=(HeadersParser&&) = delete;
-
+                HeadersParser(const Singleton<HeadersParser>::Private_s&) {};
                 ~HeadersParser() = default;
 
                 bool operator==(const HeadersParser_i& other) const override { return dynamic_cast<const HeadersParser*>(&other) != nullptr; }

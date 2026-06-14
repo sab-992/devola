@@ -27,10 +27,10 @@ namespace time_n
 
     class Timer : public std::enable_shared_from_this<Timer> {
     private:
-        struct Private { explicit Private() = default; };
+        struct Private_s { explicit Private_s() = default; };
 
     public:
-        Timer(const Private&, asio::io_context* ioCtx, timerId_t identifier, const TimerOptions& options);
+        Timer(const Private_s&, asio::io_context* ioCtx, timerId_t identifier, const TimerOptions& options);
 
         static std::shared_ptr<Timer> create(asio::io_context* ioCtx, timerId_t identifier, const TimerOptions& options);
 

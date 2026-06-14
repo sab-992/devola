@@ -17,7 +17,7 @@ namespace log_n {
         using levelInfo_t = std::pair<std::string, rang::fg>;
 
     public:
-        Light(const Creator_s&);
+        Light(const Private_s&);
         ~Light();
 
         template<typename... Args>

@@ -19,14 +19,7 @@ namespace network_n
             template<typename T>
             class BodyParser : public BodyParser_i<T>, public Singleton<BodyParser<T>> {
             public:
-                BodyParser(const Singleton<BodyParser<T>>::Creator_s&) {};
-
-                BodyParser(const BodyParser&) = delete;
-                BodyParser& operator=(const BodyParser&) = delete;
-
-                BodyParser(BodyParser&&) = delete;
-                BodyParser& operator=(BodyParser&&) = delete;
-
+                BodyParser(const Singleton<BodyParser<T>>::Private_s&) {};
                 ~BodyParser() = default;
 
                 bool operator==(const BodyParser_i<T>& other) const override { return dynamic_cast<const BodyParser<T>*>(&other) != nullptr; }

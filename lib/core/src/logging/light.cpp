@@ -1,7 +1,7 @@
 #include <core/logging/light.h>
 
 
-log_n::Light::Light(const Creator_s&) {}
+log_n::Light::Light(const Private_s&) {}
 
 log_n::Light::~Light() {
     resetColor();

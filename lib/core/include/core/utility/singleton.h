@@ -7,11 +7,19 @@
 template <typename Derived>
 class Singleton {
 protected:
-    struct Creator_s {};
+    struct Private_s {};
+
+    Singleton() {};
 
 public:
+    Singleton(const Singleton&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+
+    Singleton(Singleton&&) = delete;
+    Singleton& operator=(Singleton&&) = delete;
+
     static std::shared_ptr<Derived> instance() {
-        static std::shared_ptr<Derived> instance = std::make_shared<Derived>(Creator_s());
+        static std::shared_ptr<Derived> instance = std::make_shared<Derived>(Private_s());
         return instance;
     }
 };
