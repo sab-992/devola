@@ -5,7 +5,7 @@
     #include <unistd.h>
     #include <sys/wait.h>
     #include <core/process/detail/status.h>
-    #include <core/process/launcher.h>
+    #include <core/process/registry.h>
 
 
     using processId_t = pid_t;
