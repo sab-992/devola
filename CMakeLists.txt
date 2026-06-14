@@ -9,6 +9,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(RUN_TESTS "Build tests" OFF)
 
+# Needs to be here to have right root directory.
+add_compile_definitions(ROOT_DIRECTORY="${CMAKE_CURRENT_LIST_DIR}")
+
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/lib")
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/CompileDefinitions.cmake")
 
