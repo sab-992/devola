@@ -5,6 +5,6 @@
 
 class NotSupported : public Exception {
 public:
-    NotSupported(const std::string& message);
+    NotSupported(const std::string& functionName);
     ~NotSupported() = default;
 };
