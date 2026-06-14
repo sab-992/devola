@@ -12,11 +12,11 @@ class Process;
 
 namespace process_n
 {
-    class Launcher {
+    class Registry {
     public:
-        Launcher() {}
+        Registry() {}
 
-        ~Launcher() {
+        ~Registry() {
             for (auto& [key, process] : m_processes)
                 process.terminate();
 
@@ -24,13 +24,13 @@ namespace process_n
                 process.wait();
         }
 
-        Launcher(const Launcher&) = delete;
-        Launcher& operator=(const Launcher&) = delete;
+        Registry(const Registry&) = delete;
+        Registry& operator=(const Registry&) = delete;
 
-        Launcher(Launcher&&) = delete;
-        Launcher& operator=(Launcher&&) = delete;
+        Registry(Registry&&) = delete;
+        Registry& operator=(Registry&&) = delete;
 
-        friend std::unique_ptr<Launcher> std::make_unique<Launcher>();
+        friend std::unique_ptr<Registry> std::make_unique<Registry>();
 
         #ifdef __linux__
             #include <unistd.h>

@@ -46,7 +46,7 @@ protected:
 
 private:
     inline static std::unique_ptr<Process> mockServerProcess;
-    inline static std::unique_ptr<process_n::Launcher> m_processLauncher = std::make_unique<process_n::Launcher>();
+    inline static std::unique_ptr<process_n::Registry> m_processLauncher = std::make_unique<process_n::Registry>();
 };
 
 TYPED_TEST_SUITE(HttpTest, networkInnerTypes_t);
