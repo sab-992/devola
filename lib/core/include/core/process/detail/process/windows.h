@@ -1,6 +1,5 @@
 #pragma once
 
-
 #ifdef _WIN32
-    /* TODO */
+    using processId_t = DWORD;
 #endif

@@ -16,15 +16,12 @@ template<typename T>
 class HttpTest : public ::testing::Test {
 protected:
     static void SetUpTestCase() {
-        if (m_processLauncher)
-            mockServerProcess = std::make_unique<Process>(m_processLauncher->launch("python3", { std::format("{}/test/utils/core/mock_server.py", ROOT_DIRECTORY) }, true));
+        if (m_processRegistry)
+            m_id = m_processRegistry->start("python3", { std::format("{}/test/utils/core/mock_server.py", ROOT_DIRECTORY) }, true).id();
     }
 
     static void TearDownTestCase() {
-        if (not mockServerProcess) return;
-
-        mockServerProcess->terminate();
-        mockServerProcess->wait();
+        m_processRegistry->stop(m_id);
     }
 
     http_n::Http getHttpObject(asio::io_context& ioCtx) {
@@ -45,8 +42,8 @@ protected:
     }
 
 private:
-    inline static std::unique_ptr<Process> mockServerProcess;
-    inline static std::unique_ptr<process_n::Registry> m_processLauncher = std::make_unique<process_n::Registry>();
+    inline static processId_t m_id;
+    inline static std::shared_ptr<process_n::Registry> m_processRegistry = process_n::Registry::instance();
 };
 
 TYPED_TEST_SUITE(HttpTest, networkInnerTypes_t);
