@@ -39,7 +39,6 @@ class AddService(Command):
             # Service Folder
             new_service_directory_path = self.__fs.make_directory(path, name)
 
-            # TODO: Add new service nginx file.
             libraries: set[str] = set()
 
             self.__fs.make_directory(new_service_directory_path, "src")
