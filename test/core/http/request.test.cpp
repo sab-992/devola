@@ -2,7 +2,7 @@
 
 #include <core/exception.h>
 #include <core/http/request.h>
-#include <core/network/protocol_factory.h>
+#include <core/network/detail/protocol/factory.h>
 #include <core/xml/document.h>
 #include <nlohmann/json.hpp>
 #include <format>

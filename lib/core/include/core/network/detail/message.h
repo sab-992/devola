@@ -4,7 +4,7 @@
 #include <core/network/detail/body.h>
 #include <core/network/detail/headers.h>
 #include <core/network/network.h>
-#include <core/network/protocol_factory.h>
+#include <core/network/detail/protocol/factory.h>
 #include <core/utility/interface/builder.h>
 
 

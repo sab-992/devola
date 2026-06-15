@@ -5,4 +5,4 @@
 #include <core/network/interface/networking.h>
 #include <core/network/interface/protocol.h>
 #include <core/network/network.h>
-#include <core/network/protocol_factory.h>
+#include <core/network/detail/protocol/factory.h>
