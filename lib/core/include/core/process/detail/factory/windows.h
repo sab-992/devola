@@ -7,7 +7,6 @@
     #include <string>
 
 
-    // TODO: Complete class
     namespace process_n
     {
         class Factory {
