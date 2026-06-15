@@ -1,4 +1,4 @@
-#include <core/logging/light.h>
+#include <core/logging/light.hpp>
 
 
 log_n::Light::Light(const Private_s&) {}

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <core/str/trim.h>
+#include <core/str/trim.hpp>
 #include <string>
 
 

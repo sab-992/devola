@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
 
-#include <core/exception.h>
-#include <core/http/request.h>
-#include <core/network/detail/protocol/factory.h>
-#include <core/xml/document.h>
+#include <core/exception.hpp>
+#include <core/http/request.hpp>
+#include <core/network/detail/protocol/factory.hpp>
+#include <core/xml/document.hpp>
 #include <nlohmann/json.hpp>
 #include <format>
 #include <string>
-#include <utils/core/build_headers.h>
-#include <utils/core/inner_types.h>
+#include <utils/core/build_headers.hpp>
+#include <utils/core/inner_types.hpp>
 
 
 using http_n::Request;

@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
 
-#include <core/exception.h>
-#include <core/network/detail/body.h>
-#include <core/network/detail/headers.h>
-#include <core/str/hex.h>
+#include <core/exception.hpp>
+#include <core/network/detail/body.hpp>
+#include <core/network/detail/headers.hpp>
+#include <core/str/hex.hpp>
 #include <sstream>
-#include <utils/core/body_parser_mock.h>
-#include <utils/core/headers_parser_mock.h>
-#include <utils/core/inner_types.h>
+#include <utils/core/body_parser_mock.hpp>
+#include <utils/core/headers_parser_mock.hpp>
+#include <utils/core/inner_types.hpp>
 #include <vector>
 
 

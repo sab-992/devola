@@ -1,4 +1,4 @@
-#include <core/process/process.h>
+#include <core/process/process.hpp>
 
 #ifdef __linux__
     Process::Process(processId_t pid) : m_pid(pid), m_status(process_n::Status_en::RUNNING) {}

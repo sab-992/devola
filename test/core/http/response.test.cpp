@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
-#include <core/conversion/enum.h>
-#include <core/exception.h>
-#include <core/http/response.h>
-#include <core/xml/document.h>
+#include <core/conversion/enum.hpp>
+#include <core/exception.hpp>
+#include <core/http/response.hpp>
+#include <core/xml/document.hpp>
 #include <format>
-#include <utils/core/build_headers.h>
-#include <utils/core/inner_types.h>
+#include <utils/core/build_headers.hpp>
+#include <utils/core/inner_types.hpp>
 
 
 using http_n::Response;

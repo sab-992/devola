@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
-#include <core/exception.h>
+#include <core/exception.hpp>
 #include <format>
-#include <core/http/http.h>
-#include <core/http/request.h>
-#include <core/process/registry.h>
-#include <core/http/response.h>
-#include <utils/core/inner_types.h>
+#include <core/http/http.hpp>
+#include <core/http/request.hpp>
+#include <core/process/registry.hpp>
+#include <core/http/response.hpp>
+#include <utils/core/inner_types.hpp>
 
 
 using http_n::Request;

@@ -1,4 +1,4 @@
-#include <core/exception/exception.h>
+#include <core/exception/exception.hpp>
 
 
 Exception::Exception(const std::string& message)

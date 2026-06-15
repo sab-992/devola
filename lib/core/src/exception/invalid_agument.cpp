@@ -1,4 +1,4 @@
-#include <core/exception/invalid_argument.h>
+#include <core/exception/invalid_argument.hpp>
 
 
 InvalidArgument::InvalidArgument(const std::string& message, const std::string& argument)

@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <core/str/detail/serializer/json.h>
-#include <core/str/detail/serializer/string.h>
-#include <core/str/detail/serializer/xml.h>
-#include <utils/core/inner_types.h>
+#include <core/str/detail/serializer/json.hpp>
+#include <core/str/detail/serializer/string.hpp>
+#include <core/str/detail/serializer/xml.hpp>
+#include <utils/core/inner_types.hpp>
 
 
 using serializer_t = ::testing::Types<serializer_n::JSON, serializer_n::XML, serializer_n::String>;

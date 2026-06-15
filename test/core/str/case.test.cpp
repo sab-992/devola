@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <core/str/case.h>
+#include <core/str/case.hpp>
 #include <string>
 
 

@@ -1,4 +1,4 @@
-#include <core/network/detail/headers.h>
+#include <core/network/detail/headers.hpp>
 
 
 network_n::Headers::Headers(std::shared_ptr<protocol_n::HeadersParser_i> parser) {

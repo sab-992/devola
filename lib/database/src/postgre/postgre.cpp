@@ -1,4 +1,4 @@
-#include <database/postgre/postgre.h>
+#include <database/postgre/postgre.hpp>
 
 
 PostgreSQL::PostgreSQL(const Singleton<PostgreSQL>&) {};

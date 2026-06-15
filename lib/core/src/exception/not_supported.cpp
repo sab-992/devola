@@ -1,4 +1,4 @@
-#include <core/exception/not_supported.h>
+#include <core/exception/not_supported.hpp>
 
 
 NotSupported::NotSupported(const std::string& functionName)

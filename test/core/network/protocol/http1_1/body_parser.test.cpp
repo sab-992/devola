@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
-#include <core/exception.h>
-#include <core/network/detail/body.h>
-#include <core/network/detail/headers.h>
-#include <core/network/detail/protocol/http1_1/body_parser.h>
-#include <core/network/network.h>
-#include <utils/core/headers_parser_mock.h>
-#include <utils/core/inner_types.h>
+#include <core/exception.hpp>
+#include <core/network/detail/body.hpp>
+#include <core/network/detail/headers.hpp>
+#include <core/network/detail/protocol/http1_1/body_parser.hpp>
+#include <core/network/network.hpp>
+#include <utils/core/headers_parser_mock.hpp>
+#include <utils/core/inner_types.hpp>
 
 
 template<typename T>

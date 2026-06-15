@@ -1,4 +1,4 @@
-#include <core/process/registry.h>
+#include <core/process/registry.hpp>
 
 
 process_n::Registry::Registry(const Private_s&) {}

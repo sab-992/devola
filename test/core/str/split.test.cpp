@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <core/str/split.h>
+#include <core/str/split.hpp>
 #include <string>
 #include <tuple>
 

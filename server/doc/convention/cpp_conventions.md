@@ -3,7 +3,7 @@
 
 ### File Names
 - **Source files**: `snake_case.cpp`
-- **Header files**: `snake_case.h`
+- **Header files**: `snake_case.hpp`
 
 ### Classes
 - **Concrete/Template classes**: `PascalCase`

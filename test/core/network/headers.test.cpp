@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include <core/exception.h>
-#include <core/network/detail/headers.h>
-#include <core/network/network.h>
-#include <utils/core/build_headers.h>
-#include <utils/core/headers_parser_mock.h>
+#include <core/exception.hpp>
+#include <core/network/detail/headers.hpp>
+#include <core/network/network.hpp>
+#include <utils/core/build_headers.hpp>
+#include <utils/core/headers_parser_mock.hpp>
 
 
 class HeadersTest : public ::testing::Test {

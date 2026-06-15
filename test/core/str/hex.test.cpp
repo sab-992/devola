@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <core/str/hex.h>
+#include <core/str/hex.hpp>
 #include <cmath>
 #include <string>
 
