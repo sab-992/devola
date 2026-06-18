@@ -5,4 +5,3 @@
 #include <core/network/interface/networking.hpp>
 #include <core/network/interface/protocol.hpp>
 #include <core/network/network.hpp>
-#include <core/network/detail/protocol/factory.hpp>
