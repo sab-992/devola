@@ -2,7 +2,7 @@
 
 #include <core/exception.hpp>
 #include <core/process/process.hpp>
-#include <core/process/factory.hpp>
+#include <core/process/detail/factory/factory.hpp>
 #include <core/utility/singleton.hpp>
 #include <core/utility/rehash.hpp>
 #include <unordered_map>
