@@ -2,6 +2,7 @@
 
 #include <core/conversion.hpp>
 #include <core/exception.hpp>
+#include <core/file.hpp>
 #include <core/http.hpp>
 #include <core/logging.hpp>
 #include <core/network.hpp>
