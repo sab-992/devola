@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <core/conversion/enum.hpp>
+#include <core/utility/enum.hpp>
 #include <core/exception.hpp>
 #include <core/http/response.hpp>
 #include <core/xml/document.hpp>

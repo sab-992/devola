@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/conversion/string_convertible.hpp>
+#include <core/utility/string_convertible.hpp>
 #include <pugixml.hpp>
 #include <sstream>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/conversion/enum.hpp>
+#include <core/utility/enum.hpp>
 #include <core/file/detail/status.hpp>
 #include <core/file/detail/type.hpp>
 #include <core/file/file.hpp>

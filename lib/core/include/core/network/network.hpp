@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cmath>
-#include <core/conversion/enum.hpp>
-#include <core/conversion/string_convertible.hpp>
+#include <core/utility/enum.hpp>
+#include <core/utility/string_convertible.hpp>
 #include <format>
 #include <nlohmann/json.hpp>
 #include <string>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/conversion/string_convertible.hpp>
+#include <core/utility/string_convertible.hpp>
 #include <core/exception.hpp>
 #include <core/network/interface/headers_parser.hpp>
 #include <core/network/network.hpp>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/conversion/enum.hpp>
+#include <core/utility/enum.hpp>
 #include <core/network/detail/protocol/http1_1/http1_1.hpp>
 #include <core/network/interface/protocol.hpp>
 #include <core/network/network.hpp>
