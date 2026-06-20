@@ -19,5 +19,7 @@ namespace file_n
         File open(const std::string& path, Args... flags) {
             return File(path, (File::flagToUnderlying(flags) | ...));
         }
+
+        bool createDirectories(std::string_view path);
     };
 }
