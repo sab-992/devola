@@ -129,32 +129,27 @@ networks:
 
     def nginx(self, service_name: str, use_upload_config: bool = False) -> str:
         return f"""\
-server {'{'}
-    location /api/{service_name} {'{'}
+
+location /api/{service_name} {'{'}
+    proxy_pass http://{service_name};
 {
 f"""\
-        proxy_pass http://{service_name};
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-        # Upload specific settings
-        proxy_request_buffering off;
-        proxy_buffering off;
-        proxy_http_version 1.1;
+    # Upload specific settings
+    proxy_request_buffering off;
+    proxy_buffering off;
+    proxy_http_version 1.1;
 
-        chunked_transfer_encoding on;
+    chunked_transfer_encoding on;
 """ if use_upload_config else f"""\
-    location /api/{service_name} {'{'}
-        proxy_pass http://{service_name};
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;"
-"""
-}
-    {'}'}
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;"""}
 {'}'}
 """
     def packages(self, libraries: set[str]) -> str:
@@ -173,8 +168,10 @@ f"""\
         if not os.path.isfile(file_path):
             raise InvalidInputError("Path does not exists!")
 
+        content = ""
         with open(file_path, 'r') as f:
-            return f.read()
+            content = f.read()
+        return content
 
     def write(self, folder_path: str, file_name: str, content: str, skip_if_exists: bool=False):
         if len(folder_path) <= 0:

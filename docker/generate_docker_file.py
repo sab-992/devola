@@ -20,23 +20,23 @@ volumes_config = { "postgre": { "name": "postgre",
 
 def generate_docker_compose(services, networks=None, volumes=None, output_file=None):
     docker_compose = { "services": services}
-    
+
     if networks:
         docker_compose["networks"] = networks
-        
+
     if volumes:
         docker_compose["volumes"] = volumes
-    
+
     if output_file:
         with open(output_file, 'w') as file:
             yaml.dump(docker_compose, file, default_flow_style=False)
             print(f"{GREEN}Docker compose file saved to {output_file}{NC}")
-    
+
     return docker_compose
 
 def load_all_services_from_directory(directory_path: str) -> list[dict[str, any]]:
     json_services = []
-    
+
     if not os.path.exists(directory_path):
         print(f"{RED}ERROR: Specified path do not exist !{NC}")
         return []
@@ -44,7 +44,7 @@ def load_all_services_from_directory(directory_path: str) -> list[dict[str, any]
     for filename in os.listdir(directory_path):
         if filename.endswith('.json'):
             json_services.append(load_service_json(os.path.join(directory_path, filename)))
-    
+
     return json_services
 
 def remove_ports(all_services: dict):
@@ -57,7 +57,7 @@ def remove_ports(all_services: dict):
 def load_service_json(file_path) -> dict[str, any]:
     with open(file_path, 'r') as file:
         service_config = json.load(file)
-    
+
     return service_config
 
 def main():
@@ -76,7 +76,7 @@ def main():
         service_name = service.get("container_name", None)
         if not service_name:
             return print(f"{RED}ERROR: Service is missing its name. Here is the service file:", "\n", service, f"{NC}")
-        
+
         all_services[service_name] = service
 
     if args.prod:
@@ -85,7 +85,7 @@ def main():
             if not all_services.get(service_name):
                 print(f"{YELLOW}WARN: Cannot delete {service_name}, service is missing.{NC}")
                 continue
-            
+
             del all_services[service_name]
     generate_docker_compose(all_services, networks_config, volumes_config, f"{current_directory}/docker-compose.yml")
 

@@ -38,6 +38,7 @@ class AddService(Command):
 
             # Service Folder
             new_service_directory_path = self.__fs.make_directory(path, name)
+            root_folder = self.__fs.find_root_folder()
 
             libraries: set[str] = set()
 
@@ -46,6 +47,9 @@ class AddService(Command):
             self.__fs.make_directory(new_service_directory_path, "include")
             docker_dir = self.__fs.make_directory(new_service_directory_path, "docker")
             settings_dir = self.__fs.make_directory(new_service_directory_path, "settings")
+
+            self.__update_default_nginx_file(name, root_folder)
+            self.__fs.write(folder_path=f"{root_folder}/nginx/conf.d", file_name=f"{name}.conf", content=self.__fs.nginx(name), skip_if_exists=True)
 
             self.__fs.write(new_service_directory_path, file_name=f".gitignore", content=self.__fs.git_ignore(name), skip_if_exists=True)
             self.__fs.write(new_service_directory_path, file_name="main.cpp", content=self.__fs.cpp(name), skip_if_exists=True)
@@ -60,3 +64,12 @@ class AddService(Command):
             log(f"\"{name}\" service has been created successfully. Location: {new_service_directory_path}", False, Color.GREEN)
         except Exception as e:
             log(f"Something went wrong while creating the new service: {e}", True, Color.RED)
+
+    def __update_default_nginx_file(self, service_name: str, root_folder: str):
+        nginx_dir = f"{root_folder}/nginx"
+        content = self.__fs.read(f"{nginx_dir}/nginx.conf")
+
+        if content.endswith('}'):
+            content = content[:-1] + f"\n    include conf.d/{service_name}.conf\n{"}"}"
+
+        self.__fs.write(folder_path=nginx_dir, file_name=f"nginx.conf", content=content)

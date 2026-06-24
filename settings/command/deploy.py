@@ -74,9 +74,13 @@ class Deploy(Command, ServiceUpdater):
 
         for i in range(len(services_name)):
             log(f"Deploying {services_name[i]}...", False, Color.PURPLE)
-            cmd = [f"SERVICE_NAME={services_name[i]}", "docker", "compose", "-p", f"{services_name[i]}", "-f",
+
+            env_copy = self.env.copy()
+            env_copy["SERVICE_NAME"]="services_name[i]"
+
+            cmd = ["docker", "compose", "-p", f"{services_name[i]}", "-f",
                    f"{root_folder_path}/{SERVICES_PATH}/{services_name[i]}/docker/docker-compose.{services_name[i]}.yml", "up", "-d", "--build"]
-            subprocess.run(cmd, env=self.env)
+            subprocess.run(cmd, env=env_copy)
 
     def start_all_containers_left(self, args: Namespace, docker_folder: str):
         log(f"Starting other containers...", False, Color.PURPLE)
