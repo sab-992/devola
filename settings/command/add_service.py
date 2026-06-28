@@ -19,7 +19,7 @@ class AddService(Command):
         return "add_service"
 
     def command_explicit(self, args: Namespace) -> list[list[str]]:
-        self.__add_service(args.name, args.service_path)
+        self.__add_service(args)
         return [] # We return no command.
 
     def details(self) -> str:
@@ -31,8 +31,11 @@ class AddService(Command):
     def teardown(self, args: Namespace) -> str:
         pass
 
-    def __add_service(self, name: str, path):
+    def __add_service(self, args: Namespace):
         try:
+            name: str = args.name
+            path: str = args.service_path
+
             if not path or len(path) == 0:
                 path = SERVICES_PATH
 
@@ -49,7 +52,7 @@ class AddService(Command):
             settings_dir = self.__fs.make_directory(new_service_directory_path, "settings")
 
             self.__update_default_nginx_file(name, root_folder)
-            self.__fs.write(folder_path=f"{root_folder}/nginx/conf.d", file_name=f"{name}.conf", content=self.__fs.nginx(name), skip_if_exists=True)
+            self.__fs.write(folder_path=f"{root_folder}/nginx/conf.d", file_name=f"{name}.conf", content=self.__fs.nginx(name))
 
             self.__fs.write(new_service_directory_path, file_name=f".gitignore", content=self.__fs.git_ignore(name), skip_if_exists=True)
             self.__fs.write(new_service_directory_path, file_name="main.cpp", content=self.__fs.cpp(name), skip_if_exists=True)
@@ -69,7 +72,7 @@ class AddService(Command):
         nginx_dir = f"{root_folder}/nginx"
         content = self.__fs.read(f"{nginx_dir}/nginx.conf")
 
-        if content.endswith('}'):
-            content = content[:-1] + f"\n    include conf.d/{service_name}.conf\n{"}"}"
+        content = content.rsplit('    }\n}')[0]
+        content += '\n        include /etc/nginx/conf.d/*.conf;\n    }\n}'
 
         self.__fs.write(folder_path=nginx_dir, file_name=f"nginx.conf", content=content)

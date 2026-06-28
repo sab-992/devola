@@ -7,10 +7,10 @@ class OptionsType(Enum):
 
 CLEAN_OPTION        = { "type": OptionsType.ACTION, "value": "store_true", "required": False, "help": "(Optional) Removes EVERYTHING about Docker (for development and test modes ONLY), it also removes the database for every mode except 'Production'." }
 LAUNCH_OPTION       = { "type": OptionsType.ACTION, "value": "store_true", "required": False, "help": "(Optional) Starts the application in debug mode." }
-OUTPUT_OPTION       = { "type": OptionsType.TYPE,   "value": str,          "required": False, "help": "(Optional) Display output for the chosen docker." }
 MANUAL_OPTION       = { "type": OptionsType.ACTION, "value": "store_true", "required": False, "help": "(Optional) Describes and explain a specific command." }
-SERVICE_NAME_OPTION = { "type": OptionsType.TYPE,   "value": str,          "required": True,  "help": "Name of the created service." }
+OUTPUT_OPTION       = { "type": OptionsType.TYPE,   "value": str,          "required": False, "help": "(Optional) Display output for the chosen docker." }
 PROD_OPTION         = { "type": OptionsType.ACTION, "value": "store_true", "required": False, "help": "(Optional) Deploy in production mode." }
 REGEX_OPTION        = { "type": OptionsType.TYPE,   "value": str,          "required": False, "help": "(Optional) To launch specific tests" }
+SERVICE_NAME_OPTION = { "type": OptionsType.TYPE,   "value": str,          "required": True,  "help": "Name of the created service." }
 SERVICE_PATH_OPTION = { "type": OptionsType.TYPE,   "value": str,          "required": False, "help": "(Optional) Path of the created service." }
 VOLUMES_OPTION      = { "type": OptionsType.ACTION, "value": "store_true", "required": False, "help": "(Optional) Removes the volumes during cleaning." }
