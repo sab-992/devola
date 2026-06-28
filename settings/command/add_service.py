@@ -73,6 +73,6 @@ class AddService(Command):
         content = self.__fs.read(f"{nginx_dir}/nginx.conf")
 
         content = content.rsplit('    }\n}')[0]
-        content += '\n        include /etc/nginx/conf.d/*.conf;\n    }\n}'
+        content += "\n        include /etc/nginx/conf.d/*.conf;\n    }\n}"
 
         self.__fs.write(folder_path=nginx_dir, file_name=f"nginx.conf", content=content)
