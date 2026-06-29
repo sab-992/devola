@@ -10,8 +10,5 @@
   "networks": [
     "app-network"
   ],
-  "depends_on": [
-    "database"
-  ],
   "restart": "unless-stopped"
 }
