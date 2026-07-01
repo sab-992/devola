@@ -1,6 +1,6 @@
 import argparse
 
-from settings.command import add_service, compile, deploy, install, launch, shutdown, test
+from settings.command import service, compile, deploy, install, launch, shutdown, test
 from settings.command.detail.command import Command
 from settings.command.detail.options import OptionsType
 
@@ -11,7 +11,7 @@ COMMANDS: dict[str, Command] = { "cmake"       : compile.CMake(),
                                  "launch"      : launch.Launch(),
                                  "deploy"      : deploy.Deploy(),
                                  "install"     : install.Install(),
-                                 "add_service" : add_service.AddService(),
+                                 "service"     : service.Service(),
                                  "shutdown"    : shutdown.Shutdown(),
                                  "test"        : test.Test() }
 
@@ -24,10 +24,15 @@ def main():
             if argument in added_arguments:
                 continue
 
+            words_in_arg = argument.split("_")
+            abbrev = ""
+            for word in words_in_arg:
+                abbrev += word[0]
+
             if argument_infos["type"] == OptionsType.ACTION:
-                parser.add_argument(f"-{argument[0]}", f"--{argument}", action=argument_infos["value"], help=argument_infos["help"])
+                parser.add_argument(f"-{abbrev}", f"--{argument}", action=argument_infos["value"], help=argument_infos["help"])
             else:
-                parser.add_argument(f"-{argument[0]}", f"--{argument}", type=argument_infos["value"], help=argument_infos["help"])
+                parser.add_argument(f"-{abbrev}", f"--{argument}", type=argument_infos["value"], help=argument_infos["help"])
 
             added_arguments.add(argument)
         program_help += f" {command_name} |"

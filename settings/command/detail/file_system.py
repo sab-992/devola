@@ -52,6 +52,32 @@ int main() {'{'}
 {'}'}
 """
 
+    def database_compose(self, db_file_name: str,  service_name: str, db_identifier: str) -> str:
+        return \
+f"""
+networks:
+  app-network:
+    external: true
+services:
+  {db_identifier}:
+    build:
+      context: ../../../docker
+      dockerfile: {db_file_name}.Dockerfile
+    container_name: {db_identifier}
+    env_file:
+    - ../settings/.env
+    networks:
+    - app-network
+    restart: unless-stopped
+    volumes:
+    - {db_identifier}_vol:/var/lib/postgresql/data
+    - ../database/{db_identifier}:/docker-entrypoint-initdb.d
+volumes:
+  {db_identifier}_vol:
+    driver: local
+    name: {db_identifier}_vol"""
+
+    # Needs to be relative paths for docker
     def docker_compose(self, service_name: str, env_file_dir: str, libraries: set[str]) -> str:
         path_to_server = "../../.."
         path_to_root_folder = f"{path_to_server}/.."
@@ -65,7 +91,7 @@ services:
     image: gcc:latest
     working_dir: /app
     env_file:
-      - {env_file_dir}/{service_name}.env
+      - {env_file_dir}/.env
     container_name: {service_name}
     environment:
       - SERVICE_NAME={service_name}
@@ -113,9 +139,10 @@ networks:
         raise Exception("Root folder not found!")
 
     def git_ignore(self, name: str) -> str:
-        return f"""\
-/docker/docker-compose.{name}.yml
-"""
+        return f"/docker/docker-compose.{name}.yml"
+
+    def get_files(self, path: str) -> list[str]:
+        return [file for file in os.listdir(path) if os.path.isfile(os.path.join(path, file))]
 
     def get_directories(self, path: str) -> list[str]:
         return [directory for directory in os.listdir(path) if os.path.isdir(os.path.join(path, directory))]
@@ -174,7 +201,7 @@ location /api/{service_name} {'{'}
         file_path = os.path.join(folder_path, file_name)
 
         if (os.path.isfile(file_path) and skip_if_exists):
-            return
+            return True
 
         operation: str = "Updated" if os.path.isfile(file_path) else "Created"
 
@@ -182,3 +209,4 @@ location /api/{service_name} {'{'}
             f.write(content)
 
         log(f"{operation}: \"{file_name}\"", True, Color.YELLOW)
+        return False

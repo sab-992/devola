@@ -32,7 +32,7 @@ class Test(Command, Directory, ServiceUpdater):
         command: list[str] = [self.uniformizePath(path)]
 
         if args.regex:
-            command.append(f"--gtest_filter=\"{args.regex}\"")
+            command.append(f"--gtest_filter={args.regex}")
 
         return [command]
 

@@ -66,7 +66,12 @@ class Command(ABC):
         """
         options = "Options:\n"
         for argument, arguments_info in self.arguments().items():
-            options += f"\t-{argument[0]}, {argument} - {arguments_info["help"]}\n"
+            words_in_arg = argument.split("_")
+            abbrev = ""
+            for word in words_in_arg:
+                abbrev += word[0]
+
+            options += f"\t-{abbrev}, {argument} - {arguments_info["help"]}\n"
         return f"{self.details()}\n\n{options[:-1]}"
 
     def reset_working_directory(self) -> None:

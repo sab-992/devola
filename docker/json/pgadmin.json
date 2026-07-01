@@ -2,7 +2,7 @@
   "image": "dpage/pgadmin4",
   "container_name": "pgadmin",
   "env_file": [
-    "../settings/database.env"
+    "../settings/.env"
   ],
   "ports": [
     "5050:80"

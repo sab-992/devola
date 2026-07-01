@@ -9,7 +9,6 @@ EXTRA_BUILD_OPTIONS_FILENAME = "extra_build_options.json"
 ROOT_FOLDER_NAME = "devola-unrefactored"
 
 # Docker containers names
-DATABASE_DOCKER_SERVICE_NAME  = "database"
 FRONT_END_DOCKER_SERVICE_NAME = "angular"
 NGINX_DOCKER_SERVICE_NAME     = "nginx"
 PGADMIN_DOCKER_SERVICE_NAME   = "pgadmin"

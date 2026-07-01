@@ -43,15 +43,17 @@ class Deploy(Command, ServiceUpdater):
         pass
 
     def __deploy(self, args: Namespace):
-        root_folder_path = self.__fs.find_root_folder()
-        docker_folder = f"{root_folder_path}/docker"
-
         log("Starting development environment...", False, Color.PURPLE)
 
+        root_folder_path = self.__fs.find_root_folder()
+        docker_folder = f"{root_folder_path}/docker"
         self.create_base_docker_file(args, docker_folder)
-        self.starting_database_container(docker_folder)
-        self.start_services(root_folder_path)
-        self.start_all_containers_left(args, docker_folder)
+
+        services: list[str] = self.get_services()
+
+        self.start_base_containers(args, docker_folder)
+        self.starting_database_containers(services, root_folder_path)
+        self.start_service_containers(services, root_folder_path)
 
         log(f"Deployment complete.", False, Color.GREEN)
         log(f"Currently running containers:", False, Color.NC)
@@ -65,25 +67,30 @@ class Deploy(Command, ServiceUpdater):
 
         subprocess.run(cmd, env=self.env);
 
-    def starting_database_container(self,  docker_folder: str):
-        subprocess.run(["docker", "compose", "-f", f"{docker_folder}/docker-compose.yml", "up",
-                        "-d", "--build", f"{config.DATABASE_DOCKER_SERVICE_NAME}"], env=self.env)
+    def starting_database_containers(self, services: list[str], root_folder_path: str):
+        for i in range(len(services)):
+            service_docker_dir = f"{root_folder_path}/{SERVICES_PATH}/{services[i]}/docker"
+            files = self.__fs.get_files(service_docker_dir)
 
-    def start_services(self, root_folder_path: str):
-        services_name = self.get_services()
+            for file in files:
+                if not "database" in file:
+                    continue
 
-        for i in range(len(services_name)):
-            log(f"Deploying {services_name[i]}...", False, Color.PURPLE)
+                log(f"Deploying database for {file}...", False, Color.PURPLE)
+                subprocess.run(["docker", "compose", "-f", f"{service_docker_dir}/{file}", "up", "-d", "--build"], env=self.env)
+
+    def start_service_containers(self, services: list[str], root_folder_path: str):
+        for i in range(len(services)):
+            log(f"Deploying {services[i]}...", False, Color.PURPLE)
 
             env_copy = self.env.copy()
-            env_copy["SERVICE_NAME"]="services_name[i]"
+            env_copy["SERVICE_NAME"]=f"{services[i]}"
 
-            cmd = ["docker", "compose", "-p", f"{services_name[i]}", "-f",
-                   f"{root_folder_path}/{SERVICES_PATH}/{services_name[i]}/docker/docker-compose.{services_name[i]}.yml", "up", "-d", "--build"]
-            subprocess.run(cmd, env=env_copy)
+            subprocess.run(["docker", "compose", "-p", f"{services[i]}", "-f",
+                            f"{root_folder_path}/{SERVICES_PATH}/{services[i]}/docker/docker-compose.{services[i]}.yml", "up", "-d", "--build"], env=env_copy)
 
-    def start_all_containers_left(self, args: Namespace, docker_folder: str):
-        log(f"Starting other containers...", False, Color.PURPLE)
+    def start_base_containers(self, args: Namespace, docker_folder: str):
+        log(f"Starting base containers...", False, Color.PURPLE)
 
         cmd = ["docker", "compose", "-f", f"{docker_folder}/docker-compose.yml", "up", "-d", "--build",
                f"{config.FRONT_END_DOCKER_SERVICE_NAME}", f"{config.NGINX_DOCKER_SERVICE_NAME}"]
