@@ -27,14 +27,14 @@ public:
 
     size_t write(std::string_view data, std::streampos start=-1);
 
-    static std::ios_base::openmode flagToUnderlying(file_n::Flags_en flag);
+    static std::ios_base::openmode flagToUnderlying(file_n::flags_n::OpenMode_en flag);
 
 private:
     std::unique_ptr<std::fstream> m_file;
     std::ios_base::openmode m_flags;
     const std::string m_path;
 
-    bool isFlagSet(file_n::Flags_en flag) const;
+    bool isFlagSet(file_n::flags_n::OpenMode_en flag) const;
     bool isPointerPositive(std::streampos pointer) const;
 
     std::streampos size() const;

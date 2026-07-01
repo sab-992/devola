@@ -15,8 +15,8 @@ namespace file_n
         ~Service();
 
         template <typename... Args>
-            requires (std::is_convertible_v<Args, file_n::Flags_en> && ...)
-        File open(const std::string& path, Args... flags) {
+            requires (std::is_convertible_v<Args, file_n::flags_n::OpenMode_en> && ...)
+        File open(const std::string& path, Args... flags) const {
             return File(path, (File::flagToUnderlying(flags) | ...));
         }
 

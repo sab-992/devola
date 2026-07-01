@@ -25,11 +25,11 @@ File& File::operator>>(std::string& data) {
     return *this;
 }
 
-std::ios_base::openmode File::flagToUnderlying(file_n::Flags_en flag) {
+std::ios_base::openmode File::flagToUnderlying(file_n::flags_n::OpenMode_en flag) {
     return static_cast<std::ios_base::openmode>(flag);
 }
 
-bool File::isFlagSet(file_n::Flags_en flag) const {
+bool File::isFlagSet(file_n::flags_n::OpenMode_en flag) const {
     return m_flags & flagToUnderlying(flag);
 }
 
@@ -42,7 +42,7 @@ std::streampos File::pointer() {
 }
 
 std::string File::read(std::streampos start, std::streampos end) {
-    if(not isFlagSet(file_n::Flags_en::READ))
+    if(not isFlagSet(file_n::flags_n::OpenMode_en::READ))
        throw InvalidArgument("Cannot read because READ flag has not been set", "File flags");
 
     if (not isPointerPositive(start) or
@@ -78,7 +78,7 @@ std::streampos File::size() const {
 }
 
 size_t File::write(std::string_view data, std::streampos start) {
-    if(not isFlagSet(file_n::Flags_en::WRITE))
+    if(not isFlagSet(file_n::flags_n::OpenMode_en::WRITE))
        throw InvalidArgument("Cannot write because WRITE flag has not been set", "File flags");
 
     if (not isPointerPositive(start))
