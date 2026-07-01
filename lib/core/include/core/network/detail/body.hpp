@@ -4,7 +4,7 @@
 #include <core/network/detail/headers.hpp>
 #include <core/network/interface/body_parser.hpp>
 #include <core/str/interface/serializer.hpp>
-#include <core/str/serializer_factory.hpp>
+#include <core/str/detail/serializer/factory.hpp>
 #include <core/utility/compare.hpp>
 #include <memory>
 #include <string>
