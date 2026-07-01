@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/exception.hpp>
-#include <core/file/detail/type.hpp>
+#include <core/file/detail/flags.hpp>
 #include <fstream>
 #include <memory>
 #include <string>

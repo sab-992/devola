@@ -2,7 +2,7 @@
 
 #include <core/utility/enum.hpp>
 #include <core/file/detail/status.hpp>
-#include <core/file/detail/type.hpp>
+#include <core/file/detail/flags.hpp>
 #include <core/file/file.hpp>
 #include <core/utility/singleton.hpp>
 
