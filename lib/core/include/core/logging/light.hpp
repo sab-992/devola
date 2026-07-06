@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <core/exception.hpp>
 #include <core/utility/converter.hpp>
 #include <core/logging/detail/rang.hpp>
@@ -10,6 +11,8 @@
 #include <string>
 #include <unordered_map>
 
+
+inline std::mutex coutMutex;
 
 namespace log_n {
     class Light : public Singleton<Light> {
@@ -25,6 +28,7 @@ namespace log_n {
             if (not m_levels.contains(level))
                 throw InvalidArgument("Unhandled", "Log type");
 
+            std::lock_guard<std::mutex> guard(coutMutex);
             displayTimestamp();
             displayLevel(level);
             (display(elements), ...);
