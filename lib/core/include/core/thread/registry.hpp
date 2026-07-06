@@ -20,7 +20,7 @@ namespace thread_n
         Registry(const Private_s&);
         ~Registry();
 
-        const Thread& start(thread_n::callback_t function);
+        const Thread& start(thread_n::completionToken_t function);
         void join(std::thread::id id);
 
     private:

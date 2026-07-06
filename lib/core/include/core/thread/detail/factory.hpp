@@ -18,6 +18,6 @@ namespace thread_n
         friend class Registry;
 
     private:
-        static Thread create(thread_n::callback_t function);
+        static Thread create(thread_n::completionToken_t function);
     };
 }

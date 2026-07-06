@@ -13,12 +13,12 @@ time_n::timerId_t time_n::Timer::id() const {
     return m_id;
 }
 
-time_n::asioCallback_t time_n::Timer::onTimeExpiryCallback() {
+time_n::Timer::asioCompletionToken_t time_n::Timer::onTimeExpiryCallback() {
     return [self = shared_from_this()](const asio::error_code& ec) {
         if (ec == asio::error::operation_aborted)
             return;
 
-        self->m_options.callback(self->m_id, ec);
+        self->m_options.completionToken(self->m_id, ec);
 
         if (self->m_options.keepRestarting)
             self->start();

@@ -15,7 +15,7 @@ thread_n::Registry::~Registry() {
     m_threads.clear();
 }
 
-const Thread& thread_n::Registry::start(thread_n::callback_t function) {
+const Thread& thread_n::Registry::start(thread_n::completionToken_t function) {
     Thread thread = thread_n::Factory::create(function);
     const auto& [it, _] = m_threads.emplace(thread.id(), std::move(thread));
     return it->second;
