@@ -1,4 +1,7 @@
 ## Ignore compiled files
+
+*.crt
+*.key
 */out/*
 */build/*
 build
