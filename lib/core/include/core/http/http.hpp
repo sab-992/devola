@@ -86,12 +86,12 @@ namespace http_n
 
         // The function "function" needs to take its parameters by value. Otherwise, it is possible
         // that the object would be dangling by the time the async function would run.
-        template<typename Function, typename Callback>
-        auto spawn(Function&& function, Callback&& callback) const {
+        template<typename Function, typename CompletionToken>
+        auto spawn(Function&& function, CompletionToken&& token) const {
             if (not m_ioContext)
                 throw Exception("m_ioContext is nullptr");
 
-            return asio::co_spawn(*m_ioContext, std::forward<Function>(function), std::forward<Callback>(callback));
+            return asio::co_spawn(*m_ioContext, std::forward<Function>(function), std::forward<CompletionToken>(token));
         }
 
         template<typename T>
