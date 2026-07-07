@@ -11,9 +11,9 @@ option(RUN_TESTS "Build tests" OFF)
 
 # Needs to be here to have right root directory.
 add_compile_definitions(ROOT_DIRECTORY="${CMAKE_CURRENT_LIST_DIR}")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/CompileDefinitions.cmake")
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/lib")
-include("${CMAKE_CURRENT_LIST_DIR}/cmake/CompileDefinitions.cmake")
 
 if(ENABLE_TESTS)
     add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/test")
