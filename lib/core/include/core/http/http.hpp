@@ -13,8 +13,6 @@
 
 namespace http_n
 {
-    using sslSocket_t = asio::ssl::stream<asio::ip::tcp::socket>;
-
     class Http {
     public:
         Http(asio::io_context* ctx) : m_ioContext(ctx) {}
@@ -63,6 +61,20 @@ namespace http_n
         }
 
         template<typename T>
+        Response<T> receive(sslSocket_t& socket) const {
+            const std::string& alpnExtension = readALPNExtension(socket);
+
+            auto protocol = network_n::protocol_n::Factory<T>::create(alpnExtension);
+
+            const auto& [headers, body] = protocol->receive(socket);
+
+            return Response<T>(headers, body);
+        }
+
+        template<typename T>
+        Response<T> receive(sslSocket_t&& socket) const { return receive<T>(socket); }
+
+        template<typename T>
         sslSocket_t send(const Request<T>& request) const {
             if (not m_ioContext)
                 throw Exception("m_ioContext is nullptr");
@@ -94,19 +106,18 @@ namespace http_n
             return asio::co_spawn(*m_ioContext, std::forward<Function>(function), std::forward<CompletionToken>(token));
         }
 
-        template<typename T>
-        Response<T> receive(sslSocket_t& socket) const {
-            const std::string& alpnExtension = readALPNExtension(socket);
+        static std::string readALPNExtension(sslSocket_t& socket) {
+            const unsigned char* alpn;
+            unsigned int alpn_len;
 
-            auto protocol = network_n::protocol_n::Factory<T>::create(alpnExtension);
+            SSL* ssl = socket.native_handle();
+            SSL_get0_alpn_selected(ssl, &alpn, &alpn_len);
 
-            const auto& [headers, body] = protocol->receive(socket);
+            if (not alpn or alpn_len <= 0)
+                throw Exception("No ALPN extension negotiated");
 
-            return Response<T>(headers, body);
+            return std::string(reinterpret_cast<const char*>(alpn), alpn_len);
         }
-
-        template<typename T>
-        Response<T> receive(sslSocket_t&& socket) const { return receive<T>(socket); }
 
     private:
         asio::io_context* m_ioContext;
@@ -137,19 +148,6 @@ namespace http_n
             SSL_set_tlsext_host_name(socket.native_handle(), hostName.c_str());
 
             return std::move(socket);
-        }
-
-        std::string readALPNExtension(sslSocket_t& socket) const {
-            const unsigned char* alpn;
-            unsigned int alpn_len;
-
-            SSL* ssl = socket.native_handle();
-            SSL_get0_alpn_selected(ssl, &alpn, &alpn_len);
-
-            if (not alpn or alpn_len <= 0)
-                throw Exception("No ALPN extension negotiated");
-
-            return std::string(reinterpret_cast<const char*>(alpn), alpn_len);
         }
     };
 }
