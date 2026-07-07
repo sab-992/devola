@@ -46,6 +46,7 @@ namespace http_n
         private:
             std::unique_ptr<Http> m_http;
             asio::io_context m_ioContext;
+            asio::ssl::context m_sslContext;
             bool m_isRunning = false;
             std::unordered_map<std::string, std::function<void()>> m_commands;
             std::unordered_map<std::string, endpointsUMap_t> m_methodEndpoints;
@@ -59,13 +60,16 @@ namespace http_n
             inline static std::shared_ptr<log_n::Light> m_light;
             inline static std::shared_ptr<thread_n::Registry> m_threadRegistry;
 
-            asio::awaitable<void> handleClient(asio::ip::tcp::socket&& socket) const;
+            asio::awaitable<void> handleClient(asio::ip::tcp::socket&& socket);
             asio::awaitable<void> listen();
 
             void readCommands() const;
             void setupCommands();
             void startSequence() const;
             void startThreadPool();
+
+            static int alpnSelectCallback(SSL*, const unsigned char** out, unsigned char* outlen,
+                                                const unsigned char* in, unsigned int inlen, void* /*arg*/);
         };
     }
 }

@@ -2,13 +2,19 @@
 
 
 http_n::server_n::Basic::Basic(const Private_s&, uint16_t port)
-: m_ioContext(), m_workGuard(asio::make_work_guard(m_ioContext)), m_port(port), m_signals(m_ioContext, SIGINT, SIGTERM), m_threadPoolSize(0) {
+: m_ioContext(), m_workGuard(asio::make_work_guard(m_ioContext)), m_sslContext(asio::ssl::context::tls_server), m_port(port), m_signals(m_ioContext, SIGINT, SIGTERM), m_threadPoolSize(0) {
     setupCommands();
 
     m_light = log_n::Light::instance();
     m_threadRegistry = thread_n::Registry::instance();
 
     m_http = std::make_unique<Http>(&m_ioContext);
+    m_sslContext.set_options(asio::ssl::context::no_sslv2 |
+                             asio::ssl::context::no_sslv3);
+    SSL_CTX_set_alpn_select_cb(m_sslContext.native_handle(), alpnSelectCallback, nullptr);
+    std::string serverSettingsDir = std::format("{}/server/settings", ROOT_DIRECTORY);
+    m_sslContext.use_certificate_chain_file(std::format("{}/server.crt", serverSettingsDir));
+    m_sslContext.use_private_key_file(std::format("{}/server.key", serverSettingsDir), asio::ssl::context::pem);
     m_signals.async_wait([&](auto, auto){ stop(); });
     m_threadIds.reserve(THREADS_RESERVE_SIZE);
 }
@@ -17,16 +23,30 @@ http_n::server_n::Basic::~Basic() {
     stop();
 }
 
+int http_n::server_n::Basic::alpnSelectCallback(SSL*, const unsigned char** out, unsigned char* outlen,
+                                                      const unsigned char* in, unsigned int inlen, void* /*arg*/) {
+    static const unsigned char supported[] = { 8, 'h','t','t','p','/','1','.','1' };
+    int status = SSL_select_next_proto(const_cast<unsigned char**>(out), outlen, supported, sizeof(supported), in, inlen);
+
+    if (status != OPENSSL_NPN_NEGOTIATED)
+        return SSL_TLSEXT_ERR_ALERT_FATAL;
+
+    return SSL_TLSEXT_ERR_OK;
+}
+
 std::unique_ptr<http_n::server_n::Basic> http_n::server_n::Basic::create(uint16_t port) {
     return std::make_unique<Basic>(Private_s(), port);
 }
 
-asio::awaitable<void> http_n::server_n::Basic::handleClient(asio::ip::tcp::socket&& socket) const {
+asio::awaitable<void> http_n::server_n::Basic::handleClient(asio::ip::tcp::socket&& socket) {
     using namespace http_n;
     try {
-        Session session(std::move(socket));
+        Session session(asio::ssl::stream<asio::ip::tcp::socket>(std::move(socket), m_sslContext));
+
+        co_await session.handshake();
 
         Request<std::string> request;
+        request.setProtocol(network_n::protocol_n::Factory<std::string>::create(session.alpnExtension()));
         request.set(co_await session.read()).build();
 
         const std::string& method = request.method();
