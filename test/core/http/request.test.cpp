@@ -7,44 +7,36 @@
 #include <nlohmann/json.hpp>
 #include <format>
 #include <string>
-#include <utils/core/build_headers.hpp>
-#include <utils/core/inner_types.hpp>
+#include <helper/core/build_headers.hpp>
+#include <helper/core/inner_types.hpp>
 
 
 using http_n::Request;
 
 template<typename T>
 class RequestTest : public ::testing::Test {
-public:
-    template <typename ContentType>
-    struct TemplatedRequest {
-        using type = http_n::Request<ContentType>;
-    };
-
-    using Inner = InnerTemplatedTypes<T, RequestTest<T>::template TemplatedRequest>;
-
 protected:
-    auto getTestBody(bool alt=false) {
-        return Inner::getTestObject(getTestStringBody(alt));
+    auto getTestObject(bool alt=false) {
+        return InnerTypes<T>::getTestObject(InnerTypes<T>::getTestString(alt));
     }
 
-    std::string getTestStringBody(bool alt=false) {
-        return Inner::getTestStringObject(alt);
+    std::string getTestStringObject(bool alt=false) {
+        return InnerTypes<T>::getTestStringFromObject(this->getTestObject(alt));
     }
 };
 
-TYPED_TEST_SUITE(RequestTest, networkTemplatedInnerTypes_t<http_n::Request>);
+TYPED_TEST_SUITE(RequestTest, innerTypes_t);
 
 TYPED_TEST(RequestTest, Constructor_HasDefaultProtocol) {
-    TypeParam request;
-    EXPECT_EQ(network_n::protocol_n::Factory<decltype(this->getTestBody())>::create(http_n::DEFAULT_PROTOCOL), request.protocol());
+    Request request;
+    EXPECT_EQ(network_n::protocol_n::Factory::create(http_n::DEFAULT_PROTOCOL), request.protocol());
 }
 
 TYPED_TEST(RequestTest, BuildWithURL_AddsHostHeader) {
     const std::string EXPECTED_URL = "www.test.com";
     const uint16_t EXPECTED_PORT = 4992;
     const std::string EXPECTED_FULL_HOST_URL = std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT);
-    TypeParam request;
+    Request request;
     request.setMethod("GET")
            .setAPIEndpoint("/");
 
@@ -62,11 +54,11 @@ TYPED_TEST(RequestTest, BuildWithMethodAndAPIEndpoint_CreatesValidStartline) {
     const std::string EXPECTED_METHOD = "POST";
     const std::string EXPECTED_API_ENDPOINT = "/test";
     const Protocol EXPECTED_PROTOCOL = Protocol::HTTP1_1;
-    const auto protocol = Factory<decltype(this->getTestBody())>::create(EXPECTED_PROTOCOL);
+    const auto protocol = Factory::create(EXPECTED_PROTOCOL);
     const std::string EXPECTED_STARTLINE = std::format("{} {} {}", EXPECTED_METHOD,
                                                                    EXPECTED_API_ENDPOINT,
                                                                    protocol->name());
-    TypeParam request;
+    Request request;
     request.setMethod(EXPECTED_METHOD)
            .setAPIEndpoint(EXPECTED_API_ENDPOINT)
            .setProtocol(EXPECTED_PROTOCOL)
@@ -83,13 +75,13 @@ TYPED_TEST(RequestTest, PrepareTransmissionPackets_ReturnsPacketsToSend) {
     using namespace network_n;
     using network_n::Code;
 
-    const std::vector<std::string> EXPECTED_PACKETS = { "POST / HTTP/1.1\r\nHost: www.test.com:443", this->getTestStringBody() };
-    TypeParam request;
+    const std::vector<std::string> EXPECTED_PACKETS = { "POST / HTTP/1.1\r\nHost: www.test.com:443", this->getTestStringObject() };
+    Request request;
     request.setMethod("POST")
            .setAPIEndpoint("/")
            .setProtocol(http_n::DEFAULT_PROTOCOL)
            .setURL("www.test.com")
-           .setBody(this->getTestBody()).build();
+           .setBody<TypeParam>(this->getTestObject()).build();
 
     const auto result = request.prepareTransmissionPackets();
 
@@ -97,7 +89,7 @@ TYPED_TEST(RequestTest, PrepareTransmissionPackets_ReturnsPacketsToSend) {
 }
 
 TYPED_TEST(RequestTest, BuildWithoutAPIEndpoint_ThrowsException) {
-    TypeParam request;
+    Request request;
 
     request.setMethod("GET")
            .setURL("www.test.com");
@@ -106,7 +98,7 @@ TYPED_TEST(RequestTest, BuildWithoutAPIEndpoint_ThrowsException) {
 }
 
 TYPED_TEST(RequestTest, BuildWithoutMethod_ThrowsException) {
-    TypeParam request;
+    Request request;
 
     request.setAPIEndpoint("/")
            .setURL("www.test.com");
@@ -115,7 +107,7 @@ TYPED_TEST(RequestTest, BuildWithoutMethod_ThrowsException) {
 }
 
 TYPED_TEST(RequestTest, BuildWithoutURL_ThrowsException) {
-    TypeParam request;
+    Request request;
 
     request.setMethod("GET")
            .setAPIEndpoint("/");
@@ -131,9 +123,9 @@ TYPED_TEST(RequestTest, Set_CreatesValidHTTPRequest) {
     const std::string EXPECTED_API_ENDPOINT = "/resource/1";
     const std::string EXPECTED_URL = "www.test2.com";
     const uint16_t EXPECTED_PORT = 5503;
-    const auto EXPECTED_BODY = this->getTestBody();
-    const auto EXPECTED_STRING_BODY = this->getTestStringBody();
-    const auto EXPECTED_PROTOCOL = protocol_n::Factory<decltype(this->getTestBody())>::create(http_n::DEFAULT_PROTOCOL);
+    const auto EXPECTED_BODY = this->getTestObject();
+    const auto EXPECTED_STRING_BODY = this->getTestStringObject();
+    const auto EXPECTED_PROTOCOL = protocol_n::Factory::create(http_n::DEFAULT_PROTOCOL);
     const std::unordered_map<std::string, std::string> headersUMap{ { "Host",              std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT) },
                                                                     { "Transfer-encoding", "chunked" },
                                                                     { "Accept",            "application/xml" },
@@ -143,7 +135,7 @@ TYPED_TEST(RequestTest, Set_CreatesValidHTTPRequest) {
                                                                                  EXPECTED_PROTOCOL->name(),
                                                                                  buildHeaders(headersUMap),
                                                                                  EXPECTED_STRING_BODY);
-    TypeParam request;
+    Request request;
 
     request.set(EXPECTED_REQUEST);
 
@@ -156,5 +148,5 @@ TYPED_TEST(RequestTest, Set_CreatesValidHTTPRequest) {
     EXPECT_EQ(headersUMap.size(), request.headersMap().size());
     for (const auto& [header, expected_value]: headersUMap)
         EXPECT_EQ(expected_value, request.header(header));
-    EXPECT_EQ(EXPECTED_BODY, request.body());
+    EXPECT_EQ(EXPECTED_BODY, request.body<TypeParam>());
 }

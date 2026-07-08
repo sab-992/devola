@@ -3,8 +3,8 @@
 #include <core/exception.hpp>
 #include <core/network/detail/headers.hpp>
 #include <core/network/network.hpp>
-#include <utils/core/build_headers.hpp>
-#include <utils/core/headers_parser_mock.hpp>
+#include <helper/core/build_headers.hpp>
+#include <helper/core/headers_parser_mock.hpp>
 
 
 class HeadersTest : public ::testing::Test {

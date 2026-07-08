@@ -6,7 +6,7 @@
 #include <core/http/request.hpp>
 #include <core/process/registry.hpp>
 #include <core/http/response.hpp>
-#include <utils/core/inner_types.hpp>
+#include <helper/core/inner_types.hpp>
 
 
 using http_n::Request;
@@ -17,7 +17,7 @@ class HttpTest : public ::testing::Test {
 protected:
     static void SetUpTestCase() {
         if (m_processRegistry)
-            m_id = m_processRegistry->start("python3", { std::format("{}/test/utils/core/mock_server.py", ROOT_DIRECTORY) }, true).id();
+            m_id = m_processRegistry->start("python3", { std::format("{}/test/helper/core/mock_server.py", ROOT_DIRECTORY) }, true).id();
     }
 
     static void TearDownTestCase() {
@@ -30,15 +30,15 @@ protected:
         return std::move(http);
     }
 
-    Request<T> createTestRequest() {
-        return http_n::Request<T>().setMethod("GET")
-                                   .setAPIEndpoint("/")
-                                   .setURL("localhost")
-                                   .setPort(8000).build();
+    Request createTestRequest() {
+        return http_n::Request().setMethod("GET")
+                                .setAPIEndpoint("/")
+                                .setURL("localhost")
+                                .setPort(8000).build();
     }
 
-    asio::awaitable<Response<T>> asyncQueryMockServer(http_n::Http http, http_n::Request<T> request) {
-        co_return co_await http.async_receive<T>(co_await http.async_send(request));
+    asio::awaitable<Response> asyncQueryMockServer(http_n::Http http, http_n::Request request) {
+        co_return co_await http.async_receive(co_await http.async_send(request));
     }
 
 private:
@@ -46,13 +46,13 @@ private:
     inline static std::shared_ptr<process_n::Registry> m_processRegistry = process_n::Registry::instance();
 };
 
-TYPED_TEST_SUITE(HttpTest, networkInnerTypes_t);
+TYPED_TEST_SUITE(HttpTest, innerTypes_t);
 
 TYPED_TEST(HttpTest, SynchronousOperationsWithValidRequest_ReturnsValidResponse) {
     asio::io_context ioCtx;
     http_n::Http http = this->getHttpObject(ioCtx);
 
-    const Response<TypeParam>& response = http.receive<TypeParam>(http.send(this->createTestRequest()));
+    const Response& response = http.receive(http.send(this->createTestRequest()));
 
     EXPECT_EQ(response.status(), network_n::Code::OK);
 }
@@ -62,7 +62,7 @@ TYPED_TEST(HttpTest, AsynchronousOperationsWithValidRequest_ReturnsValidResponse
     http_n::Http http = this->getHttpObject(ioCtx);
 
     http.spawn(this->asyncQueryMockServer(http, this->createTestRequest()),
-               [](std::exception_ptr, Response<TypeParam> response) { EXPECT_EQ(response.status(), network_n::Code::OK); });
+               [](std::exception_ptr, Response response) { EXPECT_EQ(response.status(), network_n::Code::OK); });
 
     ioCtx.run();
 }

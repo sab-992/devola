@@ -1,53 +1,37 @@
 #include <gtest/gtest.h>
 
-#include <core/str/detail/serializer/json.hpp>
-#include <core/str/detail/serializer/string.hpp>
-#include <core/str/detail/serializer/xml.hpp>
-#include <utils/core/inner_types.hpp>
+#include <core/str/detail/serializer/factory.hpp>
+#include <helper/core/inner_types.hpp>
 
 
-using serializer_t = ::testing::Types<serializer_n::JSON, serializer_n::XML, serializer_n::String>;
-
-template<typename Serializer>
+template<typename T>
 class SerializerTest : public ::testing::Test {
-    template<typename ContentType>
-    struct TemplatedSerializer {
-        using type = serializer_n::Serializer_i<ContentType>;
-    };
-
-public:
-    using Inner = InnerTemplatedTypes<Serializer, SerializerTest<Serializer>::template TemplatedSerializer>;
-
+protected:
     auto getTestObject(bool alt=false) {
-        return Inner::getTestObject(Inner::getTestStringObject(alt));
+        return InnerTypes<T>::getTestObject(InnerTypes<T>::getTestString(alt));
     }
 
     std::string getTestStringObject(bool alt=false) {
-        return Inner::getTestStringObject(alt);
+        return InnerTypes<T>::getTestStringFromObject(this->getTestObject(alt));
     }
 };
 
-TYPED_TEST_SUITE_P(SerializerTest);
+TYPED_TEST_SUITE(SerializerTest, innerTypes_t);
 
-TYPED_TEST_P(SerializerTest, Serialize_ConvertsObjectIntoValidString) {
-    TypeParam serializer;
+TYPED_TEST(SerializerTest, Serialize_ConvertsObjectIntoValidString) {
+    auto serializer = serializer_n::Factory<TypeParam>::create();
     const auto EXPECTED_OBJECT = this->getTestObject();
 
-    std::string serializedObject = serializer.serialize(EXPECTED_OBJECT);
+    std::string serializedObject = serializer->serialize(EXPECTED_OBJECT);
 
-    EXPECT_EQ(EXPECTED_OBJECT, SerializerTest<TypeParam>::Inner::getTestObject(serializedObject));
+    EXPECT_EQ(EXPECTED_OBJECT, InnerTypes<TypeParam>::getTestObject(serializedObject));
 }
 
-TYPED_TEST_P(SerializerTest, Deserialize_ConvertsStringIntoValidObject) {
-    TypeParam serializer;
+TYPED_TEST(SerializerTest, Deserialize_ConvertsStringIntoValidObject) {
+    auto serializer = serializer_n::Factory<TypeParam>::create();
     const std::string EXPECTED_STRING_OBJECT = this->getTestStringObject();
 
-    const auto serializedObject = serializer.deserialize(EXPECTED_STRING_OBJECT);
+    const auto serializedObject = serializer->deserialize(EXPECTED_STRING_OBJECT);
 
-    EXPECT_EQ(SerializerTest<TypeParam>::Inner::getTestObject(EXPECTED_STRING_OBJECT), serializedObject);
+    EXPECT_EQ(InnerTypes<TypeParam>::getTestObject(EXPECTED_STRING_OBJECT), serializedObject);
 }
-
-REGISTER_TYPED_TEST_SUITE_P(SerializerTest, Serialize_ConvertsObjectIntoValidString,
-                                            Deserialize_ConvertsStringIntoValidObject);
-
-INSTANTIATE_TYPED_TEST_SUITE_P(SerializerTestSuite, SerializerTest, serializer_t);
