@@ -8,7 +8,7 @@ http_n::server_n::Session::Session(http_n::sslSocket_t&& socket) : m_socket(std:
 http_n::server_n::Session::~Session() {}
 
 asio::awaitable<void> http_n::server_n::Session::error(network_n::Code errorCode) {
-    http_n::Response<std::string> response;
+    http_n::Response response;
     response.setStatus(errorCode).build();
     co_await write(response);
 }
@@ -35,7 +35,7 @@ void http_n::server_n::Session::validateSSLContext() const {
         throw Exception("SSL context was not established.");
 }
 
-asio::awaitable<void> http_n::server_n::Session::write(const http_n::Response<std::string>& response) {
+asio::awaitable<void> http_n::server_n::Session::write(const http_n::Response& response) {
     validateSSLContext();
     const std::string stringResponse = response.toString();
     const size_t bytesWritten = stringResponse.size();

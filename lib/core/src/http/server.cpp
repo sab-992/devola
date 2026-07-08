@@ -45,8 +45,8 @@ asio::awaitable<void> http_n::server_n::Basic::handleClient(asio::ip::tcp::socke
 
         co_await session.handshake();
 
-        Request<std::string> request;
-        request.setProtocol(network_n::protocol_n::Factory<std::string>::create(session.alpnExtension()));
+        Request request;
+        request.setProtocol(network_n::protocol_n::Factory::create(session.alpnExtension()));
         request.set(co_await session.read()).build();
 
         const std::string& method = request.method();
@@ -57,7 +57,7 @@ asio::awaitable<void> http_n::server_n::Basic::handleClient(asio::ip::tcp::socke
             co_return;
         }
 
-        const Response<std::string>& response = m_methodEndpoints.at(method).at(endpoint)(session, request);
+        const Response& response = m_methodEndpoints.at(method).at(endpoint)(session, request);
         co_await session.write(response);
     } catch (std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "Exception in worker thread. Function:", std::format("[{}]", FUNCTION_SIGNATURE), "Reason: ", e.what());

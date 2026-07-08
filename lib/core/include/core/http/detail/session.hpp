@@ -22,7 +22,7 @@ namespace http_n
             asio::awaitable<void> handshake();
             asio::awaitable<std::string> read();
             std::string alpnExtension();
-            asio::awaitable<void> write(const http_n::Response<std::string>& response);
+            asio::awaitable<void> write(const http_n::Response& response);
             asio::awaitable<void> error(network_n::Code errorCode);
 
         private:

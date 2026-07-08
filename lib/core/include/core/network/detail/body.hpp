@@ -12,61 +12,46 @@
 
 namespace network_n
 {
-    namespace protocol_n
-    {
-        template<typename T>
-        class BodyParser_i;
-    }
+    namespace protocol_n { class BodyParser_i; }
 
-    template<typename T>
     class Body : public StringConvertible {
     public:
-        Body(std::shared_ptr<protocol_n::BodyParser_i<T>> parser) { setParser(parser); }
+        Body(std::shared_ptr<protocol_n::BodyParser_i> parser);
 
-        Body(const Body<T>& other) = default;
-        Body(Body<T>&& other) = default;
+        Body(const Body& other) = default;
+        Body(Body&& other) = default;
 
         ~Body() = default;
 
-        Body<T>& operator=(Body<T> other) { swap(*this, other); return *this; }
-        Body<T>& operator=(Body<T>&& other) = default;
+        Body& operator=(Body other);
+        Body& operator=(Body&& other) = default;
 
-        bool operator==(const Body<T>& other) const {
-            return pointersEqual(m_parser, other.m_parser) and
-                   m_stringBody == other.m_stringBody;
-        }
+        bool operator==(const Body& other) const;
 
-        std::vector<std::string> build(const Headers& headers) const { return m_parser->build(headers, *this); }
+        std::vector<std::string> build(const Headers& headers) const;
 
-        T convert() const { return serializer()->deserialize(m_stringBody); }
+        template <typename T>
+        T convert() const { return serializer<T>()->deserialize(m_stringBody); }
 
-        void parse(const Headers& headers, std::string_view stringBody) {
-            if (not stringBody.empty())
-                m_stringBody = m_parser->parse(headers, stringBody);
-        }
+        void parse(const Headers& headers, std::string_view stringBody);
 
-        void set(const T& body) { m_stringBody = serializer()->serialize(body); }
+        template <typename T>
+        void set(const T& body) { m_stringBody = serializer<T>()->serialize(body); }
 
-        void setParser(std::shared_ptr<protocol_n::BodyParser_i<T>> parser) {
-            if (parser == nullptr)
-                throw InvalidArgument("No parser given", "Body parser");
+        void setParser(std::shared_ptr<protocol_n::BodyParser_i> parser);
 
-            m_parser = parser;
-        }
-
-        friend void swap(Body<T>& lhs, Body<T>& rhs) {
+        friend void swap(Body& lhs, Body& rhs) {
             std::swap(lhs.m_parser, rhs.m_parser);
             std::swap(lhs.m_stringBody, rhs.m_stringBody);
         }
 
-        std::string toString() const override { return m_stringBody; }
+        std::string toString() const override;
 
     private:
-        std::shared_ptr<protocol_n::BodyParser_i<T>> m_parser;
+        std::shared_ptr<protocol_n::BodyParser_i> m_parser;
         std::string m_stringBody;
 
-        std::unique_ptr<serializer_n::Serializer_i<T>> serializer() const {
-            return serializer_n::Factory<T>::create();
-        }
+        template <typename T>
+        std::unique_ptr<serializer_n::Serializer_i<T>> serializer() const { return serializer_n::Factory<T>::create(); }
     };
 }

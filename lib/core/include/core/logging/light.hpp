@@ -54,6 +54,7 @@ namespace log_n {
 
             std::cout << message << " ";
         }
+
         void displayLevel(log_n::Level_en level) const;
         void displayTimestamp() const;
     };

@@ -19,7 +19,7 @@ namespace http_n
     namespace server_n
     {
         class Basic {
-            using completionToken_t = std::function<http_n::Response<std::string>(const Session& session, const Request<std::string>& request)>;
+            using completionToken_t = std::function<http_n::Response(const Session& session, const Request& request)>;
             using endpointsUMap_t = std::unordered_map<std::string, completionToken_t>;
 
             struct Private_s {};
