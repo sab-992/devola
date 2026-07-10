@@ -33,17 +33,15 @@ namespace http_n
 
             friend std::unique_ptr<Basic> std::make_unique<Basic>();
 
-            static std::unique_ptr<Basic> create(uint16_t port=443);
-
             void run();
-
             void setStartSequence(const std::function<void()>& function);
             void setThreadPoolSize(uint16_t size);
             void setEndpoints(std::string method, const endpointsUMap_t& endpoints);
-
             void stop();
 
-        private:
+            static std::unique_ptr<Basic> create(uint16_t port=443);
+
+        protected:
             std::unique_ptr<Http> m_http;
             asio::io_context m_ioContext;
             asio::ssl::context m_sslContext;
@@ -60,6 +58,7 @@ namespace http_n
             inline static std::shared_ptr<log_n::Light> m_light;
             inline static std::shared_ptr<thread_n::Registry> m_threadRegistry;
 
+        private:
             asio::awaitable<void> handleClient(asio::ip::tcp::socket&& socket);
             asio::awaitable<void> listen();
 
