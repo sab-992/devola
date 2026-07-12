@@ -1,12 +1,13 @@
 #include <core/http/server.hpp>
 
 
-http_n::server_n::Basic::Basic(const Private_s&, uint16_t port)
+http_n::server_n::Basic::Basic(const std::string& name, uint16_t port)
 : m_ioContext(), m_workGuard(asio::make_work_guard(m_ioContext)), m_sslContext(asio::ssl::context::tls_server), m_port(port), m_signals(m_ioContext, SIGINT, SIGTERM), m_threadPoolSize(0) {
-    setupCommands();
-
     m_light = log_n::Light::instance();
     m_threadRegistry = thread_n::Registry::instance();
+
+    addExtraLogInformation(name);
+    m_light->log(log_n::Level_en::SPECIAL, &m_extraLogInformation, "Starting", "...");
 
     m_http = std::make_unique<Http>(&m_ioContext);
     m_sslContext.set_options(asio::ssl::context::no_sslv2 |
@@ -21,6 +22,11 @@ http_n::server_n::Basic::Basic(const Private_s&, uint16_t port)
 
 http_n::server_n::Basic::~Basic() {
     stop();
+    clean();
+}
+
+void http_n::server_n::Basic::addExtraLogInformation(const std::string& element) {
+    m_extraLogInformation.emplace_back(element);
 }
 
 int http_n::server_n::Basic::alpnSelectCallback(SSL*, const unsigned char** out, unsigned char* outlen,
@@ -34,8 +40,11 @@ int http_n::server_n::Basic::alpnSelectCallback(SSL*, const unsigned char** out,
     return SSL_TLSEXT_ERR_OK;
 }
 
-std::unique_ptr<http_n::server_n::Basic> http_n::server_n::Basic::create(uint16_t port) {
-    return std::make_unique<Basic>(Private_s(), port);
+void http_n::server_n::Basic::clean() {
+    for (const auto& id : m_threadIds)
+        m_threadRegistry->join(id);
+
+    m_threadIds.clear();
 }
 
 asio::awaitable<void> http_n::server_n::Basic::handleClient(asio::ip::tcp::socket&& socket) {
@@ -60,7 +69,7 @@ asio::awaitable<void> http_n::server_n::Basic::handleClient(asio::ip::tcp::socke
         const Response& response = m_methodEndpoints.at(method).at(endpoint)(session, request);
         co_await session.write(response);
     } catch (std::exception& e) {
-        m_light->log(log_n::Level_en::ERROR, "Exception in worker thread. Function:", std::format("[{}]", FUNCTION_SIGNATURE), "Reason: ", e.what());
+        m_light->log(log_n::Level_en::ERROR, &m_extraLogInformation, "Exception in worker thread. Function:", std::format("[{}]", FUNCTION_SIGNATURE), "Reason: ", e.what());
     }
 }
 
@@ -73,33 +82,19 @@ asio::awaitable<void> http_n::server_n::Basic::listen() {
         m_http->spawn(handleClient(co_await acceptor.async_accept(asio::use_awaitable)), asio::detached);
 }
 
-void http_n::server_n::Basic::readCommands() const {
-    m_light->log(log_n::Level_en::INFO, "Reading commands ...");
-    while (m_isRunning) {
-        std::string command;
-        std::getline(std::cin, command);
-
-        if (not m_commands.contains(command)) {
-            m_light->log(log_n::Level_en::WARNING, "Command not found.");
-            continue;
-        }
-
-        m_commands.at(command)();
-    }
-}
-
 void http_n::server_n::Basic::run() {
-    assert(m_methodEndpoints.size() > 0 && "No endpoints specified");
+    if (m_methodEndpoints.size() <= 0)
+        throw Exception("No endpoints specified");
 
     m_isRunning = true;
     startSequence();
 
     startThreadPool();
 
-    m_light->log(log_n::Level_en::INFO, "Listening at port:", m_port);
+    m_light->log(log_n::Level_en::INFO, &m_extraLogInformation, "Listening at port:", m_port);
     m_http->spawn(listen(), asio::detached);
 
-    readCommands();
+    m_ioContext.run();
 }
 
 void http_n::server_n::Basic::setEndpoints(std::string method, const endpointsUMap_t& endpoints) {
@@ -117,27 +112,23 @@ void http_n::server_n::Basic::setThreadPoolSize(uint16_t size) {
     m_threadPoolSize = size;
 }
 
-void http_n::server_n::Basic::setupCommands() {
-    m_commands["stop"] = std::bind(&Basic::stop, this);
-}
-
 void http_n::server_n::Basic::startSequence() const {
     if (not m_startSequence) return;
 
-    m_light->log(log_n::Level_en::INFO, "Initiating starting sequence ...");
+    m_light->log(log_n::Level_en::INFO, &m_extraLogInformation, "Initiating starting sequence ...");
     m_startSequence();
 }
 
 void http_n::server_n::Basic::startThreadPool() {
     if (m_threadPoolSize > 0)
-        m_light->log(log_n::Level_en::INFO, "Initiating", m_threadPoolSize, "threads ...");
+        m_light->log(log_n::Level_en::INFO, &m_extraLogInformation, "Launching", m_threadPoolSize, "threads ...");
 
     for (uint16_t i = 0; i < m_threadPoolSize + BASE_THREADS; i++) {
         m_threadIds.emplace_back(m_threadRegistry->start([&](){
             try {
                 m_ioContext.run();
             } catch (std::exception& e) {
-                m_light->log(log_n::Level_en::ERROR, "Exception in worker thread: ", e.what());
+                m_light->log(log_n::Level_en::ERROR, &m_extraLogInformation, "Exception in worker thread: ", e.what());
             }
         }).id());
     }
@@ -146,10 +137,9 @@ void http_n::server_n::Basic::startThreadPool() {
 void http_n::server_n::Basic::stop() {
     if (not m_isRunning) return;
 
+    m_light->log(log_n::Level_en::SPECIAL, &m_extraLogInformation, "Stopping", "...");
+
     m_isRunning = false;
     m_workGuard.reset();
     m_ioContext.stop();
-
-    for (const auto& id : m_threadIds)
-        m_threadRegistry->join(id);
 }

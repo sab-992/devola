@@ -22,16 +22,12 @@ namespace http_n
             using completionToken_t = std::function<http_n::Response(const Session& session, const Request& request)>;
             using endpointsUMap_t = std::unordered_map<std::string, completionToken_t>;
 
-            struct Private_s {};
-
             const uint8_t BASE_THREADS = 2;
             const uint8_t THREADS_RESERVE_SIZE = 25;
 
         public:
-            Basic(const Private_s&, uint16_t port);
+            Basic(const std::string& name, uint16_t port);
             ~Basic();
-
-            friend std::unique_ptr<Basic> std::make_unique<Basic>();
 
             void run();
             void setStartSequence(const std::function<void()>& function);
@@ -39,9 +35,8 @@ namespace http_n
             void setEndpoints(std::string method, const endpointsUMap_t& endpoints);
             void stop();
 
-            static std::unique_ptr<Basic> create(uint16_t port=443);
-
         protected:
+            std::vector<std::string> m_extraLogInformation;
             std::unique_ptr<Http> m_http;
             asio::io_context m_ioContext;
             asio::ssl::context m_sslContext;
@@ -58,12 +53,14 @@ namespace http_n
             inline static std::shared_ptr<log_n::Light> m_light;
             inline static std::shared_ptr<thread_n::Registry> m_threadRegistry;
 
+            void addExtraLogInformation(const std::string& element);
+
         private:
             asio::awaitable<void> handleClient(asio::ip::tcp::socket&& socket);
             asio::awaitable<void> listen();
 
+            void clean();
             void readCommands() const;
-            void setupCommands();
             void startSequence() const;
             void startThreadPool();
 
