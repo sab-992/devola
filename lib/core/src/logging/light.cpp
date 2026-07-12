@@ -11,11 +11,15 @@ void log_n::Light::changeColor(log_n::Level_en level) const {
     std::cout << m_levels.at(level).second;
 }
 
+void log_n::Light::displayExtraInformation(const std::vector<std::string>& information) const {
+    for (const auto& element : information)
+        std::cout << std::format(" [{}]", element);
+}
+
 void log_n::Light::displayLevel(log_n::Level_en level) const {
     changeColor(level);
     std::cout << m_levels.at(level).first;
     resetColor();
-    std::cout << " - ";
 }
 
 void log_n::Light::displayTimestamp() const {
