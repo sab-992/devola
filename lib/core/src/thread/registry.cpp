@@ -22,8 +22,11 @@ const Thread& thread_n::Registry::start(thread_n::completionToken_t function) {
 }
 
 void thread_n::Registry::join(std::thread::id id) {
+    // This cannot throw an error because it is possible that the caller is not the
+    // threadRegistry, in which case when the Registry's destructor is called, it will
+    // throw an error cause the thread would not exist.
     if (not m_threads.contains(id))
-        throw InvalidArgument("does not exist", "Thread ID");
+        return;
 
     if (m_threads.at(id).status() != thread_n::Status_en::RUNNING)
         throw LogicException("Non-running thread still exists in the registry");
