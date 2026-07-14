@@ -2,26 +2,26 @@
 
 #include <core/exception.hpp>
 #include <core/network/detail/headers.hpp>
-#include <core/http/detail/protocol/http1_1/headers_parser.hpp>
+#include <core/http/detail/version/http1_1/headers_parser.hpp>
 #include <core/network/network.hpp>
 #include <helper/core/headers_parser_mock.hpp>
 
 class HeadersParserTest : public ::testing::Test {};
 
 TEST_F(HeadersParserTest, Instance_ReturnsValidPointer) {
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     EXPECT_NE(nullptr, HeadersParser::instance());
 }
 
 TEST_F(HeadersParserTest, Instance_AlwaysReturnsTheSamePointer) {
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     auto EXPECTED = HeadersParser::instance();
     EXPECT_EQ(EXPECTED, HeadersParser::instance());
 }
 
 TEST_F(HeadersParserTest, BuildWithStartlineAndWithoutHeaders_ReturnsStartline) {
     using namespace network_n;
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     const std::string EXPECTED_STARTLINE = "HTTP/1.1 200 OK";
     auto parser = HeadersParser::instance();
     Headers h(parser);
@@ -34,7 +34,7 @@ TEST_F(HeadersParserTest, BuildWithStartlineAndWithoutHeaders_ReturnsStartline) 
 
 TEST_F(HeadersParserTest, BuildWithStartlineAndHeaders_ReturnsValidHTTPHeaders) {
     using namespace network_n;
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     const std::string EXPECTED_STARTLINE = "HTTP/1.1 200 OK";
     const std::string EXPECTED_HEADER = "Transfer-Encoding";
     const std::string EXPECTED_HEADER_VALUE = "chunked";
@@ -51,7 +51,7 @@ TEST_F(HeadersParserTest, BuildWithStartlineAndHeaders_ReturnsValidHTTPHeaders) 
 
 TEST_F(HeadersParserTest, IsContentChunkedWithChunkedInHeaders_ReturnsTrue) {
     using namespace network_n;
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     const std::string EXPECTED_HEADER = "Transfer-Encoding";
     const std::string EXPECTED_HEADER_VALUE = "chunked";
     Headers h(HeadersParserMock::get(true));
@@ -64,7 +64,7 @@ TEST_F(HeadersParserTest, IsContentChunkedWithChunkedInHeaders_ReturnsTrue) {
 
 TEST_F(HeadersParserTest, IsContentChunkedWithoutChunkedInHeaders_ReturnsFalse) {
     using namespace network_n;
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     const std::string EXPECTED_HEADER = "Transfer-Encoding";
     const std::string EXPECTED_HEADER_VALUE = "chunked";
     Headers h(HeadersParserMock::get());
@@ -76,7 +76,7 @@ TEST_F(HeadersParserTest, IsContentChunkedWithoutChunkedInHeaders_ReturnsFalse) 
 
 TEST_F(HeadersParserTest, ParseWithValidStartlineAndHeaders_ReturnsStartlineAndHeadersMap) {
     using namespace network_n;
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     const std::string EXPECTED_STARTLINE = "HTTP/1.1 200 OK";
     const std::string EXPECTED_HEADER = "Transfer-Encoding";
     const std::string EXPECTED_HEADER_VALUE = "chunked";
@@ -91,7 +91,7 @@ TEST_F(HeadersParserTest, ParseWithValidStartlineAndHeaders_ReturnsStartlineAndH
 }
 
 TEST_F(HeadersParserTest, ParseStartlineWithRequestStartline_ReturnsResponseStartLineInformationMap) {
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     const std::string REQUEST_STARTLINE = "GET /test HTTP/1.1";
     const startLineInformation_t EXPECTED_REQUEST_INFORMATION = { "GET", "/test", "HTTP/1.1" };
 
@@ -101,7 +101,7 @@ TEST_F(HeadersParserTest, ParseStartlineWithRequestStartline_ReturnsResponseStar
 }
 
 TEST_F(HeadersParserTest, ParseStartlineWithResponseStartline_ReturnsResponseStartLineInformationMap) {
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     const std::string RESPONSE_STARTLINE = "HTTP/1.1 200 OK";
     const startLineInformation_t EXPECTED_RESPONSE_INFORMATION = { "HTTP/1.1", "200", "OK" };
 
@@ -112,7 +112,7 @@ TEST_F(HeadersParserTest, ParseStartlineWithResponseStartline_ReturnsResponseSta
 
 TEST_F(HeadersParserTest, BuildWithoutStartlineAndHeadersUMap_ThrowsException) {
     using namespace network_n;
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     const std::string EXPECTED_RESULT = "";
     auto parser = HeadersParser::instance();
     Headers h(parser);
@@ -122,7 +122,7 @@ TEST_F(HeadersParserTest, BuildWithoutStartlineAndHeadersUMap_ThrowsException) {
 
 TEST_F(HeadersParserTest, BuildWithHeadersAndWithoutStartlineAnd_ThrowsException) {
     using namespace network_n;
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     const std::string EXPECTED_STARTLINE = "HTTP/1.1 200 OK";
     const std::string EXPECTED_HEADER = "Transfer-Encoding";
     const std::string EXPECTED_HEADER_VALUE = "chunked";
@@ -135,7 +135,7 @@ TEST_F(HeadersParserTest, BuildWithHeadersAndWithoutStartlineAnd_ThrowsException
 
 TEST_F(HeadersParserTest, ParseWithoutValidStartline_ThrowsException) {
     using namespace network_n;
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     const std::string EXPECTED_STARTLINE = "HTTP/1.1 OK";
     const std::pair<std::string, headersUMap_t> EXPECTED_HTTP_HEADERS = { EXPECTED_STARTLINE, { } };
     auto parser = HeadersParser::instance();
@@ -147,7 +147,7 @@ TEST_F(HeadersParserTest, ParseWithoutValidStartline_ThrowsException) {
 
 TEST_F(HeadersParserTest, ParseWithoutValidHeader_ThrowsException) {
     using namespace network_n;
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     const std::string EXPECTED_STARTLINE = "HTTP/1.1 200 OK";
     const std::string EXPECTED_HEADER = "Transfer-Encoding";
     const std::string EXPECTED_HEADER_VALUE = "chunked";
@@ -160,13 +160,13 @@ TEST_F(HeadersParserTest, ParseWithoutValidHeader_ThrowsException) {
 }
 
 TEST_F(HeadersParserTest, ParseStartlineWithoutEnoughInformation_ThrowsException) {
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     const std::string INVALID_STARTLINE = "HTTP/1.1 200";
     EXPECT_THROW(HeadersParser::instance()->parseStartLine(INVALID_STARTLINE), InvalidArgument);
 }
 
 TEST_F(HeadersParserTest, ParseStartlineWithoutRequestOrResponseStartline_ThrowsException) {
-    using http_n::protocol_n::http1_1_n::HeadersParser;
+    using http_n::version_n::http1_1_n::HeadersParser;
     const std::string INVALID_STARTLINE = "GET HTTP/1.1 20easd0";
     EXPECT_THROW(HeadersParser::instance()->parseStartLine(INVALID_STARTLINE), InvalidArgument);
 }

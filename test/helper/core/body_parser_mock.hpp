@@ -4,7 +4,7 @@
 #include <string>
 
 
-class BodyParserMock : public network_n::protocol_n::BodyParser_i {
+class BodyParserMock : public network_n::version_n::BodyParser_i {
 public:
     ~BodyParserMock() {}
 
@@ -12,7 +12,7 @@ public:
         return std::shared_ptr<BodyParserMock>(new BodyParserMock(returned));
     }
 
-    bool operator==(const network_n::protocol_n::BodyParser_i& other) const override { return dynamic_cast<const BodyParserMock*>(&other) != nullptr; }
+    bool operator==(const network_n::version_n::BodyParser_i& other) const override { return dynamic_cast<const BodyParserMock*>(&other) != nullptr; }
 
     std::vector<std::string> build(const network_n::Headers& headers, const network_n::Body& body) const override { return { m_returned }; }
     std::string parse(const network_n::Headers& headers, std::string_view stringBody) const override { return m_returned; }

@@ -12,10 +12,10 @@
 
 namespace network_n
 {
-    namespace protocol_n { class BodyParser_i; }
+    namespace version_n { class BodyParser_i; }
 
     class Body : public StringConvertible {
-        using BodyParser_i = network_n::protocol_n::BodyParser_i;
+        using BodyParser_i = network_n::version_n::BodyParser_i;
 
     public:
         Body(std::shared_ptr<BodyParser_i> parser);

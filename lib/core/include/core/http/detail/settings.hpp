@@ -7,6 +7,6 @@
 
 namespace http_n
 {
-    constexpr auto DEFAULT_PROTOCOL = network_n::protocol_n::Protocol::HTTP1_1;
+    constexpr auto DEFAULT_PROTOCOL = network_n::version_n::Version::HTTP1_1;
     using sslSocket_t = asio::ssl::stream<asio::ip::tcp::socket>;
 }

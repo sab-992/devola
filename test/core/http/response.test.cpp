@@ -28,7 +28,7 @@ TYPED_TEST_SUITE(ResponseTest, innerTypes_t);
 TYPED_TEST(ResponseTest, Constructor_HasDefaultProtocol) {
     Response response;
 
-    EXPECT_EQ(network_n::protocol_n::Factory::create(http_n::DEFAULT_PROTOCOL), response.protocol());
+    EXPECT_EQ(network_n::version_n::Factory::create(http_n::DEFAULT_PROTOCOL), response.version());
 }
 
 TYPED_TEST(ResponseTest, SetStatus_CreatesStatusWithCorrectCode) {
@@ -46,11 +46,11 @@ TYPED_TEST(ResponseTest, SetStatus_CreatesStatusWithCorrectCode) {
 TYPED_TEST(ResponseTest, BuildWithStatus_CreatesValidStartline) {
     using nlohmann::json;
     using namespace network_n;
-    using namespace http_n::protocol_n;
-    using namespace network_n::protocol_n;
+    using namespace http_n::version_n;
+    using namespace network_n::version_n;
 
     const Status_s EXPECTED_STATUS(Code::NOT_FOUND);
-    const protocol_n::Protocol EXPECTED_PROTOCOL = protocol_n::Protocol::HTTP1_1;
+    const version_n::Version EXPECTED_PROTOCOL = version_n::Version::HTTP1_1;
     const std::string EXPECTED_STARTLINE = std::format("{} {} {}", Factory::create(EXPECTED_PROTOCOL)->name(), to_underlying(EXPECTED_STATUS.code()), EXPECTED_STATUS.reason());
 
     Response response;
@@ -84,17 +84,17 @@ TYPED_TEST(ResponseTest, BuildWithoutStatus_ThrowsException) {
 }
 
 TYPED_TEST(ResponseTest, Set_CreatesValidHTTPResponse) {
-    using namespace http_n::protocol_n;
-    using namespace network_n::protocol_n;
+    using namespace http_n::version_n;
+    using namespace network_n::version_n;
 
     const network_n::Status_s EXPECTED_STATUS(network_n::Code::NOT_FOUND);
-    const Protocol EXPECTED_PROTOCOL = Protocol::HTTP1_1;
+    const Version EXPECTED_PROTOCOL = Version::HTTP1_1;
     const auto EXPECTED_BODY = this->getTestObject();
     const auto EXPECTED_STRING_BODY = this->getTestStringObject();
-    const auto protocol = Factory::create(EXPECTED_PROTOCOL);
+    const auto version = Factory::create(EXPECTED_PROTOCOL);
     const std::unordered_map<std::string, std::string> headersUMap{ {"Transfer-encoding", "chunked"}, {"Content-Length", std::to_string(EXPECTED_STRING_BODY.size())}};
 
-    const std::string EXPECTED_RESPONSE = std::format("{} {} {}\r\n{}\r\n\r\n{}", protocol->name(),
+    const std::string EXPECTED_RESPONSE = std::format("{} {} {}\r\n{}\r\n\r\n{}", version->name(),
                                                                                   to_underlying(EXPECTED_STATUS.code()),
                                                                                   EXPECTED_STATUS.reason(),
                                                                                   buildHeaders(headersUMap),
@@ -105,7 +105,7 @@ TYPED_TEST(ResponseTest, Set_CreatesValidHTTPResponse) {
 
     EXPECT_NO_THROW(response.build());
     EXPECT_EQ(EXPECTED_STATUS, response.status());
-    EXPECT_EQ(protocol, response.protocol());
+    EXPECT_EQ(version, response.version());
     EXPECT_EQ(headersUMap.size(), response.headersMap().size());
     for (const auto& [header, expected_value]: headersUMap)
         EXPECT_EQ(expected_value, response.header(header));

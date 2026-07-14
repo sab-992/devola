@@ -1,13 +1,13 @@
-#include <core/http/detail/protocol/http1_1/headers_parser.hpp>
+#include <core/http/detail/version/http1_1/headers_parser.hpp>
 
 
-http_n::protocol_n::http1_1_n::HeadersParser::HeadersParser(const Singleton<HeadersParser>::Private_s&) {};
+http_n::version_n::http1_1_n::HeadersParser::HeadersParser(const Singleton<HeadersParser>::Private_s&) {};
 
-bool http_n::protocol_n::http1_1_n::HeadersParser::operator==(const HeadersParser_i& other) const {
+bool http_n::version_n::http1_1_n::HeadersParser::operator==(const HeadersParser_i& other) const {
     return dynamic_cast<const HeadersParser*>(&other) != nullptr;
 }
 
-std::string http_n::protocol_n::http1_1_n::HeadersParser::build(const Headers& headers) const {
+std::string http_n::version_n::http1_1_n::HeadersParser::build(const Headers& headers) const {
     const std::string& startLine = headers.startLine();
     if (startLine.empty()) throw InvalidArgument("Cannot be empty", "Start line");
 
@@ -18,19 +18,19 @@ std::string http_n::protocol_n::http1_1_n::HeadersParser::build(const Headers& h
     return stringHeaders;
 }
 
-bool http_n::protocol_n::http1_1_n::HeadersParser::isContentChunked(const Headers& headers) {
+bool http_n::version_n::http1_1_n::HeadersParser::isContentChunked(const Headers& headers) {
     return headers.get(TRANSFER_ENCODING) == CHUNKED;
 }
 
-bool http_n::protocol_n::http1_1_n::HeadersParser::isResponse(const startLineInformation_t& information) const {
+bool http_n::version_n::http1_1_n::HeadersParser::isResponse(const startLineInformation_t& information) const {
     return information[0].find(PROTOCOL_VERSION_NAME) != std::string::npos;
 }
 
-bool http_n::protocol_n::http1_1_n::HeadersParser::isRequest(const startLineInformation_t& information) const {
+bool http_n::version_n::http1_1_n::HeadersParser::isRequest(const startLineInformation_t& information) const {
     return information[2].find(PROTOCOL_VERSION_NAME) != std::string::npos;
 }
 
-std::pair<std::string, headersUMap_t> http_n::protocol_n::http1_1_n::HeadersParser::parse(std::string_view stringHeaders) const {
+std::pair<std::string, headersUMap_t> http_n::version_n::http1_1_n::HeadersParser::parse(std::string_view stringHeaders) const {
     std::stringstream input;
     input << trim(stringHeaders);
 
@@ -61,7 +61,7 @@ std::pair<std::string, headersUMap_t> http_n::protocol_n::http1_1_n::HeadersPars
     return { rTrim(startLine), headersUMap };
 }
 
-startLineInformation_t http_n::protocol_n::http1_1_n::HeadersParser::parseStartLine(std::string_view startLine) const {
+startLineInformation_t http_n::version_n::http1_1_n::HeadersParser::parseStartLine(std::string_view startLine) const {
     const startLineInformation_t& startLineParts = splitStartLine(startLine);
 
     validateStartline(startLineParts);
@@ -72,7 +72,7 @@ startLineInformation_t http_n::protocol_n::http1_1_n::HeadersParser::parseStartL
     return startLineParts;
 }
 
-startLineInformation_t http_n::protocol_n::http1_1_n::HeadersParser::splitStartLine(std::string_view startLine) const {
+startLineInformation_t http_n::version_n::http1_1_n::HeadersParser::splitStartLine(std::string_view startLine) const {
     uint8_t index = 0;
     startLineInformation_t startLineInformation;
     for (; index < 2; ++index) {
@@ -96,7 +96,7 @@ startLineInformation_t http_n::protocol_n::http1_1_n::HeadersParser::splitStartL
     return startLineInformation;
 };
 
-void http_n::protocol_n::http1_1_n::HeadersParser::validateStartline(const startLineInformation_t& startLineInformation) const {
+void http_n::version_n::http1_1_n::HeadersParser::validateStartline(const startLineInformation_t& startLineInformation) const {
     for (const auto& elem : startLineInformation)
         if (elem.empty()) throw InvalidArgument("Ill-formed: Missing information", "HTTP message startLine");
 };

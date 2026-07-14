@@ -9,7 +9,7 @@ http_n::memento_n::Request::Request(const http_n::Request& toSave) {
     m_headers = std::make_unique<Headers>(*toSave.m_headers);
     m_method = toSave.m_method;
     m_port = toSave.m_port;
-    m_protocol = toSave.m_protocol;
+    m_version = toSave.m_version;
     m_URL = toSave.m_URL;
 }
 
@@ -20,7 +20,7 @@ http_n::memento_n::Request::Request(const Request& other) {
     m_body = std::make_unique<Body>(*other.m_body);
     m_headers = std::make_unique<Headers>(*other.m_headers);
     m_port = other.m_port;
-    m_protocol = other.m_protocol;
+    m_version = other.m_version;
     m_URL = other.m_URL;
 }
 
@@ -30,6 +30,6 @@ bool http_n::memento_n::Request::operator==(const http_n::memento_n::Request& ot
             pointersEqual(m_headers, other.m_headers) and
             m_method      ==  other.m_method          and
             m_port        ==  other.m_port            and
-            m_protocol    ==  other.m_protocol        and
+            m_version    ==  other.m_version        and
             m_URL         ==  other.m_URL;
 }

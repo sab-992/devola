@@ -18,9 +18,9 @@ namespace network_n
     const size_t DOWNLOAD_BUFFER_MAX_SIZE = 64 * KiB;
     const size_t REQUEST_BUFFER_MAX_SIZE = 32 * KiB;
 
-    namespace protocol_n
+    namespace version_n
     {
-        enum class Protocol {
+        enum class Version {
             HTTP1_1,
             NONE // For error handling
         };

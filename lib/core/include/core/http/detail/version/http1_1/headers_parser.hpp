@@ -13,13 +13,13 @@
 
 namespace http_n
 {
-    namespace protocol_n
+    namespace version_n
     {
         namespace http1_1_n
         {
             const std::string PROTOCOL_VERSION_NAME = "HTTP/1.1";
 
-            class HeadersParser : public network_n::protocol_n::HeadersParser_i, public Singleton<HeadersParser> {
+            class HeadersParser : public network_n::version_n::HeadersParser_i, public Singleton<HeadersParser> {
                 using Headers = network_n::Headers;
 
             public:

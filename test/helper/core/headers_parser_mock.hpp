@@ -7,13 +7,13 @@
 #include <utility>
 
 
-class HeadersParserMock : public network_n::protocol_n::HeadersParser_i {
+class HeadersParserMock : public network_n::version_n::HeadersParser_i {
 public:
     static std::shared_ptr<HeadersParserMock> get(bool isChunked=false, bool isDownload=false) {
         return std::shared_ptr<HeadersParserMock>(new HeadersParserMock(isChunked, isDownload));
     }
 
-    bool operator==(const network_n::protocol_n::HeadersParser_i& other) const override { return dynamic_cast<const HeadersParserMock*>(&other) != nullptr; }
+    bool operator==(const network_n::version_n::HeadersParser_i& other) const override { return dynamic_cast<const HeadersParserMock*>(&other) != nullptr; }
 
     std::string build(const network_n::Headers& headers) const override {
         std::string stringHeaders = "HTTP/1.1 200 OK\r\n"

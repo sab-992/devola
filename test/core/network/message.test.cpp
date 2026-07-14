@@ -117,6 +117,6 @@ TYPED_TEST(MessageTest, SetProtocolWithoutProtocol_ThrowsException) {
     ForEachType<innerTypes_t>([&]<typename T>() {
         SCOPED_TRACE(std::format("Body type: {}", typeid(T).name()));
         TypeParam message;
-        EXPECT_THROW(message.setProtocol(network_n::protocol_n::Protocol::NONE), InvalidArgument);
+        EXPECT_THROW(message.setProtocol(network_n::version_n::Version::NONE), InvalidArgument);
     });
 }

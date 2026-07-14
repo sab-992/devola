@@ -14,7 +14,7 @@
 namespace http_n
 {
     class Http {
-        using Protocol_i = network_n::protocol_n::Protocol_i;
+        using Version_i = network_n::version_n::Version_i;
 
     public:
         Http(asio::io_context* ctx);
@@ -51,6 +51,6 @@ namespace http_n
         int m_sslMode = asio::ssl::verify_peer;
 
         void negotiateAlpnExtension(asio::ssl::context& context, std::string_view extension) const;
-        sslSocket_t prepareSSLHandshake(std::shared_ptr<Protocol_i> protocol, const std::string& hostName) const;
+        sslSocket_t prepareSSLHandshake(std::shared_ptr<Version_i> version, const std::string& hostName) const;
     };
 }

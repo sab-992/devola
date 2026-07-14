@@ -3,9 +3,9 @@
 #include <asio.hpp>
 #include <asio/ssl.hpp>
 #include <core/exception.hpp>
-#include <core/http/detail/protocol/http1_1/body_parser.hpp>
-#include <core/http/detail/protocol/http1_1/headers_parser.hpp>
-#include <core/network/interface/protocol.hpp>
+#include <core/http/detail/version/http1_1/body_parser.hpp>
+#include <core/http/detail/version/http1_1/headers_parser.hpp>
+#include <core/network/interface/version.hpp>
 #include <core/network/network.hpp>
 #include <core/utility/singleton.hpp>
 #include <format>
@@ -16,13 +16,13 @@
 
 namespace http_n
 {
-    namespace protocol_n
+    namespace version_n
     {
-        class Http1_1 : public network_n::protocol_n::Protocol_i, public Singleton<Http1_1> {
+        class Http1_1 : public network_n::version_n::Version_i, public Singleton<Http1_1> {
             using Body = network_n::Body;
             using Headers = network_n::Headers;
-            using BodyParser_i = network_n::protocol_n::BodyParser_i;
-            using HeadersParser_i = network_n::protocol_n::HeadersParser_i;
+            using BodyParser_i = network_n::version_n::BodyParser_i;
+            using HeadersParser_i = network_n::version_n::HeadersParser_i;
 
         public:
             Http1_1(const Singleton<Http1_1>::Private_s&);

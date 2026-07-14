@@ -10,7 +10,7 @@ namespace network_n
 {
     class Headers;
 
-    namespace protocol_n
+    namespace version_n
     {
         class HeadersParser_i {
         public:

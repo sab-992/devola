@@ -12,9 +12,9 @@ http_n::Http::Http(asio::io_context* ctx) : m_ioContext(ctx) {}
 asio::awaitable<http_n::Response> http_n::Http::async_receive(sslSocket_t& socket) const {
     const std::string& alpnExtension = readALPNExtension(socket);
 
-    auto protocol = network_n::protocol_n::Factory::create(alpnExtension);
+    auto version = network_n::version_n::Factory::create(alpnExtension);
 
-    const auto& [headers, body] = co_await protocol->async_receive(socket);
+    const auto& [headers, body] = co_await version->async_receive(socket);
 
     co_return Response(headers, body);
 }
@@ -30,16 +30,16 @@ asio::awaitable<http_n::sslSocket_t> http_n::Http::async_send(const Request& req
     using namespace asio;
     using namespace asio::ip;
 
-    auto protocol = request.protocol();
+    auto version = request.version();
 
-    sslSocket_t socket = prepareSSLHandshake(protocol, request.url());
+    sslSocket_t socket = prepareSSLHandshake(version, request.url());
 
     tcp::resolver resolver(*m_ioContext);
     co_await async_connect(socket.lowest_layer(), resolver.resolve(request.url(), std::to_string(request.port())));
 
     co_await socket.async_handshake(asio::ssl::stream_base::client);
 
-    co_await request.protocol()->async_send(socket, request.toString());
+    co_await request.version()->async_send(socket, request.toString());
 
     co_return std::move(socket);
 }
@@ -50,7 +50,7 @@ void http_n::Http::negotiateAlpnExtension(asio::ssl::context& context, std::stri
     SSL_CTX_set_alpn_protos(context.native_handle(), protos, sizeof(protos) + 1);
 }
 
-http_n::sslSocket_t http_n::Http::prepareSSLHandshake(std::shared_ptr<network_n::protocol_n::Protocol_i> protocol, const std::string& hostName) const {
+http_n::sslSocket_t http_n::Http::prepareSSLHandshake(std::shared_ptr<network_n::version_n::Version_i> version, const std::string& hostName) const {
     if (not m_ioContext)
         throw Exception("m_ioContext is nullptr");
 
@@ -59,7 +59,7 @@ http_n::sslSocket_t http_n::Http::prepareSSLHandshake(std::shared_ptr<network_n:
 
     ssl::context sslContext(ssl::context::tls_client);
 
-    negotiateAlpnExtension(sslContext, protocol->alpnExtension());
+    negotiateAlpnExtension(sslContext, version->alpnExtension());
 
     sslContext.set_verify_mode(m_sslMode);
     sslContext.set_default_verify_paths();
@@ -86,9 +86,9 @@ std::string http_n::Http::readALPNExtension(sslSocket_t& socket) {
 http_n::Response http_n::Http::receive(sslSocket_t& socket) const {
     const std::string& alpnExtension = readALPNExtension(socket);
 
-    auto protocol = network_n::protocol_n::Factory::create(alpnExtension);
+    auto version = network_n::version_n::Factory::create(alpnExtension);
 
-    const auto& [headers, body] = protocol->receive(socket);
+    const auto& [headers, body] = version->receive(socket);
 
     return Response(headers, body);
 }
@@ -102,16 +102,16 @@ http_n::sslSocket_t http_n::Http::send(const Request& request) const {
     using namespace asio;
     using namespace asio::ip;
 
-    auto protocol = request.protocol();
+    auto version = request.version();
 
-    sslSocket_t socket = prepareSSLHandshake(protocol, request.url());
+    sslSocket_t socket = prepareSSLHandshake(version, request.url());
 
     tcp::resolver resolver(*m_ioContext);
     connect(socket.lowest_layer(), resolver.resolve(request.url(), std::to_string(request.port())));
 
     socket.handshake(asio::ssl::stream_base::client);
 
-    protocol->send(socket, request.toString());
+    version->send(socket, request.toString());
 
     return std::move(socket);
 }

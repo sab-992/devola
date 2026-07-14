@@ -3,7 +3,7 @@
 #include <core/http/request.hpp>
 #include <core/network/detail/body.hpp>
 #include <core/network/detail/headers.hpp>
-#include <core/network/interface/protocol.hpp>
+#include <core/network/interface/version.hpp>
 #include <core/network/network.hpp>
 #include <core/utility/interface/memento.hpp>
 #include <core/utility/compare.hpp>
@@ -32,7 +32,7 @@ namespace http_n
             std::unique_ptr<network_n::Headers> m_headers;
             std::string m_method;
             uint16_t m_port;
-            std::shared_ptr<network_n::protocol_n::Protocol_i> m_protocol;
+            std::shared_ptr<network_n::version_n::Version_i> m_version;
             std::string m_URL;
         };
     }

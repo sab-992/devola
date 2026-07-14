@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/exception.hpp>
-#include <core/http/detail/protocol/http1_1/headers_parser.hpp>
+#include <core/http/detail/version/http1_1/headers_parser.hpp>
 #include <core/network/interface/body_parser.hpp>
 #include <core/network/network.hpp>
 #include <core/str/hex.hpp>
@@ -12,11 +12,11 @@
 
 namespace http_n
 {
-    namespace protocol_n
+    namespace version_n
     {
         namespace http1_1_n
         {
-            class BodyParser : public network_n::protocol_n::BodyParser_i, public Singleton<BodyParser> {
+            class BodyParser : public network_n::version_n::BodyParser_i, public Singleton<BodyParser> {
                 using Body = network_n::Body;
                 using Headers = network_n::Headers;
 

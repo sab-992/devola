@@ -9,7 +9,7 @@ namespace network_n
 {
     class Body;
 
-    namespace protocol_n
+    namespace version_n
     {
         class BodyParser_i {
         public:

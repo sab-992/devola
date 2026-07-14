@@ -11,10 +11,10 @@
 
 namespace network_n
 {
-    namespace protocol_n { class HeadersParser_i; }
+    namespace version_n { class HeadersParser_i; }
 
     class Headers : public StringConvertible {
-        using HeadersParser_i = network_n::protocol_n::HeadersParser_i;
+        using HeadersParser_i = network_n::version_n::HeadersParser_i;
 
     public:
         Headers(std::shared_ptr<HeadersParser_i> parser);

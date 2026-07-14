@@ -6,7 +6,7 @@ http_n::Response::Response() : Message<Response>(http_n::DEFAULT_PROTOCOL) {}
 http_n::Response::Response(Headers headers, Body body) : Message<Response>(http_n::DEFAULT_PROTOCOL) {
     Message<Response>::set(std::move(headers), std::move(body));
 
-    const startLineInformation_t& responseInfo = this->protocol()->headersParser()->parseStartLine(this->m_headers->startLine());
+    const startLineInformation_t& responseInfo = this->version()->headersParser()->parseStartLine(this->m_headers->startLine());
     initFromStartLineInformation(responseInfo);
 }
 
@@ -19,7 +19,7 @@ http_n::Response& http_n::Response::operator=(Response other) { swap(*this, othe
 
 void http_n::Response::finalize() {
     validateMembers();
-    this->setStartLine(std::format("{} {}", this->protocol()->name(), m_status.toString()));
+    this->setStartLine(std::format("{} {}", this->version()->name(), m_status.toString()));
 }
 
 bool http_n::Response::hasChangedSinceLastBuild() const {

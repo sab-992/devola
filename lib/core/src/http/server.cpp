@@ -55,7 +55,7 @@ asio::awaitable<void> http_n::server_n::Basic::handleClient(asio::ip::tcp::socke
         co_await session.handshake();
 
         Request request;
-        request.setProtocol(network_n::protocol_n::Factory::create(session.alpnExtension()));
+        request.setProtocol(network_n::version_n::Factory::create(session.alpnExtension()));
         request.set(co_await session.read()).build();
 
         const std::string& method = request.method();

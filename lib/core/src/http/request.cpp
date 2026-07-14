@@ -2,13 +2,13 @@
 
 
 http_n::Request::Request()
-: Message<Request>(http_n::DEFAULT_PROTOCOL), m_port(this->protocol()->defaultPort()) {}
+: Message<Request>(http_n::DEFAULT_PROTOCOL), m_port(this->version()->defaultPort()) {}
 
 http_n::Request::Request(Headers headers, Body body)
-: Message<http_n::Request>(http_n::DEFAULT_PROTOCOL), m_port(this->protocol()->defaultPort()) {
+: Message<http_n::Request>(http_n::DEFAULT_PROTOCOL), m_port(this->version()->defaultPort()) {
     Message<http_n::Request>::set(std::move(headers), std::move(body));
 
-    const startLineInformation_t& requestInfo = this->protocol()->headersParser()->parseStartLine(this->m_headers->startLine());
+    const startLineInformation_t& requestInfo = this->version()->headersParser()->parseStartLine(this->m_headers->startLine());
     initFromStartLineInformation(requestInfo);
 }
 
@@ -31,7 +31,7 @@ std::string http_n::Request::APIEndpoint() const {
 
 void http_n::Request::finalize() {
     validateMembers();
-    this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->protocol()->name()));
+    this->setStartLine(std::format("{} {} {}", m_method, m_APIEndpoint, this->version()->name()));
     this->m_headers->setHeader("Host", std::format("{}:{}", m_URL, m_port));
 }
 

@@ -3,12 +3,12 @@
 #include <core/exception.hpp>
 #include <core/network/detail/body.hpp>
 #include <core/network/detail/headers.hpp>
-#include <core/http/detail/protocol/http1_1/body_parser.hpp>
+#include <core/http/detail/version/http1_1/body_parser.hpp>
 #include <core/network/network.hpp>
 #include <helper/core/headers_parser_mock.hpp>
 #include <helper/core/inner_types.hpp>
 
-using namespace http_n::protocol_n::http1_1_n;
+using namespace http_n::version_n::http1_1_n;
 using network_n::Headers;
 
 Headers getMockedHeaders(bool isChunked=false, bool isDownload=false) {
@@ -71,7 +71,7 @@ protected:
 
 TEST_F(BodyParserTest, BuildWithChunkedHeaderAndBodySmallerThanChunkSize_ReturnsChunkedBodyAsSingleChunk) {
     using namespace network_n;
-    using namespace http_n::protocol_n::http1_1_n;
+    using namespace http_n::version_n::http1_1_n;
 
     const std::string EXPECTED_STRING_BODY = "Hello world";
     const std::vector<std::string> EXPECTED_CHUNKS { std::format("{}\r\n{}", toHex(EXPECTED_STRING_BODY.size()), EXPECTED_STRING_BODY), "0\r\n\r\n" };
@@ -88,7 +88,7 @@ TEST_F(BodyParserTest, BuildWithChunkedHeaderAndBodySmallerThanChunkSize_Returns
 
 TEST_F(BodyParserTest, BuildWithChunkedHeaderAndDownloadAndBodySmallerThanChunkSize_ReturnsChunkedBodyAsSingleChunk) {
     using namespace network_n;
-    using namespace http_n::protocol_n::http1_1_n;
+    using namespace http_n::version_n::http1_1_n;
 
     const std::string EXPECTED_STRING_BODY = "Hello world";
     const std::vector<std::string> EXPECTED_CHUNKS { std::format("{}\r\n{}", toHex(EXPECTED_STRING_BODY.size()), EXPECTED_STRING_BODY), "0\r\n\r\n" };
@@ -105,7 +105,7 @@ TEST_F(BodyParserTest, BuildWithChunkedHeaderAndDownloadAndBodySmallerThanChunkS
 
 TEST_F(BodyParserTest, BuildWithChunkedHeader_ReturnsMultipleBodyChunks) {
     using namespace network_n;
-    using namespace http_n::protocol_n::http1_1_n;
+    using namespace http_n::version_n::http1_1_n;
 
     const std::string EXPECTED_FIRST_CHUNK = std::string(REQUEST_BUFFER_MAX_SIZE, '*');
     const std::string EXPECTED_SECOND_CHUNK = "*";
@@ -125,7 +125,7 @@ TEST_F(BodyParserTest, BuildWithChunkedHeader_ReturnsMultipleBodyChunks) {
 
 TEST_F(BodyParserTest, BuildWithChunkedHeaderAndDownload_ReturnsMultipleBiggerBodyChunks) {
     using namespace network_n;
-    using namespace http_n::protocol_n::http1_1_n;
+    using namespace http_n::version_n::http1_1_n;
 
     const std::string EXPECTED_FIRST_CHUNK = std::string(DOWNLOAD_BUFFER_MAX_SIZE, '*');
     const std::string EXPECTED_SECOND_CHUNK = "*";
@@ -144,7 +144,7 @@ TEST_F(BodyParserTest, BuildWithChunkedHeaderAndDownload_ReturnsMultipleBiggerBo
 }
 
 TEST_F(BodyParserTest, ParseWithChunkedHeader_ReturnsMergedBody) {
-    using namespace http_n::protocol_n::http1_1_n;
+    using namespace http_n::version_n::http1_1_n;
 
     const std::string EXPECTED_PARSED_RESULT = "Hello world";
 
@@ -158,7 +158,7 @@ TEST_F(BodyParserTest, ParseWithChunkedHeader_ReturnsMergedBody) {
 }
 
 TEST_F(BodyParserTest, ParseWithChunkedHeaderAndDownload_ReturnsMergedBody) {
-    using namespace http_n::protocol_n::http1_1_n;
+    using namespace http_n::version_n::http1_1_n;
 
     const std::string EXPECTED_PARSED_RESULT = "Hello world2";
 
@@ -172,7 +172,7 @@ TEST_F(BodyParserTest, ParseWithChunkedHeaderAndDownload_ReturnsMergedBody) {
 }
 
 TEST_F(BodyParserTest, ParseWithIncorrectStringBody_ThrowsException) {
-    using namespace http_n::protocol_n::http1_1_n;
+    using namespace http_n::version_n::http1_1_n;
 
     const std::string POORLY_CHUNKED_BODY = "5"
                                             "Hello\r\n"

@@ -2,7 +2,7 @@
 
 #include <core/exception.hpp>
 #include <core/http/request.hpp>
-#include <core/network/detail/protocol/factory.hpp>
+#include <core/network/detail/version/factory.hpp>
 #include <core/xml/document.hpp>
 #include <nlohmann/json.hpp>
 #include <format>
@@ -29,7 +29,7 @@ TYPED_TEST_SUITE(RequestTest, innerTypes_t);
 
 TYPED_TEST(RequestTest, Constructor_HasDefaultProtocol) {
     Request request;
-    EXPECT_EQ(network_n::protocol_n::Factory::create(http_n::DEFAULT_PROTOCOL), request.protocol());
+    EXPECT_EQ(network_n::version_n::Factory::create(http_n::DEFAULT_PROTOCOL), request.version());
 }
 
 TYPED_TEST(RequestTest, BuildWithURL_AddsHostHeader) {
@@ -49,16 +49,16 @@ TYPED_TEST(RequestTest, BuildWithURL_AddsHostHeader) {
 
 TYPED_TEST(RequestTest, BuildWithMethodAndAPIEndpoint_CreatesValidStartline) {
     using nlohmann::json;
-    using namespace http_n::protocol_n;
-    using namespace network_n::protocol_n;
+    using namespace http_n::version_n;
+    using namespace network_n::version_n;
 
     const std::string EXPECTED_METHOD = "POST";
     const std::string EXPECTED_API_ENDPOINT = "/test";
-    const Protocol EXPECTED_PROTOCOL = Protocol::HTTP1_1;
-    const auto protocol = Factory::create(EXPECTED_PROTOCOL);
+    const Version EXPECTED_PROTOCOL = Version::HTTP1_1;
+    const auto version = Factory::create(EXPECTED_PROTOCOL);
     const std::string EXPECTED_STARTLINE = std::format("{} {} {}", EXPECTED_METHOD,
                                                                    EXPECTED_API_ENDPOINT,
-                                                                   protocol->name());
+                                                                   version->name());
     Request request;
     request.setMethod(EXPECTED_METHOD)
            .setAPIEndpoint(EXPECTED_API_ENDPOINT)
@@ -126,7 +126,7 @@ TYPED_TEST(RequestTest, Set_CreatesValidHTTPRequest) {
     const uint16_t EXPECTED_PORT = 5503;
     const auto EXPECTED_BODY = this->getTestObject();
     const auto EXPECTED_STRING_BODY = this->getTestStringObject();
-    const auto EXPECTED_PROTOCOL = network_n::protocol_n::Factory::create(http_n::DEFAULT_PROTOCOL);
+    const auto EXPECTED_PROTOCOL = network_n::version_n::Factory::create(http_n::DEFAULT_PROTOCOL);
     const std::unordered_map<std::string, std::string> headersUMap{ { "Host",              std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT) },
                                                                     { "Transfer-encoding", "chunked" },
                                                                     { "Accept",            "application/xml" },
@@ -143,7 +143,7 @@ TYPED_TEST(RequestTest, Set_CreatesValidHTTPRequest) {
     EXPECT_NO_THROW(request.build());
     EXPECT_EQ(EXPECTED_METHOD, request.method());
     EXPECT_EQ(EXPECTED_API_ENDPOINT, request.APIEndpoint());
-    EXPECT_EQ(EXPECTED_PROTOCOL, request.protocol());
+    EXPECT_EQ(EXPECTED_PROTOCOL, request.version());
     EXPECT_EQ(EXPECTED_URL, request.url());
     EXPECT_EQ(EXPECTED_PORT, request.port());
     EXPECT_EQ(headersUMap.size(), request.headersMap().size());
