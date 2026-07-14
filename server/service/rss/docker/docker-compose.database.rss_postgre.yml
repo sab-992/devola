@@ -1,0 +1,22 @@
+
+networks:
+  app-network:
+    external: true
+services:
+  rss_postgre:
+    build:
+      context: ../../../docker
+      dockerfile: pg_sql.Dockerfile
+    container_name: rss_postgre
+    env_file:
+    - ../settings/.env
+    networks:
+    - app-network
+    restart: unless-stopped
+    volumes:
+    - rss_postgre_vol:/var/lib/postgresql/data
+    - ../database/rss_postgre:/docker-entrypoint-initdb.d
+volumes:
+  rss_postgre_vol:
+    driver: local
+    name: rss_postgre_vol
