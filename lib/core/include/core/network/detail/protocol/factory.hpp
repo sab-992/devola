@@ -1,9 +1,9 @@
 #pragma once
 
-#include <core/utility/enum.hpp>
-#include <core/network/detail/protocol/http1_1/http1_1.hpp>
+#include <core/http/detail/protocol/http1_1/http1_1.hpp>
 #include <core/network/interface/protocol.hpp>
 #include <core/network/network.hpp>
+#include <core/utility/enum.hpp>
 #include <memory>
 #include <unordered_map>
 
@@ -13,6 +13,8 @@ namespace network_n
     namespace protocol_n
     {
         class Factory {
+            using Protocol_i = network_n::protocol_n::Protocol_i;
+
         public:
             static std::shared_ptr<Protocol_i> create(const Protocol& protocol);
             static std::shared_ptr<Protocol_i> create(const std::string& alpnExtension);

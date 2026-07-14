@@ -1,13 +1,13 @@
-#include <core/network/detail/protocol/http1_1/http1_1.hpp>
+#include <core/http/detail/protocol/http1_1/http1_1.hpp>
 
 
-network_n::protocol_n::Http1_1::Http1_1(const Singleton<Http1_1>::Private_s&) {}
+http_n::protocol_n::Http1_1::Http1_1(const Singleton<Http1_1>::Private_s&) {}
 
-std::string network_n::protocol_n::Http1_1::alpnExtension() const {
+std::string http_n::protocol_n::Http1_1::alpnExtension() const {
     return "http/1.1";
 };
 
-asio::awaitable<std::pair<network_n::Headers, network_n::Body>> network_n::protocol_n::Http1_1::async_receive(asio::ssl::stream<asio::ip::tcp::socket>& socket) const {
+asio::awaitable<std::pair<network_n::Headers, network_n::Body>> http_n::protocol_n::Http1_1::async_receive(asio::ssl::stream<asio::ip::tcp::socket>& socket) const {
     using namespace network_n;
     using namespace asio;
 
@@ -35,44 +35,44 @@ asio::awaitable<std::pair<network_n::Headers, network_n::Body>> network_n::proto
     co_return result;
 }
 
-asio::awaitable<void> network_n::protocol_n::Http1_1::async_send(asio::ssl::stream<asio::ip::tcp::socket>& socket, const std::string& stringRequest) const {
+asio::awaitable<void> http_n::protocol_n::Http1_1::async_send(asio::ssl::stream<asio::ip::tcp::socket>& socket, const std::string& stringRequest) const {
     using namespace asio;
     co_await async_write(socket, buffer(stringRequest));
 }
 
-std::shared_ptr<network_n::protocol_n::BodyParser_i> network_n::protocol_n::Http1_1::bodyParser() const {
+std::shared_ptr<network_n::protocol_n::BodyParser_i> http_n::protocol_n::Http1_1::bodyParser() const {
     return http1_1_n::BodyParser::instance();
 }
 
-uint16_t network_n::protocol_n::Http1_1::defaultPort() const {
+uint16_t http_n::protocol_n::Http1_1::defaultPort() const {
     return DEFAULT_PORT;
 }
 
-std::shared_ptr<network_n::protocol_n::HeadersParser_i> network_n::protocol_n::Http1_1::headersParser() const {
+std::shared_ptr<network_n::protocol_n::HeadersParser_i> http_n::protocol_n::Http1_1::headersParser() const {
     return http1_1_n::HeadersParser::instance();
 }
 
-std::string network_n::protocol_n::Http1_1::messageToString(const Headers& headers, const Body& body) const {
+std::string http_n::protocol_n::Http1_1::messageToString(const Headers& headers, const Body& body) const {
     return std::format("{}\r\n\r\n{}", headers.toString(), body.toString());
 }
 
-std::string network_n::protocol_n::Http1_1::name() const {
+std::string http_n::protocol_n::Http1_1::name() const {
     return http1_1_n::PROTOCOL_VERSION_NAME;
 }
 
-std::vector<std::string> network_n::protocol_n::Http1_1::packetize(const Headers& headers, const Body& body) const {
+std::vector<std::string> http_n::protocol_n::Http1_1::packetize(const Headers& headers, const Body& body) const {
     std::vector<std::string> packets { headers.build() };
     const std::vector<std::string>& bodyPackets = body.build(headers);
     packets.insert(packets.end(), bodyPackets.begin(), bodyPackets.end());
     return packets;
 }
 
-std::tuple<startLineInformation_t, network_n::Headers, network_n::Body> network_n::protocol_n::Http1_1::parse(std::string_view raw) const {
+std::tuple<startLineInformation_t, network_n::Headers, network_n::Body> http_n::protocol_n::Http1_1::parse(std::string_view raw) const {
     const auto& [rawHeaders, rawBody] = splitMessage(raw);
     return parse(rawHeaders, rawBody);
 }
 
-std::tuple<startLineInformation_t, network_n::Headers, network_n::Body> network_n::protocol_n::Http1_1::parse(std::string_view rawHeaders, std::string_view rawBody) const {
+std::tuple<startLineInformation_t, network_n::Headers, network_n::Body> http_n::protocol_n::Http1_1::parse(std::string_view rawHeaders, std::string_view rawBody) const {
     Headers headers = Headers(headersParser());
     headers.parse(rawHeaders);
     Body body = Body(bodyParser());
@@ -80,7 +80,7 @@ std::tuple<startLineInformation_t, network_n::Headers, network_n::Body> network_
     return  { headersParser()->parseStartLine(headers.startLine()), headers, body };
 }
 
-std::pair<network_n::Headers, network_n::Body> network_n::protocol_n::Http1_1::receive(asio::ssl::stream<asio::ip::tcp::socket>& socket) const {
+std::pair<network_n::Headers, network_n::Body> http_n::protocol_n::Http1_1::receive(asio::ssl::stream<asio::ip::tcp::socket>& socket) const {
     using namespace network_n;
     using namespace asio;
 
@@ -107,12 +107,12 @@ std::pair<network_n::Headers, network_n::Body> network_n::protocol_n::Http1_1::r
     return { std::move(headers), std::move(body) };
 }
 
-void network_n::protocol_n::Http1_1::send(asio::ssl::stream<asio::ip::tcp::socket>& socket, const std::string& stringRequest) const {
+void http_n::protocol_n::Http1_1::send(asio::ssl::stream<asio::ip::tcp::socket>& socket, const std::string& stringRequest) const {
     using namespace asio;
     write(socket, buffer(stringRequest));
 }
 
-std::pair<std::string_view, std::string_view> network_n::protocol_n::Http1_1::splitMessage(std::string_view message) const {
+std::pair<std::string_view, std::string_view> http_n::protocol_n::Http1_1::splitMessage(std::string_view message) const {
     const size_t END_OF_HEADERS = message.find(END_OF_HEADERS_TOKEN);
 
     if (END_OF_HEADERS == std::string::npos)

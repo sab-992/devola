@@ -1,11 +1,11 @@
 #pragma once
 
-#include <core/utility/string_convertible.hpp>
 #include <core/network/detail/headers.hpp>
 #include <core/network/interface/body_parser.hpp>
 #include <core/str/interface/serializer.hpp>
 #include <core/str/detail/serializer/factory.hpp>
 #include <core/utility/compare.hpp>
+#include <core/utility/string_convertible.hpp>
 #include <memory>
 #include <string>
 
@@ -15,8 +15,10 @@ namespace network_n
     namespace protocol_n { class BodyParser_i; }
 
     class Body : public StringConvertible {
+        using BodyParser_i = network_n::protocol_n::BodyParser_i;
+
     public:
-        Body(std::shared_ptr<protocol_n::BodyParser_i> parser);
+        Body(std::shared_ptr<BodyParser_i> parser);
 
         Body(const Body& other) = default;
         Body(Body&& other) = default;
@@ -38,7 +40,7 @@ namespace network_n
         template <typename T>
         void set(const T& body) { m_stringBody = serializer<T>()->serialize(body); }
 
-        void setParser(std::shared_ptr<protocol_n::BodyParser_i> parser);
+        void setParser(std::shared_ptr<BodyParser_i> parser);
 
         friend void swap(Body& lhs, Body& rhs) {
             std::swap(lhs.m_parser, rhs.m_parser);
@@ -48,7 +50,7 @@ namespace network_n
         std::string toString() const override;
 
     private:
-        std::shared_ptr<protocol_n::BodyParser_i> m_parser;
+        std::shared_ptr<BodyParser_i> m_parser;
         std::string m_stringBody;
 
         template <typename T>

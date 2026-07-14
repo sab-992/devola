@@ -2,12 +2,12 @@
 
 #include <core/network/detail/body.hpp>
 #include <core/network/detail/headers.hpp>
-#include <core/network/detail/protocol/http1_1/http1_1.hpp>
+#include <core/http/detail/protocol/http1_1/http1_1.hpp>
 #include <helper/core/body_parser_mock.hpp>
 #include <helper/core/headers_parser_mock.hpp>
 #include <helper/core/inner_types.hpp>
 
-using network_n::protocol_n::Http1_1;
+using http_n::protocol_n::Http1_1;
 
 template<typename T>
 class Http1_1Test : public ::testing::Test {

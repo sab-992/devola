@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/exception.hpp>
-#include <core/network/detail/protocol/http1_1/headers_parser.hpp>
+#include <core/http/detail/protocol/http1_1/headers_parser.hpp>
 #include <core/network/interface/body_parser.hpp>
 #include <core/network/network.hpp>
 #include <core/str/hex.hpp>
@@ -10,13 +10,16 @@
 #include <string>
 
 
-namespace network_n
+namespace http_n
 {
     namespace protocol_n
     {
         namespace http1_1_n
         {
-            class BodyParser : public BodyParser_i, public Singleton<BodyParser> {
+            class BodyParser : public network_n::protocol_n::BodyParser_i, public Singleton<BodyParser> {
+                using Body = network_n::Body;
+                using Headers = network_n::Headers;
+
             public:
                 BodyParser(const Singleton<BodyParser>::Private_s&);
                 ~BodyParser() = default;

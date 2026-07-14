@@ -46,6 +46,7 @@ TYPED_TEST(ResponseTest, SetStatus_CreatesStatusWithCorrectCode) {
 TYPED_TEST(ResponseTest, BuildWithStatus_CreatesValidStartline) {
     using nlohmann::json;
     using namespace network_n;
+    using namespace http_n::protocol_n;
     using namespace network_n::protocol_n;
 
     const Status_s EXPECTED_STATUS(Code::NOT_FOUND);
@@ -83,14 +84,14 @@ TYPED_TEST(ResponseTest, BuildWithoutStatus_ThrowsException) {
 }
 
 TYPED_TEST(ResponseTest, Set_CreatesValidHTTPResponse) {
-    using namespace http_n;
-    using namespace network_n;
+    using namespace http_n::protocol_n;
+    using namespace network_n::protocol_n;
 
-    const Status_s EXPECTED_STATUS(Code::NOT_FOUND);
-    const protocol_n::Protocol EXPECTED_PROTOCOL = protocol_n::Protocol::HTTP1_1;
+    const network_n::Status_s EXPECTED_STATUS(network_n::Code::NOT_FOUND);
+    const Protocol EXPECTED_PROTOCOL = Protocol::HTTP1_1;
     const auto EXPECTED_BODY = this->getTestObject();
     const auto EXPECTED_STRING_BODY = this->getTestStringObject();
-    const auto protocol = protocol_n::Factory::create(EXPECTED_PROTOCOL);
+    const auto protocol = Factory::create(EXPECTED_PROTOCOL);
     const std::unordered_map<std::string, std::string> headersUMap{ {"Transfer-encoding", "chunked"}, {"Content-Length", std::to_string(EXPECTED_STRING_BODY.size())}};
 
     const std::string EXPECTED_RESPONSE = std::format("{} {} {}\r\n{}\r\n\r\n{}", protocol->name(),

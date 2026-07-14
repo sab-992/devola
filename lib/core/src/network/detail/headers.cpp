@@ -1,7 +1,7 @@
 #include <core/network/detail/headers.hpp>
 
 
-network_n::Headers::Headers(std::shared_ptr<protocol_n::HeadersParser_i> parser) {
+network_n::Headers::Headers(std::shared_ptr<HeadersParser_i> parser) {
     setParser(parser);
 }
 
@@ -42,7 +42,7 @@ void network_n::Headers::setHeader(const std::string& name, std::string_view val
     m_headersMap[name] = value;
 }
 
-void network_n::Headers::setParser(std::shared_ptr<protocol_n::HeadersParser_i> parser) {
+void network_n::Headers::setParser(std::shared_ptr<HeadersParser_i> parser) {
     if (parser == nullptr)
         throw InvalidArgument("No parser given", "Headers parser");
 

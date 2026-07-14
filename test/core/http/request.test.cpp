@@ -49,6 +49,7 @@ TYPED_TEST(RequestTest, BuildWithURL_AddsHostHeader) {
 
 TYPED_TEST(RequestTest, BuildWithMethodAndAPIEndpoint_CreatesValidStartline) {
     using nlohmann::json;
+    using namespace http_n::protocol_n;
     using namespace network_n::protocol_n;
 
     const std::string EXPECTED_METHOD = "POST";
@@ -125,7 +126,7 @@ TYPED_TEST(RequestTest, Set_CreatesValidHTTPRequest) {
     const uint16_t EXPECTED_PORT = 5503;
     const auto EXPECTED_BODY = this->getTestObject();
     const auto EXPECTED_STRING_BODY = this->getTestStringObject();
-    const auto EXPECTED_PROTOCOL = protocol_n::Factory::create(http_n::DEFAULT_PROTOCOL);
+    const auto EXPECTED_PROTOCOL = network_n::protocol_n::Factory::create(http_n::DEFAULT_PROTOCOL);
     const std::unordered_map<std::string, std::string> headersUMap{ { "Host",              std::format("{}:{}", EXPECTED_URL, EXPECTED_PORT) },
                                                                     { "Transfer-encoding", "chunked" },
                                                                     { "Accept",            "application/xml" },

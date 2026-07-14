@@ -1,11 +1,11 @@
 #pragma once
 
-#include <core/utility/string_convertible.hpp>
 #include <core/network/detail/body.hpp>
 #include <core/network/detail/headers.hpp>
 #include <core/network/network.hpp>
 #include <core/network/detail/protocol/factory.hpp>
 #include <core/utility/interface/builder.hpp>
+#include <core/utility/string_convertible.hpp>
 
 
 #define DERIVED_REF_STATIC_CAST static_cast<Derived&>(*this)
@@ -14,6 +14,8 @@ namespace network_n
 {
     template <typename Derived>
     class Message : public StringConvertible, public Builder_i<Derived> {
+        using Protocol_i = network_n::protocol_n::Protocol_i;
+
     public:
         virtual ~Message() = default;
 
@@ -40,7 +42,7 @@ namespace network_n
             return protocol()->packetize(*this->m_headers, *this->m_body);
         }
 
-        std::shared_ptr<protocol_n::Protocol_i> protocol() const { return m_protocol; }
+        std::shared_ptr<Protocol_i> protocol() const { return m_protocol; }
 
         template <typename T>
         Derived& setBody(const T& body) {
@@ -57,7 +59,7 @@ namespace network_n
             return setProtocol(protocol_n::Factory::create(protocol));
         }
 
-        Derived& setProtocol(std::shared_ptr<protocol_n::Protocol_i> protocol) {
+        Derived& setProtocol(std::shared_ptr<Protocol_i> protocol) {
             if (protocol == nullptr)
                 throw InvalidArgument("No protocol given", "Message protocol");
 
@@ -101,7 +103,7 @@ namespace network_n
 
         std::unique_ptr<Body> m_body;
         std::unique_ptr<Headers> m_headers;
-        std::shared_ptr<protocol_n::Protocol_i> m_protocol;
+        std::shared_ptr<Protocol_i> m_protocol;
 
         virtual void finalize() = 0;
         virtual bool hasChangedSinceLastBuild() const = 0;

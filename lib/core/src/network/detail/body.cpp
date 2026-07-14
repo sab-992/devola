@@ -1,7 +1,7 @@
 #include <core/network/detail/body.hpp>
 
 
-network_n::Body::Body(std::shared_ptr<protocol_n::BodyParser_i> parser) {
+network_n::Body::Body(std::shared_ptr<BodyParser_i> parser) {
     setParser(parser);
 }
 
@@ -24,7 +24,7 @@ void network_n::Body::parse(const Headers& headers, std::string_view stringBody)
         m_stringBody = m_parser->parse(headers, stringBody);
 }
 
-void network_n::Body::setParser(std::shared_ptr<protocol_n::BodyParser_i> parser) {
+void network_n::Body::setParser(std::shared_ptr<BodyParser_i> parser) {
     if (parser == nullptr)
         throw InvalidArgument("No parser given", "Body parser");
 

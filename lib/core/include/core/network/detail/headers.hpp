@@ -1,11 +1,11 @@
 #pragma once
 
-#include <core/utility/string_convertible.hpp>
 #include <core/exception.hpp>
 #include <core/network/interface/headers_parser.hpp>
 #include <core/network/network.hpp>
 #include <core/str/trim.hpp>
 #include <core/utility/compare.hpp>
+#include <core/utility/string_convertible.hpp>
 #include <string>
 
 
@@ -14,8 +14,10 @@ namespace network_n
     namespace protocol_n { class HeadersParser_i; }
 
     class Headers : public StringConvertible {
+        using HeadersParser_i = network_n::protocol_n::HeadersParser_i;
+
     public:
-        Headers(std::shared_ptr<protocol_n::HeadersParser_i> parser);
+        Headers(std::shared_ptr<HeadersParser_i> parser);
         Headers(const Headers& other) = default;
         Headers(Headers&& other) = default;
 
@@ -33,7 +35,7 @@ namespace network_n
         void parse(std::string_view stringHeaders);
 
         void setHeader(const std::string& name, std::string_view value);
-        void setParser(std::shared_ptr<protocol_n::HeadersParser_i> parser);
+        void setParser(std::shared_ptr<HeadersParser_i> parser);
         void setStartLine(std::string_view startLine);
 
         std::string startLine() const;
@@ -51,7 +53,7 @@ namespace network_n
 
     private:
         headersUMap_t m_headersMap;
-        std::shared_ptr<protocol_n::HeadersParser_i> m_parser;
+        std::shared_ptr<HeadersParser_i> m_parser;
         std::string m_startLine;
     };
 }

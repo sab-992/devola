@@ -11,7 +11,7 @@
 #include <utility>
 
 
-namespace network_n
+namespace http_n
 {
     namespace protocol_n
     {
@@ -19,7 +19,9 @@ namespace network_n
         {
             const std::string PROTOCOL_VERSION_NAME = "HTTP/1.1";
 
-            class HeadersParser : public HeadersParser_i, public Singleton<HeadersParser> {
+            class HeadersParser : public network_n::protocol_n::HeadersParser_i, public Singleton<HeadersParser> {
+                using Headers = network_n::Headers;
+
             public:
                 HeadersParser(const Singleton<HeadersParser>::Private_s&);
                 ~HeadersParser() = default;

@@ -36,6 +36,6 @@ std::unordered_map<std::string, network_n::protocol_n::Protocol> network_n::prot
 }
 
 const std::unordered_map<network_n::protocol_n::Protocol, std::shared_ptr<network_n::protocol_n::Protocol_i>>& network_n::protocol_n::Factory::getProtocols() {
-    static const std::unordered_map<Protocol, std::shared_ptr<Protocol_i>> PROTOCOLS = { { Protocol::HTTP1_1, Http1_1::instance() } };
+    static const std::unordered_map<Protocol, std::shared_ptr<Protocol_i>> PROTOCOLS = { { Protocol::HTTP1_1, http_n::protocol_n::Http1_1::instance() } };
     return PROTOCOLS;
 }
