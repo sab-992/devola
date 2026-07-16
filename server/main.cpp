@@ -1,4 +1,5 @@
 
+#include <core/http.hpp>
 #include <core/logging.hpp>
 #include <core/file.hpp>
 #include <core/process.hpp>
@@ -30,9 +31,23 @@ int main() {
             running = false;
         };
 
-        light->log(log_n::Level_en::INFO, "Reading user input...");
+        asio::io_context ioCtx;
+        commands["send"] = [&](const std::vector<std::string>& params) {
+            http_n::Http http(&ioCtx);
+
+            auto request = http_n::Request().setMethod("GET")
+                                            .setAPIEndpoint("/")
+                                            .setURL("localhost")
+                                            .setPort(443).build();
+
+            http.disablePeerVerification();
+            auto response = http.receive(http.send(request));
+            light->log(log_n::Level_en::SPECIAL, std::format("Received response:\n{}", response.toString()));
+        };
+
         while (running) {
             std::string input;
+            light->log(log_n::Level_en::INFO, "Reading user input...");
             std::getline(std::cin, input);
 
             std::vector<std::string> tokens = split(input);
@@ -47,7 +62,7 @@ int main() {
             commands[command](tokens);
         }
         return 0;
-    } catch (std::exception e) {
-        light->log(log_n::Level_en::ERROR, "Uncaught error: ", e.what());
+    } catch (Exception e) {
+        light->log(log_n::Level_en::ERROR, "Uncaught error: ", e);
     }
 }

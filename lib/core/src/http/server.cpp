@@ -17,7 +17,6 @@ http_n::server_n::Basic::Basic(const std::string& name, uint16_t port)
     m_sslContext.use_certificate_chain_file(std::format("{}/server.crt", serverSettingsDir));
     m_sslContext.use_private_key_file(std::format("{}/server.key", serverSettingsDir), asio::ssl::context::pem);
     m_signals.async_wait([&](auto, auto){ stop(); });
-    m_threadIds.reserve(THREADS_RESERVE_SIZE);
 }
 
 http_n::server_n::Basic::~Basic() {
@@ -61,13 +60,13 @@ asio::awaitable<void> http_n::server_n::Basic::handleClient(asio::ip::tcp::socke
         const std::string& method = request.method();
         const std::string& endpoint = request.APIEndpoint();
 
-        if (not m_methodEndpoints.contains(method) or not m_methodEndpoints.at(method).contains(endpoint)) {
+        if (not m_endpoints.contains(method))
             co_await session.error(network_n::Code::NOT_FOUND);
-            co_return;
-        }
+        else if (not m_endpoints[method].contains(endpoint))
+            co_await session.error(network_n::Code::NOT_ALLOWED);
+        else
+            co_await session.write(m_endpoints[method][endpoint](session, request));
 
-        const Response& response = m_methodEndpoints.at(method).at(endpoint)(session, request);
-        co_await session.write(response);
     } catch (std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, &m_extraLogInformation, "Exception in worker thread. Function:", std::format("[{}]", FUNCTION_SIGNATURE), "Reason: ", e.what());
     }
@@ -83,7 +82,7 @@ asio::awaitable<void> http_n::server_n::Basic::listen() {
 }
 
 void http_n::server_n::Basic::run() {
-    if (m_methodEndpoints.size() <= 0)
+    if (m_endpoints.size() <= 0)
         throw Exception("No endpoints specified");
 
     m_isRunning = true;
@@ -97,14 +96,14 @@ void http_n::server_n::Basic::run() {
     m_ioContext.run();
 }
 
-void http_n::server_n::Basic::setEndpoints(std::string method, const endpointsUMap_t& endpoints) {
-    if (endpoints.size() <= 0)
-        throw InvalidArgument("No endpoints specified", "Endpoints umap");
+void http_n::server_n::Basic::setEndpoint(std::string method, const std::string& endpoint, handlers_t handler) {
+    if (not handler)
+        throw InvalidArgument("No handler provided", "Endpoint handler");
 
-    m_methodEndpoints[method] = endpoints;
+    m_endpoints[method][endpoint] = handler;
 }
 
-void http_n::server_n::Basic::setStartSequence(const std::function<void()>& function) {
+void http_n::server_n::Basic::setStartSequence(const startSequence_t& function) {
     m_startSequence = function;
 }
 
@@ -112,11 +111,11 @@ void http_n::server_n::Basic::setThreadPoolSize(uint16_t size) {
     m_threadPoolSize = size;
 }
 
-void http_n::server_n::Basic::startSequence() const {
+void http_n::server_n::Basic::startSequence() {
     if (not m_startSequence) return;
 
     m_light->log(log_n::Level_en::INFO, &m_extraLogInformation, "Initiating starting sequence ...");
-    m_startSequence();
+    m_startSequence(this);
 }
 
 void http_n::server_n::Basic::startThreadPool() {
