@@ -7,6 +7,10 @@ http_n::server_n::Session::Session(http_n::sslSocket_t&& socket) : m_socket(std:
 
 http_n::server_n::Session::~Session() {}
 
+std::string http_n::server_n::Session::alpnExtension() {
+    return http_n::Http::readALPNExtension(m_socket);
+}
+
 asio::awaitable<void> http_n::server_n::Session::error(network_n::Code errorCode) {
     http_n::Response response;
     response.setStatus(errorCode).build();
@@ -24,10 +28,6 @@ asio::awaitable<std::string> http_n::server_n::Session::read() {
     std::size_t n_bytes = co_await async_read_until(m_socket, asio::dynamic_buffer(data), "\r\n\r\n", asio::use_awaitable);
     m_light->log(log_n::Level_en::INFO, "Received", n_bytes, "bytes from", std::format("[{}].", m_remoteEndpoint));
     co_return data;
-}
-
-std::string http_n::server_n::Session::alpnExtension() {
-    return http_n::Http::readALPNExtension(m_socket);
 }
 
 void http_n::server_n::Session::validateSSLContext() const {
