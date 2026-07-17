@@ -33,21 +33,28 @@ int main() {
 
         asio::io_context ioCtx;
         commands["send"] = [&](const std::vector<std::string>& params) {
+
+            if (params.size() < 1) {
+                light->log(log_n::Level_en::WARNING, "The endpoint parameter is needed.", "Example: send /example/test");
+                return;
+            }
+
             http_n::Http http(&ioCtx);
 
             auto request = http_n::Request().setMethod("GET")
-                                            .setAPIEndpoint("/")
+                                            .setAPIEndpoint(params[0])
                                             .setURL("localhost")
-                                            .setPort(443).build();
+                                            .setPort(55555).build();
 
             http.disablePeerVerification();
             auto response = http.receive(http.send(request));
             light->log(log_n::Level_en::SPECIAL, std::format("Received response:\n{}", response.toString()));
         };
 
+        sleep(1);
         while (running) {
             std::string input;
-            light->log(log_n::Level_en::INFO, "Reading user input...");
+            std::cout << "Enter a command: ";
             std::getline(std::cin, input);
 
             std::vector<std::string> tokens = split(input);

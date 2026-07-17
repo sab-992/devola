@@ -65,7 +65,9 @@ asio::awaitable<void> http_n::server_n::Basic::handleClient(asio::ip::tcp::socke
         else if (not m_endpoints[method].contains(endpoint))
             co_await session.error(network_n::Code::NOT_ALLOWED);
         else
-            co_await session.write(m_endpoints[method][endpoint](session, request));
+            co_await session.write(co_await m_endpoints[method][endpoint](session, request));
+
+        co_await session.shutdown();
 
     } catch (std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, &m_extraLogInformation, "Exception in worker thread. Function:", std::format("[{}]", FUNCTION_SIGNATURE), "Reason: ", e.what());

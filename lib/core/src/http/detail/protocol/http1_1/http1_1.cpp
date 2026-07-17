@@ -27,6 +27,8 @@ asio::awaitable<std::pair<network_n::Headers, network_n::Body>> http_n::version_
         unsigned long contentLength = std::stoul(headers.get("Content-Length"));
         co_await async_read(socket, dynamic_buffer(rawBody), transfer_exactly(contentLength - extractedPartOfBody.size()), use_awaitable);
     }
+    else
+        throw Exception("Non chunked response has no content-length");
 
     Body body(bodyParser());
     body.parse(headers, extractedPartOfBody + rawBody);
@@ -85,7 +87,7 @@ std::pair<network_n::Headers, network_n::Body> http_n::version_n::Http1_1::recei
     using namespace asio;
 
     std::string rawHeaders;
-    read_until(socket,  dynamic_buffer(rawHeaders), std::string_view(END_OF_HEADERS_TOKEN));
+    read_until(socket,  dynamic_buffer(rawHeaders), END_OF_HEADERS_TOKEN);
 
     size_t endOfHeadersPos = rawHeaders.find(END_OF_HEADERS_TOKEN);
     const std::string extractedPartOfBody = rawHeaders.substr(endOfHeadersPos + END_OF_HEADERS_TOKEN.size());
@@ -100,6 +102,8 @@ std::pair<network_n::Headers, network_n::Body> http_n::version_n::Http1_1::recei
         unsigned long contentLength = std::stoul(headers.get("Content-Length"));
         read(socket, dynamic_buffer(rawBody), transfer_exactly(contentLength - extractedPartOfBody.size()));
     }
+    else
+        throw Exception("Non chunked response has no content-length");
 
     Body body(bodyParser());
     body.parse(headers, extractedPartOfBody + rawBody);

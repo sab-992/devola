@@ -35,7 +35,7 @@ asio::awaitable<http_n::sslSocket_t> http_n::Http::async_send(const Request& req
     sslSocket_t socket = prepareSSLHandshake(version, request.url());
 
     tcp::resolver resolver(*m_ioContext);
-    co_await async_connect(socket.lowest_layer(), resolver.resolve(request.url(), std::to_string(request.port())));
+    co_await async_connect(socket.lowest_layer(), co_await resolver.async_resolve(request.url(), std::to_string(request.port())));
 
     co_await socket.async_handshake(asio::ssl::stream_base::client);
 
@@ -47,7 +47,7 @@ asio::awaitable<http_n::sslSocket_t> http_n::Http::async_send(const Request& req
 void http_n::Http::negotiateAlpnExtension(asio::ssl::context& context, std::string_view extension) const {
     const std::string& prefixedProtos = std::format("{}{}", static_cast<char>(extension.size()), extension);
     const unsigned char* protos = reinterpret_cast<const unsigned char*>(prefixedProtos.data());
-    SSL_CTX_set_alpn_protos(context.native_handle(), protos, sizeof(protos) + 1);
+    SSL_CTX_set_alpn_protos(context.native_handle(), protos, prefixedProtos.size());
 }
 
 http_n::sslSocket_t http_n::Http::prepareSSLHandshake(std::shared_ptr<network_n::version_n::Version_i> version, const std::string& hostName) const {

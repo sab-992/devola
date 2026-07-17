@@ -14,14 +14,14 @@
 #include <unordered_map>
 
 #define ENDPOINT(METHOD, PATH) \
-    EndpointRegistrar(this, METHOD, PATH) = [&](const Session& session, const Request& request)
+    EndpointRegistrar(this, METHOD, PATH) = [&](const Session& session, const Request& request) -> asio::awaitable<http_n::Response>
 
 namespace http_n
 {
     namespace server_n
     {
         class Basic {
-            using handlers_t = std::function<http_n::Response(const Session& session, const Request& request)>;
+            using handlers_t = std::function<asio::awaitable<http_n::Response>(const Session&, const Request&)>;
             using endpoints_t = std::unordered_map<std::string, handlers_t>;
             using startSequence_t = std::function<void(Basic*)>;
 
@@ -60,9 +60,8 @@ namespace http_n
                 EndpointRegistrar(Basic* server, const std::string& method, const std::string& path)
                 : m_server(server), m_method(method), m_endpoint(path) {}
 
-                template<typename F>
-                void operator=(F&& handler) {
-                    m_server->setEndpoint(m_method, m_endpoint, std::forward<F>(handler));
+                void operator=(handlers_t&& handler) {
+                    m_server->setEndpoint(m_method, m_endpoint, std::forward<handlers_t>(handler));
                 }
 
             private:
