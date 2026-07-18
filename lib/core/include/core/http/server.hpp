@@ -13,8 +13,12 @@
 #include <memory>
 #include <unordered_map>
 
-#define ENDPOINT(METHOD, PATH) \
-    EndpointRegistrar(this, METHOD, PATH) = [&](const Session& session, const Request& request) -> asio::awaitable<http_n::Response>
+
+#define ENDPOINT(METHOD, PATH, HANDLER) \
+    EndpointRegistrar(this, METHOD, PATH) = std::bind_front(HANDLER, this)
+
+#define ENDPOINT_L(METHOD, PATH) \
+    EndpointRegistrar(this, METHOD, PATH) = [&](const http_n::server_n::Session& session, const http_n::Request& request) -> asio::awaitable<http_n::Response>
 
 namespace http_n
 {
@@ -30,6 +34,8 @@ namespace http_n
         public:
             Basic(const std::string& name, uint16_t port);
             ~Basic();
+
+            virtual std::string pathPrefix() const = 0;
 
             void run();
             void setStartSequence(const startSequence_t& function);
@@ -61,7 +67,7 @@ namespace http_n
                 : m_server(server), m_method(method), m_endpoint(path) {}
 
                 void operator=(handlers_t&& handler) {
-                    m_server->setEndpoint(m_method, m_endpoint, std::forward<handlers_t>(handler));
+                    m_server->setEndpoint(m_method, std::format("{}{}", m_server->pathPrefix(), m_endpoint), std::forward<handlers_t>(handler));
                 }
 
             private:
