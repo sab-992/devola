@@ -78,7 +78,7 @@ std::string http_n::Http::readALPNExtension(sslSocket_t& socket) {
     SSL_get0_alpn_selected(ssl, &alpn, &alpn_len);
 
     if (not alpn or alpn_len <= 0)
-        throw Exception("No ALPN extension negotiated");
+        return "http/1.1"; // Default protocol.
 
     return std::string(reinterpret_cast<const char*>(alpn), alpn_len);
 }
