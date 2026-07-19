@@ -53,7 +53,7 @@ void network_n::Headers::setStartLine(std::string_view startLine) {
     m_startLine = trim(startLine);
 }
 
-headersUMap_t network_n::Headers::toMap() const {
+headers_t network_n::Headers::toMap() const {
     return m_headersMap;
 }
 

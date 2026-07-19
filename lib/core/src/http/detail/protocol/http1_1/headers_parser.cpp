@@ -30,7 +30,7 @@ bool http_n::version_n::http1_1_n::HeadersParser::isRequest(const startLineInfor
     return information[2].find(PROTOCOL_VERSION_NAME) != std::string::npos;
 }
 
-std::pair<std::string, headersUMap_t> http_n::version_n::http1_1_n::HeadersParser::parse(std::string_view stringHeaders) const {
+std::pair<std::string, headers_t> http_n::version_n::http1_1_n::HeadersParser::parse(std::string_view stringHeaders) const {
     std::stringstream input;
     input << trim(stringHeaders);
 
@@ -40,7 +40,7 @@ std::pair<std::string, headersUMap_t> http_n::version_n::http1_1_n::HeadersParse
     validateStartline(splitStartLine(line));
 
     const std::string startLine = line;
-    headersUMap_t headersUMap;
+    headers_t headersUMap;
     for (; std::getline(input, line);) {
         line = trim(line);
 

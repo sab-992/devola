@@ -80,12 +80,12 @@ TEST_F(HeadersParserTest, ParseWithValidStartlineAndHeaders_ReturnsStartlineAndH
     const std::string EXPECTED_STARTLINE = "HTTP/1.1 200 OK";
     const std::string EXPECTED_HEADER = "Transfer-Encoding";
     const std::string EXPECTED_HEADER_VALUE = "chunked";
-    const std::pair<std::string, headersUMap_t> EXPECTED_HTTP_HEADERS = { EXPECTED_STARTLINE, { {EXPECTED_HEADER, EXPECTED_HEADER_VALUE } } };
+    const std::pair<std::string, headers_t> EXPECTED_HTTP_HEADERS = { EXPECTED_STARTLINE, { {EXPECTED_HEADER, EXPECTED_HEADER_VALUE } } };
     auto parser = HeadersParser::instance();
     Headers h(parser);
     h.setStartLine(EXPECTED_STARTLINE);
 
-    const std::pair<std::string, headersUMap_t> result = parser->parse(std::format("{}\r\n{}: {}", EXPECTED_STARTLINE, EXPECTED_HEADER, EXPECTED_HEADER_VALUE));
+    const std::pair<std::string, headers_t> result = parser->parse(std::format("{}\r\n{}: {}", EXPECTED_STARTLINE, EXPECTED_HEADER, EXPECTED_HEADER_VALUE));
 
     EXPECT_EQ(EXPECTED_HTTP_HEADERS, result);
 }
@@ -137,7 +137,7 @@ TEST_F(HeadersParserTest, ParseWithoutValidStartline_ThrowsException) {
     using namespace network_n;
     using http_n::version_n::http1_1_n::HeadersParser;
     const std::string EXPECTED_STARTLINE = "HTTP/1.1 OK";
-    const std::pair<std::string, headersUMap_t> EXPECTED_HTTP_HEADERS = { EXPECTED_STARTLINE, { } };
+    const std::pair<std::string, headers_t> EXPECTED_HTTP_HEADERS = { EXPECTED_STARTLINE, { } };
     auto parser = HeadersParser::instance();
     Headers h(parser);
     h.setStartLine(EXPECTED_STARTLINE);
@@ -151,7 +151,7 @@ TEST_F(HeadersParserTest, ParseWithoutValidHeader_ThrowsException) {
     const std::string EXPECTED_STARTLINE = "HTTP/1.1 200 OK";
     const std::string EXPECTED_HEADER = "Transfer-Encoding";
     const std::string EXPECTED_HEADER_VALUE = "chunked";
-    const std::pair<std::string, headersUMap_t> EXPECTED_HTTP_HEADERS = { EXPECTED_STARTLINE, { {EXPECTED_HEADER, EXPECTED_HEADER_VALUE } } };
+    const std::pair<std::string, headers_t> EXPECTED_HTTP_HEADERS = { EXPECTED_STARTLINE, { {EXPECTED_HEADER, EXPECTED_HEADER_VALUE } } };
     auto parser = HeadersParser::instance();
     Headers h(parser);
     h.setStartLine(EXPECTED_STARTLINE);

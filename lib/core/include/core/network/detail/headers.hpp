@@ -48,11 +48,11 @@ namespace network_n
             swap(lhs.m_startLine, rhs.m_startLine);
         }
 
-        headersUMap_t toMap() const;
+        headers_t toMap() const;
         std::string toString() const override;
 
     private:
-        headersUMap_t m_headersMap;
+        headers_t m_headersMap;
         std::shared_ptr<HeadersParser_i> m_parser;
         std::string m_startLine;
     };

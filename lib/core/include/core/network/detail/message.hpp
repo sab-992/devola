@@ -35,7 +35,7 @@ namespace network_n
         }
 
         std::string header(const std::string& name) const { return m_headers->get(name); }
-        headersUMap_t headersMap() const { return m_headers->toMap(); }
+        headers_t headersMap() const { return m_headers->toMap(); }
 
         std::vector<std::string> prepareTransmissionPackets() const {
             assert(not hasChangedSinceLastBuild() && "network_n::Message::build() needs to be called after making changes to the object");

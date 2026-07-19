@@ -29,7 +29,7 @@ namespace http_n
                 bool operator==(const HeadersParser_i& other) const override;
 
                 std::string build(const Headers& headers) const override;
-                std::pair<std::string, headersUMap_t> parse(std::string_view stringHeaders) const override;
+                std::pair<std::string, headers_t> parse(std::string_view stringHeaders) const override;
                 startLineInformation_t parseStartLine(std::string_view startLine) const override;
 
                 static bool isContentChunked(const Headers& headers);
