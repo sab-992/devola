@@ -84,7 +84,7 @@ asio::awaitable<void> http_n::server_n::Basic::listen() {
 }
 
 void http_n::server_n::Basic::run() {
-    if (m_endpoints.size() <= 0)
+    if (m_endpoints.empty())
         throw Exception("No endpoints specified");
 
     m_isRunning = true;

@@ -43,7 +43,7 @@ namespace log_n {
             displayTimestamp();
             displayLevel(level);
 
-            if (information.size() > 0)
+            if (not information.empty())
                 displayExtraInformation(information);
 
             std::cout << " - ";

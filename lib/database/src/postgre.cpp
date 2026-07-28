@@ -101,7 +101,7 @@ std::pair<std::vector<std::string>, pqxx::params> PostgreSQL::extractParams(cons
 }
 
 std::string PostgreSQL::getProjection(const std::vector<std::string>& projection) const {
-    if (projection.size() <= 0)
+    if (projection.empty())
         throw Exception("Projection exists but is empty");
 
     std::string columns;
