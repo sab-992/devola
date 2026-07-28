@@ -49,7 +49,7 @@ class Deploy(Command, ServiceUpdater):
         docker_folder = f"{root_folder_path}/docker"
         self.create_base_docker_file(args, docker_folder)
 
-        services: list[str] = self.get_services()
+        services: list[str] = self.__fs.get_services()
 
         self.start_base_containers(args, docker_folder)
         self.starting_database_containers(services, root_folder_path)

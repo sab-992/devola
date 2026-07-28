@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .errors import InvalidInputError
 from .log import log, Color
-from settings.config import EXTRA_BUILD_OPTIONS_FILENAME, DATABASE_LIB_NAME, ROOT_FOLDER_NAME
+from settings.config import EXTRA_BUILD_OPTIONS_FILENAME, DATABASE_LIB_NAME, ROOT_FOLDER_NAME, SERVICES_PATH
 
 
 class FileSystem():
@@ -37,6 +37,7 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET {service_name_lower} PROPERTY CXX_STANDARD 20)
 endif()
 
+target_compile_definitions({service_name_lower} PRIVATE SERVICE_DIRECTORY="${'{'}CMAKE_CURRENT_LIST_DIR{'}'}")
 target_include_directories({service_name_lower} PRIVATE "${'{'}{service_name_lower}_path{'}'}/include")
 target_link_libraries({service_name_lower} PRIVATE {librairies_str})
 """
@@ -146,6 +147,11 @@ networks:
 
     def get_directories(self, path: str) -> list[str]:
         return [directory for directory in os.listdir(path) if os.path.isdir(os.path.join(path, directory))]
+
+    def get_services(self) -> list[str]:
+        service_full_path = os.path.join(self.find_root_folder(), SERVICES_PATH)
+        os.makedirs(service_full_path, exist_ok=True);
+        return self.get_directories(service_full_path)
 
     def make_directory(self, dir_path: str, dir_name: str):
         root_folder = self.find_root_folder()

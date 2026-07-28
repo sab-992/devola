@@ -14,6 +14,6 @@ class Directory():
 
     def root_directory(self) -> str:
         return FileSystem().find_root_folder()
-    
+
     def uniformizePath(self, path: str):
         return str(Path(path))
