@@ -5,6 +5,7 @@ from settings.config import DEPENDENCIES, USE_VCPKG, UPDATE_PACKAGE_REPOS_COMMAN
 from settings.command.detail.command import Command
 from settings.command.detail.errors import NotSupportedOperatingSystem
 from settings.command.detail.options import MANUAL_OPTION
+from settings.command.detail.postgres import Postgres
 
 
 class Install(Command):
@@ -40,7 +41,7 @@ class Install(Command):
                "In order to do this, go in the config.py and change 'USE_VCPKG' to 'True' to use either one of them."
 
     def setup(self, args: Namespace) -> str:
-        pass
+        Postgres().setup()
 
     def teardown(self, args: Namespace) -> str:
         pass
