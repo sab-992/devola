@@ -25,19 +25,26 @@ namespace log_n {
 
         template<typename... Args>
         void log(log_n::Level_en level, Args... elements) const {
-            log(level, static_cast<std::vector<std::string>*>(nullptr), elements...);
+            log(level, {}, elements...);
         }
 
         template<typename... Args>
-        void log(log_n::Level_en level, std::vector<std::string>* information, Args... elements) const {
+        void log(log_n::Level_en level, const std::vector<std::string>& information, Args... elements) const {
+
+            #ifndef DEBUG_MODE_ENABLED
+            if (level == log_n::Level_en::DEBUG)
+                return;
+            #endif
+
             if (not m_levels.contains(level))
                 throw InvalidArgument("Unhandled", "Log type");
 
             std::lock_guard<std::mutex> guard(coutMutex);
             displayTimestamp();
             displayLevel(level);
-            if (information)
-                displayExtraInformation(*information);
+
+            if (information.size() > 0)
+                displayExtraInformation(information);
 
             std::cout << " - ";
 

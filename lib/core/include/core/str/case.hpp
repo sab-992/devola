@@ -4,7 +4,7 @@
 #include <string>
 
 
-inline namespace
+namespace
 {
     std::string changeCase(std::function<int(int)> caseFunction, std::string_view string) {
         std::string result;

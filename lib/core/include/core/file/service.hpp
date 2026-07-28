@@ -17,7 +17,7 @@ namespace file_n
 
         template <typename... Args>
             requires (std::is_convertible_v<Args, file_n::flags_n::OpenMode_en> && ...)
-        File open(const std::string& path, Args... flags) const {
+        File open(std::string_view path, Args... flags) const {
             return File(path, (File::flagToUnderlying(flags) | ...));
         }
 
@@ -31,6 +31,7 @@ namespace file_n
         }
 
         bool createDirectories(std::string_view path) const;
+
     private:
         bool isEntryFlagSet(uint16_t flags, file_n::flags_n::Entry_en flag) const;
 

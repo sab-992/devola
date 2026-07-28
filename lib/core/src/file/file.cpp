@@ -1,8 +1,8 @@
 #include <core/file/file.hpp>
 
 
-File::File(const std::string& path, std::ios_base::openmode flags) : m_flags(flags), m_path(path) {
-    m_file = std::make_unique<std::fstream>(path, flags);
+File::File(std::string_view path, std::ios_base::openmode flags) : m_flags(flags), m_path(path) {
+    m_file = std::make_unique<std::fstream>(m_path, flags);
 
     if (not m_file or
         not m_file->is_open())
@@ -18,7 +18,7 @@ File& File::operator<<(std::string_view data) {
     return *this;
 }
 
-File& File::operator>>(std::string& data) {
+const File& File::operator>>(std::string& data) const {
     std::string extracted;
     *m_file >> extracted;
     data.append(std::format("{} ", extracted));
@@ -37,11 +37,11 @@ bool File::isPointerPositive(std::streampos pointer) const {
     return pointer >= 0;
 }
 
-std::streampos File::pointer() {
+std::streampos File::pointer() const {
     return m_file->tellg();
 }
 
-std::string File::read(std::streampos start, std::streampos end) {
+std::string File::read(std::streampos start, std::streampos end) const {
     if(not isFlagSet(file_n::flags_n::OpenMode_en::READ))
        throw InvalidArgument("Cannot read because READ flag has not been set", "File flags");
 
@@ -63,7 +63,7 @@ std::string File::read(std::streampos start, std::streampos end) {
     return file;
 }
 
-std::string File::read(std::streampos start) {
+std::string File::read(std::streampos start) const {
     return read(isPointerPositive(start) ? start : std::streampos(0), this->size());
 }
 

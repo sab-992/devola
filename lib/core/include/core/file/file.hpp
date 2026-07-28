@@ -9,19 +9,19 @@
 
 class File {
 public:
-    File(const std::string& path, std::ios_base::openmode flags);
+    File(std::string_view path, std::ios_base::openmode flags);
     ~File();
 
     File& operator<<(std::string_view data);
-    File& operator>>(std::string& buffer);
+    const File& operator>>(std::string& buffer) const;
 
-    std::streampos pointer();
+    std::streampos pointer() const;
 
     // Read from start to end (included) position => [start, end].
-    std::string read(std::streampos start, std::streampos end);
+    std::string read(std::streampos start, std::streampos end) const;
 
     // Read all from start position.
-    std::string read(std::streampos start=-1);
+    std::string read(std::streampos start=-1) const;
 
     void setPointer(std::streampos value);
 
