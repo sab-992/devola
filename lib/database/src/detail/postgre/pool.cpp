@@ -15,8 +15,8 @@ pqxx::connection& pgsql_n::ConnectionPool::Access::connection() & {
     return *m_connection;
 }
 
-pgsql_n::ConnectionPool::Access pgsql_n::ConnectionPool::access() {
-    return Access(*this);
+std::unique_ptr<pgsql_n::ConnectionPool::Access> pgsql_n::ConnectionPool::access() {
+    return std::make_unique<Access>(*this);
 }
 
 // ----------------------------------------------------------

@@ -16,19 +16,19 @@ database_n::Query::Cardinality_en database_n::Query::cardinality() const {
     return m_cardinality;
 }
 
-std::optional<database_n::record_t> database_n::Query::data() const {
+const std::optional<database_n::record_t>& database_n::Query::data() const {
     return m_data;
 }
 
-std::optional<database_n::Query::Options> database_n::Query::extraOptions() const {
-    return m_options;
-}
-
-std::optional<database_n::record_t> database_n::Query::filter() const {
+const std::optional<database_n::record_t>& database_n::Query::filter() const {
     return m_filter;
 }
 
-std::optional<std::vector<std::string>> database_n::Query::projection() const {
+const std::optional<database_n::Query::Options>& database_n::Query::options() const {
+    return m_options;
+}
+
+const std::optional<std::vector<std::string>>& database_n::Query::projection() const {
     return m_projection;
 }
 
@@ -42,13 +42,13 @@ database_n::Query& database_n::Query::setData(record_t data) {
     return *this;
 }
 
-database_n::Query& database_n::Query::setExtraOptions(Options options) {
-    m_options = std::move(options);
+database_n::Query& database_n::Query::setFilter(record_t filter) {
+    m_filter = std::move(filter);
     return *this;
 }
 
-database_n::Query& database_n::Query::setFilter(record_t filter) {
-    m_filter = std::move(filter);
+database_n::Query& database_n::Query::setOptions(Options options) {
+    m_options = std::move(options);
     return *this;
 }
 
@@ -67,7 +67,7 @@ database_n::Query& database_n::Query::setType(Type_en type) {
     return *this;
 }
 
-std::string database_n::Query::target() const {
+const std::string& database_n::Query::target() const {
     return m_target;
 }
 

@@ -27,6 +27,8 @@ namespace pgsql_n
             Access& operator=(const Access&) = delete;
             ~Access();
 
+            friend std::unique_ptr<Access> std::make_unique<Access>();
+
             pqxx::connection& connection() &;
             pqxx::connection& connection() && = delete;
 
@@ -35,7 +37,7 @@ namespace pgsql_n
             ConnectionPool& m_pool;
         };
 
-        Access access();
+        std::unique_ptr<Access> access();
 
     private:
         std::condition_variable m_conditionVariable;

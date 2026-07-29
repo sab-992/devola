@@ -38,17 +38,17 @@ namespace database_n
         Query build() && override;
 
         Cardinality_en cardinality() const;
-        std::optional<record_t> data() const;
-        std::optional<Options> extraOptions() const;
-        std::optional<record_t> filter() const;
-        std::optional<std::vector<std::string>> projection() const;
-        std::string target() const;
+        const std::optional<record_t>& data() const;
+        const std::optional<record_t>& filter() const;
+        const std::optional<Options>& options() const;
+        const std::optional<std::vector<std::string>>& projection() const;
+        const std::string& target() const;
         Type_en type() const;
 
         Query& setCardinality(Cardinality_en cardinality);
         Query& setData(record_t data);
-        Query& setExtraOptions(Options options);
         Query& setFilter(record_t filter);
+        Query& setOptions(Options options);
         Query& setProjection(std::vector<std::string> projection);
         Query& setTarget(std::string_view target);
         Query& setType(Type_en type);
@@ -60,7 +60,7 @@ namespace database_n
 
         std::optional<record_t> m_data;
         std::optional<record_t> m_filter;
-        std::optional<std::vector<std::string>> m_projection;
         std::optional<Options> m_options;
+        std::optional<std::vector<std::string>> m_projection;
     };
 }

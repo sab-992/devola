@@ -26,13 +26,16 @@ database_n::Value PostgreSQL::convertField(pqxx::field const &field) const {
     }
 }
 
-database_n::Result PostgreSQL::Create(const Query& query) {
-    ConnectionPool::Access access = m_pool->access();
-    if (not access.connection().is_open())
-        return Result().setError("Failure to connect to Postgres")
-                       .setStatus(Status_en::CONNECTION_ERROR).build();
+database_n::Result PostgreSQL::Create(const Query& query, Transaction* transaction) {
+    std::unique_ptr<Transaction> ownedTransaction;
 
-    pqxx::work tx(access.connection());
+    if (not transaction) {
+        ownedTransaction = std::make_unique<Transaction>(pgsql_n::Transaction());
+        transaction = ownedTransaction.get();
+    }
+
+    pgsql_n::Transaction& tx = transaction->get<pgsql_n::Transaction>();
+    tx.begin(*m_pool);
     try {
         if (not query.data().has_value())
             return Result().setError("No data to insert")
@@ -58,13 +61,15 @@ database_n::Result PostgreSQL::Create(const Query& query) {
         if (query.projection().has_value())
             sql.append(std::format(" RETURNING {}", getProjection(query.projection().value())));
 
-        pqxx::result queryResult = tx.exec(sql, params);
+        pqxx::result queryResult = tx.execute(sql, params);
 
         if (not validateCardinality(queryResult, query.cardinality()))
             return Result().setError(std::format("Expected ({} rows) but got: ({} rows)", to_underlying(query.cardinality()), queryResult.size()))
                            .setStatus(Status_en::CARDINALITY_ERROR).build();
 
-        tx.commit();
+        if (ownedTransaction)
+            tx.commit();
+
         return success(queryResult);
     } catch (std::exception& e) {
         tx.abort();
@@ -74,7 +79,7 @@ database_n::Result PostgreSQL::Create(const Query& query) {
     }
 }
 
-database_n::Result PostgreSQL::Delete(const Query& query) {
+database_n::Result PostgreSQL::Delete(const Query& query, Transaction* transaction) {
     return {};
 }
 
@@ -123,7 +128,7 @@ pgsql_n::Options PostgreSQL::optionsFromJSON(const json& postgresJSON) const {
              env(std::format("{}/settings/.env", ROOT_DIRECTORY))["POSTGRES_APP_USER_PASSWORD"] };
 }
 
-database_n::Result PostgreSQL::Read(const Query& query) const {
+database_n::Result PostgreSQL::Read(const Query& query, Transaction* transaction) const {
     return {};
 }
 
@@ -147,7 +152,7 @@ database_n::Result PostgreSQL::success(const pqxx::result& dbResult) const {
                  .setStatus(Status_en::OK).build();
 }
 
-database_n::Result PostgreSQL::Update(const Query& query) {
+database_n::Result PostgreSQL::Update(const Query& query, Transaction* transaction) {
     return {};
 }
 

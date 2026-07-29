@@ -37,10 +37,10 @@ public:
 
     ~PostgreSQL() = default;
 
-    Result Create(const Query& query) override;
-    Result Read(const Query& query) const override;
-    Result Update(const Query& query) override;
-    Result Delete(const Query& query) override;
+    Result Create(const Query& query, Transaction* transaction=nullptr) override;
+    Result Read(const Query& query, Transaction* transaction=nullptr) const override;
+    Result Update(const Query& query, Transaction* transaction=nullptr) override;
+    Result Delete(const Query& query, Transaction* transaction=nullptr) override;
 
     static std::shared_ptr<PostgreSQL> instance(const json& postgresJSON) {
         static std::shared_ptr<PostgreSQL> instance = std::make_shared<PostgreSQL>(Private_s(), postgresJSON);
