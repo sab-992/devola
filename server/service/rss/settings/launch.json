@@ -1,1 +1,31 @@
-{}
+{
+    "version": "1.0.0",
+    "configuration": {
+        "debug": {
+            "server": {
+                "port": 55555
+            },
+            "postgres": {
+                "host": "localhost",
+                "port": "5432"
+            },
+            "redis": {
+                "host": "localhost",
+                "port": 6380
+            }
+        },
+        "production": {
+            "server": {
+                "port": 443
+            },
+            "postgres": {
+                "host": "localhost",
+                "port": "5432"
+            },
+            "redis": {
+                "host": "localhost",
+                "port": "port"
+            }
+        }
+    }
+}

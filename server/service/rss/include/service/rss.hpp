@@ -1,15 +1,32 @@
 #pragma once
 
-#include <core/http/server.hpp>
-#include <core/utility/service.hpp>
+#include <core/http.hpp>
+#include <core/file.hpp>
+#include <core/utility.hpp>
+#include <database/postgre.hpp>
+#include <utility/url.hpp>
 
 
 class RSS : public http_n::server_n::Basic, public Service<RSS> {
     using Basic = http_n::server_n::Basic;
+    using Session = http_n::server_n::Session;
+    using json = nlohmann::json;
+    using Database_i = database_n::Database_i;
 
 public:
-    RSS(const Private_s&, uint16_t port);
+    RSS(const Private_s&, const json& configJSON);
     ~RSS();
 
-    static std::unique_ptr<RSS> create(uint16_t port=443);
+    std::string pathPrefix() const override;
+    void setDatabase(std::shared_ptr<Database_i> database);
+    void setCache(std::shared_ptr<Database_i> cache);
+
+    static std::unique_ptr<RSS> create(const json& configJSON);
+
+private:
+    std::shared_ptr<Database_i> m_cache;
+    std::shared_ptr<Database_i> m_database;
+    json m_configJSON;
+
+    void setEndpoints();
 };

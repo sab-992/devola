@@ -4,7 +4,7 @@ set(cmake_modules_path "${CMAKE_CURRENT_LIST_DIR}/../../../cmake")
 set(rss_path "${CMAKE_CURRENT_LIST_DIR}")
 
 include("${cmake_modules_path}/FindCppFiles.cmake")
-
+include("${cmake_modules_path}/DatabaseLibrary.cmake")
 
 project(rss VERSION 1.0)
 
@@ -16,5 +16,6 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET rss PROPERTY CXX_STANDARD 20)
 endif()
 
+target_compile_definitions(rss PRIVATE SERVICE_DIRECTORY="${CMAKE_CURRENT_LIST_DIR}")
 target_include_directories(rss PRIVATE "${rss_path}/include")
-target_link_libraries(rss PRIVATE core_lib)
+target_link_libraries(rss PRIVATE core_lib database_lib)
