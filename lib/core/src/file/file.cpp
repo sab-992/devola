@@ -84,7 +84,8 @@ size_t File::write(std::string_view data, std::streampos start) {
     if (not isPointerPositive(start))
         start = 0;
 
-    m_file->seekg(start);
+    if (std::filesystem::is_regular_file(m_path))
+        m_file->seekg(start);
 
     size_t size = data.size();
     m_file->write(data.data(), size);

@@ -1,5 +1,5 @@
 ## Ignore compiled files
-
+pyrefly.toml
 *.crt
 *.key
 */out/*
