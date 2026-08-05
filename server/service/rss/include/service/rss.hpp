@@ -4,6 +4,8 @@
 #include <core/file.hpp>
 #include <core/utility.hpp>
 #include <database/postgre.hpp>
+#include <listing/listing.hpp>
+#include <parser/listings.hpp>
 #include <utility/url.hpp>
 
 
@@ -18,8 +20,8 @@ public:
     ~RSS();
 
     std::string pathPrefix() const override;
-    void setDatabase(std::shared_ptr<Database_i> database);
     void setCache(std::shared_ptr<Database_i> cache);
+    void setDatabase(std::shared_ptr<Database_i> database);
 
     static std::unique_ptr<RSS> create(const json& configJSON);
 
@@ -28,5 +30,8 @@ private:
     std::shared_ptr<Database_i> m_database;
     json m_configJSON;
 
+    asio::awaitable<http_n::Response> fetchFeeds(const Session& session, const http_n::Request& request);
+    asio::awaitable<http_n::Response> fetchFromURL(std::string_view host, std::string_view endpoint);
     void setEndpoints();
+    asio::awaitable<nlohmann::json> updateListingsDatabase(std::string_view host, std::string_view endpoint, Transaction& tx);
 };
