@@ -41,6 +41,7 @@ public:
     Result Read(const Query& query, Transaction* transaction=nullptr) const override;
     Result Update(const Query& query, Transaction* transaction=nullptr) override;
     Result Delete(const Query& query, Transaction* transaction=nullptr) override;
+    Result Other(const Query& query, Transaction* transaction=nullptr) override;
 
     static std::shared_ptr<PostgreSQL> instance(const json& postgresJSON) {
         static std::shared_ptr<PostgreSQL> instance = std::make_shared<PostgreSQL>(Private_s(), postgresJSON);
@@ -53,6 +54,7 @@ private:
     Options m_options;
     std::unique_ptr<pgsql_n::ConnectionPool> m_pool;
 
+    pgsql_n::Transaction& beginTransaction(Transaction*& transaction, std::unique_ptr<Transaction>& ownedTransaction);
     Value convertField(pqxx::field const &field) const;
     std::pair<std::vector<std::string>, pqxx::params> extractParams(const record_t& record) const;
     std::string getProjection(const std::vector<std::string>& projection) const;

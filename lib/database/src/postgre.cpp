@@ -6,6 +6,18 @@ PostgreSQL::PostgreSQL(const Private_s&, const json& postgresJSON) : m_light(log
     m_pool = std::make_unique<ConnectionPool>(m_options);
 };
 
+pgsql_n::Transaction& PostgreSQL::beginTransaction(Transaction*& transaction, std::unique_ptr<Transaction>& ownedTransaction) {
+    if (not transaction) {
+        ownedTransaction = std::make_unique<Transaction>(pgsql_n::Transaction());
+        transaction = ownedTransaction.get();
+    }
+
+    auto& tx = transaction->get<pgsql_n::Transaction>();
+    tx.begin(*m_pool);
+
+    return tx;
+}
+
 database_n::Value PostgreSQL::convertField(pqxx::field const &field) const {
     if (field.is_null())
         return nullptr;
@@ -27,15 +39,11 @@ database_n::Value PostgreSQL::convertField(pqxx::field const &field) const {
 }
 
 database_n::Result PostgreSQL::Create(const Query& query, Transaction* transaction) {
+    if (query.type() != Query::Type_en::TARGETED)
+        throw LogicException(std::format("{} expects TARGETED query:", FUNCTION_SIGNATURE));
+
     std::unique_ptr<Transaction> ownedTransaction;
-
-    if (not transaction) {
-        ownedTransaction = std::make_unique<Transaction>(pgsql_n::Transaction());
-        transaction = ownedTransaction.get();
-    }
-
-    pgsql_n::Transaction& tx = transaction->get<pgsql_n::Transaction>();
-    tx.begin(*m_pool);
+    pgsql_n::Transaction& tx = beginTransaction(transaction, ownedTransaction);
     try {
         if (not query.data().has_value())
             return Result().setError("No data to insert")
@@ -80,6 +88,9 @@ database_n::Result PostgreSQL::Create(const Query& query, Transaction* transacti
 }
 
 database_n::Result PostgreSQL::Delete(const Query& query, Transaction* transaction) {
+    if (query.type() != Query::Type_en::TARGETED)
+        throw LogicException(std::format("{} expects TARGETED query:", FUNCTION_SIGNATURE));
+
     return {};
 }
 
@@ -128,15 +139,51 @@ pgsql_n::Options PostgreSQL::optionsFromJSON(const json& postgresJSON) const {
              env(std::format("{}/settings/.env", ROOT_DIRECTORY))["POSTGRES_APP_USER_PASSWORD"] };
 }
 
+database_n::Result PostgreSQL::Other(const Query& query, Transaction* transaction) {
+    if (query.type() != Query::Type_en::PROCEDURE)
+        throw LogicException(std::format("{} expects PROCEDURE query:", FUNCTION_SIGNATURE));
+
+    std::unique_ptr<Transaction> ownedTransaction;
+    pgsql_n::Transaction& tx = beginTransaction(transaction, ownedTransaction);
+    try {
+        const auto& [_, params] = extractParams(query.data().value());
+
+        std::string values;
+        for (size_t i = 0; i < params.size(); i++)
+            values.append(i != 0 ? ", " : std::format("${}", i + 1));
+
+        pqxx::result queryResult = tx.execute(std::format("CALL {}({})", query.target(), values), params);
+
+        if (not validateCardinality(queryResult, query.cardinality()))
+            return Result().setError(std::format("Expected ({} rows) but got: ({} rows)", to_underlying(query.cardinality()), queryResult.size()))
+                           .setStatus(Status_en::CARDINALITY_ERROR).build();
+
+        if (ownedTransaction)
+            tx.commit();
+
+        return success(queryResult);
+    } catch (std::exception& e) {
+        tx.abort();
+        m_light->log(log_n::Level_en::ERROR, m_extraLogs, "ABORTED: error during insertion: ", e.what());
+        return Result().setError(e.what())
+                       .setStatus(Status_en::QUERY_ERROR).build();
+    }
+}
+
 database_n::Result PostgreSQL::Read(const Query& query, Transaction* transaction) const {
+    if (query.type() != Query::Type_en::TARGETED)
+        throw LogicException(std::format("{} expects TARGETED query:", FUNCTION_SIGNATURE));
+
     return {};
 }
 
 database_n::Result PostgreSQL::success(const pqxx::result& dbResult) const {
-    auto result = Result().setAffected(dbResult.affected_rows());
+    auto result = Result().setStatus(Status_en::OK);
 
-    if (dbResult.size() <= 0)
-        return result.build();
+    if(dbResult.empty())
+        return result.setAffected(0).build();
+
+    result.setAffected(dbResult.affected_rows());
 
     std::vector<record_t> records;
     for (const pqxx::row& row : dbResult) {
@@ -148,11 +195,13 @@ database_n::Result PostgreSQL::success(const pqxx::result& dbResult) const {
         records.emplace_back(record);
     }
 
-    return result.setRecords(records)
-                 .setStatus(Status_en::OK).build();
+    return result.setRecords(records).build();
 }
 
 database_n::Result PostgreSQL::Update(const Query& query, Transaction* transaction) {
+    if (query.type() != Query::Type_en::TARGETED)
+        throw LogicException(std::format("{} expects TARGETED query:", FUNCTION_SIGNATURE));
+
     return {};
 }
 
