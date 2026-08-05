@@ -10,6 +10,10 @@ Time::~Time() {
         stopTimer(id);
 }
 
+double Time::convertToSecondsSinceEpoch(const std::chrono::time_point<std::chrono::system_clock>& timepoint) {
+    return std::chrono::duration<double>(timepoint.time_since_epoch()).count();
+}
+
 time_n::timerId_t Time::nextID() {
     static time_n::timerId_t currentID = 0;
     return currentID++;
@@ -36,6 +40,13 @@ void Time::stopTimer(time_n::timerId_t identifier) {
     timer(identifier)->stop();
     m_timers.erase(identifier);
     rehashIfNeeded(m_timers);
+}
+
+std::chrono::time_point<std::chrono::system_clock> timepoint(const std::string& specification, const std::string& time) {
+    std::istringstream in{time};
+    std::chrono::sys_seconds tp;
+    in >> std::chrono::parse(specification, tp);
+    return tp;
 }
 
 std::shared_ptr<time_n::Timer> Time::timer(time_n::timerId_t identifier) {
