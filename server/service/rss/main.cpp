@@ -8,7 +8,7 @@ int main() {
         std::unique_ptr<RSS> server = RSS::create(configJSON);
 
         server->setDatabase(PostgreSQL::instance(configJSON["postgres"]));
-        // server->setCache(Redis::instance(configJSON["redis"]));
+        // TODO: server->setCache(Redis::instance(configJSON["redis"]));
 
         server->run();
 
