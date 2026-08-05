@@ -10,7 +10,7 @@ using commandsMap_t = std::unordered_map<std::string, std::function<void(const s
 
 int main() {
     auto light = log_n::Light::instance();
-    const std::vector<std::string> extraLogs = { "MAIN" };
+    const std::vector<std::string> EXTRA_LOGS = { "MAIN" };
     try {
         const std::string BUILD_DIRECTORY = std::format("{}/build", ROOT_DIRECTORY);
         const std::string SERVICE_DIRECTORY = std::format("{}/server/service", ROOT_DIRECTORY);
@@ -35,14 +35,14 @@ int main() {
         sleep(1);
         while (running) {
             std::string input;
-            light->log(log_n::Level_en::INFO, extraLogs, "Enter a command:");
+            light->log(log_n::Level_en::INFO, EXTRA_LOGS, "Enter a command:");
             std::getline(std::cin, input);
 
             std::vector<std::string> tokens = split(input);
 
             std::string command = tokens[0];
             if (not commands.contains(command)) {
-                light->log(log_n::Level_en::WARNING, extraLogs, "Command not recognized");
+                light->log(log_n::Level_en::WARNING, EXTRA_LOGS, "Command not recognized");
                 continue;
             }
 
@@ -51,6 +51,6 @@ int main() {
         }
         return 0;
     } catch (Exception e) {
-        light->log(log_n::Level_en::ERROR, extraLogs, "Uncaught error: ", e);
+        light->log(log_n::Level_en::ERROR, EXTRA_LOGS, "Uncaught error: ", e);
     }
 }
