@@ -1,7 +1,20 @@
-#include <iostream>
+#include <service/rss.hpp>
 
 
 int main() {
-    std::cout << "Hello world from rss !" << std::endl;
+    auto light = log_n::Light::instance();
+    try {
+        nlohmann::json configJSON = readConfigJSON(std::format("{}/settings/launch.json", SERVICE_DIRECTORY));
+        std::unique_ptr<RSS> server = RSS::create(configJSON);
+
+        server->setDatabase(PostgreSQL::instance(configJSON["postgres"]));
+        // server->setCache(Redis::instance(configJSON["redis"]));
+
+        server->run();
+
+        return 0;
+    } catch (Exception e) {
+        light->log(log_n::Level_en::ERROR,  "Uncaught error: ", e);
+    }
     return 0;
 }
