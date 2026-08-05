@@ -95,7 +95,7 @@ asio::awaitable<nlohmann::json> RSS::updateListingsDatabase(std::string_view hos
     Response feed = co_await fetchFromURL(host, endpoint);
 
     // 1) TODO: Check if website exists
-    // 1.1) TODO:  If exists: read the id and last_updated
+    // 1.1) TODO:  If exists: read the id, update last_updated and return it
 
     auto websiteQuery = Query().setTarget("websites")
                                .setType(Query::Type_en::TARGETED)
