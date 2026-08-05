@@ -18,12 +18,12 @@ class Postgres():
 
     def setup(self):
         current_dir = str(Path(__file__).resolve().parent)
-        setup_file = os.path.join(str(current_dir), "setup.sql")
+        setup_file = os.path.join(current_dir, "setup.sql")
 
         self.create_pg_user()
         self.run_file(setup_file, self.admin_user)
 
-    def run(self) -> str:
+    def run(self) -> None:
         services_dir = os.path.join(self.fs.find_root_folder(), SERVICES_PATH)
 
         for service in self.fs.get_services():
@@ -34,6 +34,7 @@ class Postgres():
                 self.run_sql_folder(service_database_dir, "tables.sql")
                 self.run_sql_folder(service_database_dir, "constraints.sql")
                 self.run_sql_folder(service_database_dir, "indexes.sql")
+                self.run_sql_folder(service_database_dir, "procedures.sql")
             else:
                 log(f"No folder: {service_database_dir}", False, Color.RED)
 
@@ -53,6 +54,9 @@ class Postgres():
         env_path = os.path.join(self.fs.find_root_folder(), "settings", ".env")
         load_dotenv(env_path)
         password = os.getenv("POSTGRES_APP_USER_PASSWORD")
+
+        if (not password):
+            raise RuntimeError(f"PGSQL: No user password given")
 
         escaped_password = password.replace("'", "''")
         sql = f"CREATE USER {self.app_user} WITH PASSWORD '{escaped_password}';"
