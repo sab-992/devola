@@ -1,1 +1,1 @@
-CREATE UNIQUE INDEX IF NOT EXISTS idx_listing_website_id ON listings (website_id);
+CREATE INDEX IF NOT EXISTS idx_listing_website_id ON listings (website_id);

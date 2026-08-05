@@ -8,5 +8,5 @@ CREATE TABLE IF NOT EXISTS listings (
     publication TIMESTAMP NOT NULL,
     content     TEXT NOT NULL,
     link        VARCHAR NOT NULL,
-    expire_at   TIMESTAMPTZ NOT NULL
+    expire_at   TIMESTAMP NOT NULL
 );
