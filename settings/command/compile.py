@@ -8,6 +8,7 @@ from settings.command.detail.command import Command
 from settings.command.detail.directory import Directory
 from settings.command.detail.file_system import FileSystem
 from settings.command.detail.options import LAUNCH_OPTION, MANUAL_OPTION
+from settings.command.detail.postgres import Postgres
 from settings.command.detail.service_updater import ServiceUpdater
 
 
@@ -55,6 +56,7 @@ class Make(Command, Directory, ServiceUpdater):
         return "make"
 
     def command_explicit(self, args: Namespace, build_type: bool=True) -> list[list[str]]:
+        Postgres().run()
         make_command = ["cmake", "--build", "."]
 
         commands = [make_command]

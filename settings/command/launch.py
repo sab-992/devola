@@ -19,8 +19,6 @@ class Launch(Command, Directory):
         return "launch"
 
     def command_explicit(self, args: Namespace) -> list[list[str]]:
-        Postgres().run()
-
         if platform.system() == "Windows":
             path = "server/Debug/dev_server.exe"
             # Fallback case (might be GNU compiler on Windows)
