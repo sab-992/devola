@@ -32,4 +32,10 @@ namespace database_n
         virtual ~Deleter_i() = default;
         virtual Result Delete(const Query& query, Transaction* transaction=nullptr) = 0;
     };
+
+    class Other_i {
+    public:
+        virtual ~Other_i() = default;
+        virtual Result Other(const Query& query, Transaction* transaction=nullptr) = 0;
+    };
 }
