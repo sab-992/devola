@@ -1,11 +1,12 @@
 #pragma once
 
-#include <climits>
 #include <core/exception.hpp>
 #include <core/str.hpp>
+#include <core/time.hpp>
 #include <core/xml.hpp>
 #include <core/utility.hpp>
 #include <database/value.hpp>
+#include <listing/listing.hpp>
 #include <pugixml.hpp>
 #include <string>
 #include <unordered_map>
@@ -21,7 +22,6 @@ namespace parser_n
         using aliases_t = std::vector<std::string>;
         template <typename T>
         using hashmap_t = std::unordered_map<std::string, T>;
-        using websiteInfo_t = hashmap_t<std::string>;
 
         inline static const std::unordered_set<std::string> TTL_ALIASES = { "ttl", "sy:updateFrequency" };
         inline static const hashmap_t<aliases_t> ITEM_NODES_ALIASES = {{ "title",       { "title" } },
@@ -32,7 +32,7 @@ namespace parser_n
                                                                        { "content",     { "content:encoded", "description", "content", "summary" } },
                                                                        { "link",        { "link" } }};
 
-        inline static const std::unordered_set<std::string> TO_VERIFY_CONTENT = { "title", "company", "location", "content", "link" };
+        inline static const std::unordered_set<std::string> CONTENT_TO_VERIFY = { "title", "company", "location", "content", "link" };
 
         inline static constexpr size_t SIZE_T_MAX = std::numeric_limits<size_t>::max();
 
@@ -40,36 +40,27 @@ namespace parser_n
         Listings() = delete;
         ~Listings() = default;
 
-        static std::tuple<int, websiteInfo_t, std::vector<record_t>> parse(const xml_n::Document& document);
+        static std::vector<Listing> parse(int64_t websiteID, const xml_n::Document& document);
 
     private:
 
-        template <typename T>
-            requires (std::is_convertible_v<T, database_n::Value> || std::is_convertible_v<T, std::string>)
-        static hashmap_t<T> addRelevantNodes(xml_node& node, const hashmap_t<aliases_t>& aliases={}) {
-            hashmap_t<T> map;
-
+        static bool addRelevantNodes(xml_node& node, Listing& listing, const hashmap_t<aliases_t>& aliases={}) {
             for (const auto& [key, candidates] : aliases) {
                 std::string value = search(node, candidates);
 
                 // Remove the illegal and fake state
-                if (TO_VERIFY_CONTENT.contains(key) and toLower(value).find("israel") != std::string::npos) {
-                    map.clear();
-                    return std::move(map);
-                }
+                if (CONTENT_TO_VERIFY.contains(key) and toLower(value).find("israel") != std::string::npos)
+                    return false;
 
-                map.emplace(key, value);
+                listing.setAttribute(key, value);
             }
 
-            if constexpr (std::is_same_v<T, database_n::Value>)
-                normalize(map);
-
-            return std::move(map);
+            listing.normalize();
+            return true;
         }
 
-        static void normalize(record_t& record);
+        static std::chrono::time_point<std::chrono::system_clock> computeExpirationTimepoint(int ttl);
         static int parseTTL(const xml_node& ttl);
-        static bool recordContains(const record_t& record, const std::string& key);
         static size_t relevancy(std::string_view name, const aliases_t& aliases, const size_t currentBest);
         static std::string search(xml_node& node, const aliases_t& aliases);
     };

@@ -1,23 +1,18 @@
 #include <parser/listings.hpp>
 
 
-void parser_n::Listings::normalize(record_t& record) {
-    if (record.empty() or recordContains(record, "company"))
-        return;
-
-    const std::string& title = record["title"].asString();
-    record["company"] = title.substr(0, title.find(":"));
+std::chrono::time_point<std::chrono::system_clock> parser_n::Listings::computeExpirationTimepoint(int ttl){
+    return Time::now() + std::chrono::minutes(ttl);
 }
 
-std::tuple<int, parser_n::Listings::websiteInfo_t, std::vector<database_n::record_t>> parser_n::Listings::parse(const xml_n::Document& document) {
+std::vector<Listing> parser_n::Listings::parse(int64_t websiteID, const xml_n::Document& document) {
     xml_node channelNode = document.find_node([](const xml_node& node) -> bool { return strcmp(node.name(), "channel") == 0; });
 
     if (not channelNode)
         throw InvalidArgument("Invalid XML format", "XML document");
 
     unsigned int ttl = UINT_MAX;
-    websiteInfo_t websiteInformation;
-    std::vector<database_n::record_t> records;
+    std::vector<Listing> listings;
 
     for (xml_node node = channelNode.first_child(); node; node = node.next_sibling()) {
         std::string name = node.name();
@@ -25,21 +20,33 @@ std::tuple<int, parser_n::Listings::websiteInfo_t, std::vector<database_n::recor
         if (TTL_ALIASES.contains(name))
             ttl = parseTTL(node);
         else if (name == "item") {
-            record_t record = addRelevantNodes<database_n::Value>(node, ITEM_NODES_ALIASES);
-            if (not record.empty())
-                records.emplace_back(std::move(record));
+            Listing listing;
+
+            // Ignore if no relevant nodes are added (aka Listing is empty).
+            if (not addRelevantNodes(node, listing, ITEM_NODES_ALIASES))
+                continue;
+
+            listing.website_id = websiteID;
+            listing.expire_at = computeExpirationTimepoint(ttl);
+            listings.emplace_back(listing);
         }
     }
 
-    return { std::move(ttl), std::move(websiteInformation), std::move(records) };
+    return listings;
 }
 
-int parser_n::Listings::parseTTL(const xml_node& ttl) {
-    return std::stoi(ttl.first_child().value());
-}
+int parser_n::Listings::parseTTL(const xml_node& node) {
+    const uint8_t TTL_INCREASE = 5;
+    const int MAX_TTL = 1440;
+    int ttl = std::stoi(node.first_child().value());
 
-bool parser_n::Listings::recordContains(const record_t& record, const std::string& key) {
-    return record.contains(key) and not trim(record.at("company").asString()).empty();
+    auto normalize = [](int result) -> int {
+        int normalized = result * TTL_INCREASE;
+        return (normalized > MAX_TTL) ? MAX_TTL : normalized;
+    };
+
+    // Convert hours into minutes.
+    return normalize(ttl > 24 ? ttl : ttl * 60);
 }
 
 size_t parser_n::Listings::relevancy(std::string_view name, const aliases_t& aliases, const size_t currentBest) {
