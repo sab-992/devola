@@ -20,7 +20,7 @@ const std::optional<database_n::record_t>& database_n::Query::data() const {
     return m_data;
 }
 
-const std::optional<database_n::record_t>& database_n::Query::filter() const {
+const std::optional<database_n::Query::filter_t>& database_n::Query::filter() const {
     return m_filter;
 }
 
@@ -42,7 +42,7 @@ database_n::Query& database_n::Query::setData(record_t data) {
     return *this;
 }
 
-database_n::Query& database_n::Query::setFilter(record_t filter) {
+database_n::Query& database_n::Query::setFilter(filter_t filter) {
     m_filter = std::move(filter);
     return *this;
 }

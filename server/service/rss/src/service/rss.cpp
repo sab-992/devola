@@ -25,11 +25,10 @@ asio::awaitable<http_n::Response> RSS::fetchFeeds(const Session& session, const 
 
     // 2) TODO: Fetch subscribed urls from DB.
     // 2.1) TODO: If no urls --> Return empty.
-    std::vector<std::string> subscribedURLs = {
-                                                // "https://weworkremotely.com/categories/remote-customer-support-jobs.rss" };
-                                                "https://remotive.com/remote-jobs/feed/software-development" };
-                                                // "https://himalayas.app/jobs/rss" };
-                                                // "https://jobicy.com/jobs/feed?industry=engineering" };
+    std::vector<std::string> subscribedURLs = { "https://weworkremotely.com/categories/remote-customer-support-jobs.rss",
+                                                "https://remotive.com/remote-jobs/feed/software-development",
+                                                "https://himalayas.app/jobs/rss",
+                                                "https://jobicy.com/jobs/feed?industry=engineering" };
 
     auto response = Response();
     if (subscribedURLs.empty())

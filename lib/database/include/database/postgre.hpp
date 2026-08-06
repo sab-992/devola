@@ -26,6 +26,7 @@ class PostgreSQL : public database_n::Database_i {
     struct overloads : Ts... { using Ts::operator()...; };
     struct Private_s {};
 
+    const std::vector<std::string> EXTRA_LOGS = { "PSQL" };
 public:
     PostgreSQL(const Private_s&, const json& postgresJSON);
 
@@ -38,7 +39,7 @@ public:
     ~PostgreSQL() = default;
 
     Result Create(const Query& query, Transaction* transaction=nullptr) override;
-    Result Read(const Query& query, Transaction* transaction=nullptr) const override;
+    Result Read(const Query& query, Transaction* transaction=nullptr) override;
     Result Update(const Query& query, Transaction* transaction=nullptr) override;
     Result Delete(const Query& query, Transaction* transaction=nullptr) override;
     Result Other(const Query& query, Transaction* transaction=nullptr) override;
@@ -49,16 +50,23 @@ public:
     }
 
 private:
-    const std::vector<std::string> m_extraLogs = { "PSQL" };
     std::shared_ptr<log_n::Light> m_light;
     Options m_options;
     std::unique_ptr<pgsql_n::ConnectionPool> m_pool;
 
+    void addParam(pqxx::params& params, const Value& value) const;
     pgsql_n::Transaction& beginTransaction(Transaction*& transaction, std::unique_ptr<Transaction>& ownedTransaction);
+    std::string condition(const Query::filter_t& filter, pqxx::params& params, pqxx::placeholders<>& placeholders) const;
     Value convertField(pqxx::field const &field) const;
     std::pair<std::vector<std::string>, pqxx::params> extractParams(const record_t& record) const;
     std::string getProjection(const std::vector<std::string>& projection) const;
+    std::string groupBy(const Query& query) const;
+    std::string having(const Query& query, pqxx::params& params, pqxx::placeholders<>& placeholders) const;
+    std::string limit(const Query& query) const;
+    std::string offset(const Query& query) const;
     pgsql_n::Options optionsFromJSON(const json& postgresJSON) const;
+    std::string orderBy(const Query& query) const;
     Result success(const pqxx::result& result) const;
     bool validateCardinality(const pqxx::result& result, Cardinality_en expected) const;
+    std::string where(const Query& query, pqxx::params& params, pqxx::placeholders<>& placeholders) const;
 };

@@ -9,6 +9,8 @@ namespace database_n
 {
     class Query : public Builder_i<Query> {
     public:
+        using operator_t = std::string;
+        using filter_t = std::unordered_map<std::string, std::pair<operator_t, Value>>;
         enum class Type_en : uint8_t {
             TARGETED,
             PROCEDURE
@@ -20,15 +22,17 @@ namespace database_n
             MULTIPLE = 2
         };
 
-        struct SortField {
+        struct Sort {
             std::string field;
             bool ascending = true;
         };
 
         struct Options {
+            std::optional<std::vector<std::string>> group;
+            std::optional<filter_t> having;
             std::optional<size_t> limit;
             std::optional<size_t> offset;
-            std::optional<std::vector<SortField>> sort;
+            std::optional<std::vector<Sort>> sort;
         };
 
         Query();
@@ -39,7 +43,7 @@ namespace database_n
 
         Cardinality_en cardinality() const;
         const std::optional<record_t>& data() const;
-        const std::optional<record_t>& filter() const;
+        const std::optional<filter_t>& filter() const;
         const std::optional<Options>& options() const;
         const std::optional<std::vector<std::string>>& projection() const;
         const std::string& target() const;
@@ -47,7 +51,7 @@ namespace database_n
 
         Query& setCardinality(Cardinality_en cardinality);
         Query& setData(record_t data);
-        Query& setFilter(record_t filter);
+        Query& setFilter(filter_t filter);
         Query& setOptions(Options options);
         Query& setProjection(std::vector<std::string> projection);
         Query& setTarget(std::string_view target);
@@ -59,7 +63,7 @@ namespace database_n
         Cardinality_en m_cardinality;
 
         std::optional<record_t> m_data;
-        std::optional<record_t> m_filter;
+        std::optional<filter_t> m_filter;
         std::optional<Options> m_options;
         std::optional<std::vector<std::string>> m_projection;
     };

@@ -18,7 +18,7 @@ namespace database_n
     class Reader_i {
     public:
         virtual ~Reader_i() = default;
-        virtual Result Read(const Query& query, Transaction* transaction=nullptr) const = 0;
+        virtual Result Read(const Query& query, Transaction* transaction=nullptr) = 0;
     };
 
     class Updater_i {
