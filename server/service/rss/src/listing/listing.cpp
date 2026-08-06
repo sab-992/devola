@@ -24,24 +24,3 @@ void Listing::normalize() {
 
     company = title.substr(0, title.find(":"));
 }
-
-void Listing::setAttribute(std::string_view attribute, auto value) {
-    if (attribute == "id")
-        id = std::stoll(value);
-    else if (attribute == "website_id")
-        website_id = std::stoll(value);
-    else if (attribute == "title")
-        title = value;
-    else if (attribute == "category")
-        category = value;
-    else if (attribute == "company")
-        company = value;
-    else if (attribute == "location")
-        location = value;
-    else if (attribute == "publication")
-        publication = std::chrono::floor<std::chrono::seconds>(Time::timepoint("%a, %d %b %Y %H:%M:%S %z", value));
-    else if (attribute == "content")
-        content = value;
-    else if (attribute == "link")
-        link = value;
-}
