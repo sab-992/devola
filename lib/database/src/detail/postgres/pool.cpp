@@ -1,4 +1,4 @@
-#include <database/detail/postgre/pool.hpp>
+#include <database/detail/postgres/pool.hpp>
 
 
 // ----------------------------------------------------------

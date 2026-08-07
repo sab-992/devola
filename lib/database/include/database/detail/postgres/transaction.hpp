@@ -1,6 +1,6 @@
 #pragma once
 
-#include <database/detail/postgre/pool.hpp>
+#include <database/detail/postgres/pool.hpp>
 #include <database/detail/tx.hpp>
 #include <pqxx/pqxx>
 

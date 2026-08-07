@@ -5,8 +5,8 @@
 #include <core/logging.hpp>
 #include <core/utility.hpp>
 #include <database/interface/database.hpp>
-#include <database/detail/postgre/options.hpp>
-#include <database/detail/postgre/pool.hpp>
+#include <database/detail/postgres/options.hpp>
+#include <database/detail/postgres/pool.hpp>
 #include <memory>
 #include <pqxx/pqxx>
 

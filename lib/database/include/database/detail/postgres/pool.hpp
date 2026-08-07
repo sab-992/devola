@@ -2,7 +2,7 @@
 
 #include <condition_variable>
 #include <core/str.hpp>
-#include <database/detail/postgre/options.hpp>
+#include <database/detail/postgres/options.hpp>
 #include <memory>
 #include <mutex>
 #include <pqxx/pqxx>
