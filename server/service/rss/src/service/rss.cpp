@@ -15,6 +15,24 @@ std::unique_ptr<RSS> RSS::create(const json& configJSON) {
     return std::make_unique<RSS>(Private_s(), configJSON);
 }
 
+std::string RSS::pathPrefix() const {
+    return "/rss";
+}
+
+void RSS::setCache(std::shared_ptr<Database_i> cache) {
+    m_cache = cache;
+}
+
+void RSS::setDatabase(std::shared_ptr<Database_i> database) {
+    m_database = database;
+}
+
+void RSS::setEndpoints() {
+    ENDPOINT("GET", "/feed", &RSS::fetchFeeds);
+}
+
+
+// TODO: Move functions below to its own class
 asio::awaitable<http_n::Response> RSS::fetchFeeds(const Session& session, const http_n::Request& request) {
     using namespace http_n;
     using namespace database_n;
@@ -34,20 +52,27 @@ asio::awaitable<http_n::Response> RSS::fetchFeeds(const Session& session, const 
     if (subscribedURLs.empty())
         co_return response.setStatus(network_n::Code::OK).build();
 
-    nlohmann::json body = nlohmann::json::array();
+    json body = json::array();
 
     auto tx = Transaction(pgsql_n::Transaction());
     for (const auto& url : subscribedURLs) {
         auto [host, endpoint] = parseURL(url);
 
-        // 3) TODO: Check Redis cache if has listings
-        // 3.1) TODO: If in Redis and not expired --> Return feed.
-        // 3.2) TODO: If in Redis cache but expired --> Refresh Redis cache and DB
+        // 3.1) TODO: check in cache:
+        //     3.1.1) TODO: if in cache and not expired, add it.
 
-        // 4) TODO: If not in Redis cache, check DB.
-        // 4.1) TODO: If in DB and not expired --> Return feed.
-        body.emplace_back(co_await updateListingsDatabase(host, endpoint, tx));
-        // 5) TODO: refresh listings cache with the website JSON object
+        json websiteListings;
+        const auto& [last_updated, listings] = fetchListings(host, endpoint, tx);
+        if (last_updated.empty() or listings.empty())
+            websiteListings= co_await saveWebsiteListingsToDatabase(host, endpoint, tx);
+        else if (isExpired(listings[0].expire_at))
+            websiteListings = co_await updateWebsiteListingsDatabase(host, endpoint, tx);
+        else
+            websiteListings = listingsToJSON(host, last_updated, listings);
+
+        // 3.4) TODO: save in cache
+        // saveWebsiteListingsToCache(host, endpoint, websiteListings);
+        body.emplace_back(websiteListings);
     }
     tx.get<pgsql_n::Transaction>().commit();
 
@@ -71,30 +96,60 @@ asio::awaitable<http_n::Response> RSS::fetchFromURL(std::string_view host, std::
     co_return co_await m_http->async_receive(co_await m_http->async_send(request));
 }
 
-std::string RSS::pathPrefix() const {
-    return "/rss";
+std::pair<std::string, std::vector<Listing>> RSS::fetchListings(std::string_view host, std::string_view endpoint, Transaction& tx) {
+    using namespace http_n;
+    using namespace database_n;
+
+    auto websiteExistsQuery = Query().setTarget("websites")
+                                     .setType(Query::Type_en::TARGETED)
+                                     .setProjection({ "last_updated", "listings.*" })
+                                     .setCardinality(Query::Cardinality_en::MULTIPLE)
+                                     .setFilter({{ "host",     { "=", Value(host) }},
+                                                 { "endpoint", { "=", Value(endpoint) }}})
+                                     .addJoin({ Query::JoinType_en::INNER,
+                                                "listings",
+                                                std::nullopt,
+                                                std::nullopt,
+                                                {{"websites.id", "=", "listings.website_id"}}}).build();
+
+    Result websiteExistsResult = m_database->Read(websiteExistsQuery, &tx);
+
+    if (not websiteExistsResult.isOK())
+        throw Exception(websiteExistsResult.error().value());
+
+    if (websiteExistsResult.isEmpty())
+        return { "", {} };
+
+    const auto& recordsOpt = websiteExistsResult.records();
+    std::vector<Listing> listings;
+    for (const auto& record : recordsOpt.value())
+        listings.emplace_back(Listing::fromDatabaseFormat(record));
+
+    return { recordsOpt.value().at(0).at("last_updated").asString(), listings };
 }
 
-void RSS::setCache(std::shared_ptr<Database_i> cache) {
-    m_cache = cache;
+bool RSS::isExpired(const std::chrono::time_point<std::chrono::system_clock>& expiryTimestamp) const {
+    return expiryTimestamp < Time::now();
 }
 
-void RSS::setDatabase(std::shared_ptr<Database_i> database) {
-    m_database = database;
+nlohmann::json RSS::listingsToJSON(std::string_view host, std::string_view lastUpdated, const std::vector<Listing>& listings) const {
+    json websiteListings;
+    websiteListings["website_name"] = host;
+    websiteListings["last_updated"] = Time::convertToSecondsSinceEpoch(Time::timepoint("%Y-%m-%d %H:%M:%S", lastUpdated));
+
+    json listingsJSON = json::array();
+    for (const auto& listing : listings)
+        listingsJSON.push_back(listing.ToDatabaseFormat());
+
+    websiteListings["listings"] = listingsJSON;
+    return websiteListings;
 }
 
-void RSS::setEndpoints() {
-    ENDPOINT("GET", "/feed", &RSS::fetchFeeds);
-}
-
-asio::awaitable<nlohmann::json> RSS::updateListingsDatabase(std::string_view host, std::string_view endpoint, Transaction& tx) {
+asio::awaitable<nlohmann::json> RSS::saveWebsiteListingsToDatabase(std::string_view host, std::string_view endpoint, Transaction& tx) {
     using namespace http_n;
     using namespace database_n;
 
     Response feed = co_await fetchFromURL(host, endpoint);
-
-    // 1) TODO: Check if website exists
-    // 1.1) TODO:  If exists: read the id, update last_updated and return it
 
     auto websiteQuery = Query().setTarget("websites")
                                .setType(Query::Type_en::TARGETED)
@@ -115,23 +170,21 @@ asio::awaitable<nlohmann::json> RSS::updateListingsDatabase(std::string_view hos
 
     const std::vector<Listing>& listings = parser_n::Listings::parse(result.records()->at(0).at("id").asInt64(), feed.body<xml_n::Document>());
 
-    nlohmann::json jsonListings = nlohmann::json::array();
-    for (const auto& listing : listings)
-        jsonListings.push_back(listing.databaseFormat());
+    nlohmann::json websiteListings = listingsToJSON(host, result.records()->at(0).at("last_updated").asString(), listings);
 
     auto listingsQuery = Query().setTarget("insert_listings_batch")
                                 .setType(Query::Type_en::PROCEDURE)
                                 .setCardinality(Query::Cardinality_en::NONE)
-                                .setData({ { "payload", Value(jsonListings.dump()) } }).build();
+                                .setData({ { "payload", Value(websiteListings["listings"].dump()) } }).build();
 
     Result listingsResult = m_database->Other(listingsQuery, &tx);
     if (not listingsResult.isOK())
         throw Exception(listingsResult.error().value());
 
-    nlohmann::json websiteFeed;
-    websiteFeed["website_name"] = host;
-    websiteFeed["last_updated"] = Time::convertToSecondsSinceEpoch(Time::timepoint("%Y-%m-%d %H:%M:%S", result.records()->at(0).at("last_updated").asString()));
-    websiteFeed["listings"] = jsonListings;
+    co_return websiteListings;
+}
 
-    co_return websiteFeed;
+asio::awaitable<nlohmann::json> RSS::updateWebsiteListingsDatabase(std::string_view host, std::string_view endpoint, Transaction& tx) {
+    // TODO
+    co_return listingsToJSON(host, "", {});
 }

@@ -28,6 +28,7 @@ namespace database_n
 
         size_t affected() const;
         std::optional<std::string> error() const;
+        bool isEmpty() const;
         bool isOK() const;
         std::optional<std::vector<record_t>> records() const;
         Status_en status() const;

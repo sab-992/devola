@@ -30,8 +30,14 @@ private:
     std::shared_ptr<Database_i> m_database;
     json m_configJSON;
 
+    void setEndpoints();
+
+    // TODO: Move functions below to its own class
     asio::awaitable<http_n::Response> fetchFeeds(const Session& session, const http_n::Request& request);
     asio::awaitable<http_n::Response> fetchFromURL(std::string_view host, std::string_view endpoint);
-    void setEndpoints();
-    asio::awaitable<nlohmann::json> updateListingsDatabase(std::string_view host, std::string_view endpoint, Transaction& tx);
+    std::pair<std::string, std::vector<Listing>> fetchListings(std::string_view host, std::string_view endpoint, Transaction& tx);
+    bool isExpired(const std::chrono::time_point<std::chrono::system_clock>& expiryTimestamp) const;
+    json listingsToJSON(std::string_view host, std::string_view lastUpdated, const std::vector<Listing>& listings) const;
+    asio::awaitable<json> saveWebsiteListingsToDatabase(std::string_view host, std::string_view endpoint, Transaction& tx);
+    asio::awaitable<json> updateWebsiteListingsDatabase(std::string_view host, std::string_view endpoint, Transaction& tx);
 };

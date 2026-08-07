@@ -20,6 +20,10 @@ std::optional<std::string> database_n::Result::error() const {
     return m_error;
 }
 
+bool database_n::Result::isEmpty() const {
+    return not m_records.has_value() or m_records->empty();
+}
+
 bool database_n::Result::isOK() const {
     return m_status == Status_en::OK and not m_error.has_value();
 }

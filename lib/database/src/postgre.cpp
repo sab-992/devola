@@ -8,6 +8,7 @@ PostgreSQL::PostgreSQL(const Private_s&, const json& postgresJSON) : m_light(log
 
 void PostgreSQL::addParam(pqxx::params& params, const Value& value) const {
     std::visit(overloads{
+        [&](const std::shared_ptr<Query>&) {},
         [&](const std::shared_ptr<record_t>&) { throw LogicException("Value is a nested record. It cannot be bound as Postgres params"); },
         [&](const std::shared_ptr<std::vector<Value>>&) { throw LogicException("Value is a nested list of values. It cannot be bound as Postgres params"); },
         [&, &value = std::as_const(value)](auto&& arg) {
@@ -36,14 +37,33 @@ std::string PostgreSQL::condition(const Query::filter_t& filter, pqxx::params& p
     bool first = true;
     for (const auto& [column, rvalue] : filter) {
         if (not first)
-            result += "AND ";
+            result += " AND ";
 
-        result += std::format("{} {}", column, rvalue.first);
-        if (not rvalue.second.isNull()) {
-            result += std::format(" {}", placeholders.get());
-            placeholders.next();
-            addParam(params, rvalue.second);
+        const std::string& op = rvalue.first;
+        const Value& value = rvalue.second;
+
+        if (value.holds<std::shared_ptr<Query>>()) {
+            result += std::format("{} {} ({})", column, op, selectSql(*value.asQuery(), params, placeholders));
+            first = false;
+            continue;
         }
+
+        if (value.isNull()) {
+            result += std::format("{} {}", column, op);
+            first = false;
+            continue;
+        }
+
+        std::string placeholder = placeholders.get();
+        placeholders.next();
+        addParam(params, value);
+
+        if (op == "IN")
+            result += std::format("{} = ANY({})", column, placeholder);
+        else if (op == "NOT IN")
+            result += std::format("{} <> ALL({})", column, placeholder);
+        else
+            result += std::format("{} {} {}", column, op, placeholder);
 
         first = false;
     }
@@ -138,6 +158,14 @@ std::pair<std::vector<std::string>, pqxx::params> PostgreSQL::extractParams(cons
     return { columns, params };
 }
 
+std::string PostgreSQL::from(const Query& query, pqxx::params& params, pqxx::placeholders<>& placeholders) const {
+    if (not query.source().has_value())
+        return query.target();
+
+    const auto& [subquery, alias] = query.source().value();
+    return std::format("({}) AS {}", selectSql(*subquery, params, placeholders), alias);
+}
+
 std::string PostgreSQL::getProjection(const std::vector<std::string>& projection) const {
     if (projection.empty())
         throw Exception("Projection exists but is empty");
@@ -180,7 +208,32 @@ std::string PostgreSQL::having(const Query& query, pqxx::params& params, pqxx::p
     if (having.empty())
         return "";
 
-    return std::format(" HAVING {}", condition(query.filter().value(), params, placeholders));
+    return std::format(" HAVING {}", condition(having, params, placeholders));
+}
+
+std::string PostgreSQL::join(const Query& query, pqxx::params& params, pqxx::placeholders<>& placeholders) const {
+    if (not query.joins().has_value())
+        return "";
+
+    std::string result;
+    for (const auto& j : query.joins().value()) {
+        std::string joinTarget = j.source.has_value() ? std::format("({}) AS {}", selectSql(*j.source.value(), params, placeholders), j.alias.value()) : j.target.value();
+        result += std::format(" {} JOIN {}", joinTypeToStr(j.type), joinTarget);
+        if (j.type != Query::JoinType_en::CROSS and not j.on.empty())
+            result += std::format(" ON {}", onCondition(j.on));
+    }
+    return result;
+}
+
+std::string PostgreSQL::joinTypeToStr(Query::JoinType_en type) const {
+    switch (type) {
+        case Query::JoinType_en::INNER: return "INNER";
+        case Query::JoinType_en::LEFT:  return "LEFT";
+        case Query::JoinType_en::RIGHT: return "RIGHT";
+        case Query::JoinType_en::FULL:  return "FULL";
+        case Query::JoinType_en::CROSS: return "CROSS";
+    }
+    throw LogicException("Unhandled Query::JoinType_en");
 }
 
 std::string PostgreSQL::limit(const Query& query) const {
@@ -195,6 +248,17 @@ std::string PostgreSQL::offset(const Query& query) const {
         return "";
 
     return std::format(" OFFSET {}", query.options().value().offset.value());
+}
+
+std::string PostgreSQL::onCondition(const std::vector<Query::JoinCondition>& conditions) const {
+    std::string result;
+    for (size_t i = 0; i < conditions.size(); i++) {
+        if (i != 0)
+            result += " AND ";
+
+        result += std::format("{} {} {}", conditions[i].left_field, conditions[i].op, conditions[i].right_field);
+    }
+    return result;
 }
 
 pgsql_n::Options PostgreSQL::optionsFromJSON(const json& postgresJSON) const {
@@ -257,6 +321,19 @@ database_n::Result PostgreSQL::Other(const Query& query, Transaction* transactio
     }
 }
 
+std::string PostgreSQL::projection(const Query& query) const {
+    if (not query.projection().has_value())
+        return "*";
+
+    const std::vector<std::string>& columns = query.projection().value();
+
+    std::string result;
+    for (size_t i = 0; i < columns.size(); i++)
+        result.append(i != 0 ? std::format(", {}", columns[i]) : columns[i]);
+
+    return result;
+}
+
 database_n::Result PostgreSQL::Read(const Query& query, Transaction* transaction) {
     if (query.type() != Query::Type_en::TARGETED)
         throw LogicException(std::format("{} expects TARGETED query:", FUNCTION_SIGNATURE));
@@ -264,27 +341,9 @@ database_n::Result PostgreSQL::Read(const Query& query, Transaction* transaction
     std::unique_ptr<Transaction> ownedTransaction;
     pgsql_n::Transaction& tx = beginTransaction(transaction, ownedTransaction);
     try {
-        std::string projection;
-        if (not query.projection().has_value())
-            projection = "*";
-        else {
-            std::vector<std::string> columns = query.projection().value();
-            for (size_t i = 0; i < columns.size(); i++)
-                projection.append(i != 0 ? std::format(", {}", columns[i]) : columns[i]);
-        }
-
         pqxx::params params;
-        pqxx::placeholders placeholders;
-        std::string sql = std::format("SELECT {} FROM {}{}{}{}{}{};", projection, query.target(), where(query, params, placeholders),
-                                                                                                  groupBy(query),
-                                                                                                  having(query, params, placeholders),
-                                                                                                  orderBy(query),
-                                                                                                  limit(query),
-                                                                                                  offset(query));
-
-        m_light->log(log_n::Level_en::SPECIAL, EXTRA_LOGS, "SQL READ CMD:", sql);
-
-        pqxx::result queryResult = tx.execute(sql, params);
+        pqxx::placeholders<> placeholders;
+        pqxx::result queryResult = tx.execute(std::format("{};", selectSql(query, params, placeholders)), params);
 
         if (not validateCardinality(queryResult, query.cardinality()))
             return Result().setError(std::format("Expected ({} rows) but got: ({} rows)", to_underlying(query.cardinality()), queryResult.size()))
@@ -300,8 +359,18 @@ database_n::Result PostgreSQL::Read(const Query& query, Transaction* transaction
         return Result().setError(e.what())
                        .setStatus(Status_en::QUERY_ERROR).build();
     }
+}
 
-    return {};
+std::string PostgreSQL::selectSql(const Query& query, pqxx::params& params, pqxx::placeholders<>& placeholders) const {
+    std::string sql = std::format("SELECT {} FROM {}", projection(query), from(query, params, placeholders));
+    sql += join(query, params, placeholders);
+    sql += where(query, params, placeholders);
+    sql += groupBy(query);
+    sql += having(query, params, placeholders);
+    sql += orderBy(query);
+    sql += limit(query);
+    sql += offset(query);
+    return sql;
 }
 
 database_n::Result PostgreSQL::success(const pqxx::result& dbResult) const {
