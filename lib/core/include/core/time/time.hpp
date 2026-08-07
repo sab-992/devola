@@ -19,7 +19,7 @@ public:
 
     static double convertToSecondsSinceEpoch(const std::chrono::time_point<std::chrono::system_clock>& timepoint);
     static std::chrono::time_point<std::chrono::system_clock> now();
-    static std::chrono::time_point<std::chrono::system_clock> timepoint(const std::string& specification, const std::string& time);
+    static std::chrono::time_point<std::chrono::system_clock> timepoint(const std::string& specification, std::string_view time);
     static std::string toUTC(const std::chrono::time_point<std::chrono::system_clock>& time);
 
     template<typename Duration=std::chrono::milliseconds>

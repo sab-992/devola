@@ -42,8 +42,8 @@ void Time::stopTimer(time_n::timerId_t identifier) {
     rehashIfNeeded(m_timers);
 }
 
-std::chrono::time_point<std::chrono::system_clock> Time::timepoint(const std::string& specification, const std::string& time) {
-    std::istringstream in{time};
+std::chrono::time_point<std::chrono::system_clock> Time::timepoint(const std::string& specification, std::string_view time) {
+    std::istringstream in{std::string(time)};
     std::chrono::sys_seconds tp;
     in >> std::chrono::parse(specification, tp);
     return tp;
