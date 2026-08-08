@@ -34,6 +34,8 @@ private:
     std::unique_ptr<ListingRepository> m_listingRepos;
 
     asio::awaitable<http_n::Response> fetchFeeds(const Session& session, const http_n::Request& request);
+    asio::awaitable<http_n::Response> recommend(const Session& session, const http_n::Request& request);
+    asio::awaitable<http_n::Response> recommendations(const Session& session, const http_n::Request& request);
     void setEndpoints();
     rss::ServerTools tools();
 
