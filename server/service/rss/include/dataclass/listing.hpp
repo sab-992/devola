@@ -3,6 +3,7 @@
 
 #include <core/time.hpp>
 #include <core/str.hpp>
+#include <database/utility/timestamp.hpp>
 #include <database/value.hpp>
 #include <chrono>
 #include <cstdint>
@@ -11,7 +12,8 @@
 
 struct Listing {
     std::optional<int64_t> id = -1;
-    int64_t website_id;
+    std::string website_host;
+    std::string website_endpoint;
     std::string title;
     std::string category;
     std::string company;
@@ -19,7 +21,6 @@ struct Listing {
     std::chrono::time_point<std::chrono::system_clock> publication;
     std::string content;
     std::string link;
-    std::chrono::time_point<std::chrono::system_clock> expire_at;
 
     void normalize();
     void setAttribute(std::string_view attribute, std::string_view value);
