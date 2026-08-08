@@ -1,8 +1,7 @@
 CREATE TABLE IF NOT EXISTS websites (
-    id            BIGINT GENERATED ALWAYS AS IDENTITY UNIQUE,
     host          VARCHAR(253) NOT NULL,
     endpoint      VARCHAR(255) NOT NULL,
-    added         TIMESTAMP NOT NULL DEFAULT now(),
     last_updated TIMESTAMP NOT NULL DEFAULT now(),
+    expire_at    TIMESTAMP NOT NULL,
     PRIMARY KEY (host, endpoint)
 );
