@@ -4,7 +4,7 @@
 #include <core/file.hpp>
 #include <core/utility.hpp>
 #include <database/postgres.hpp>
-#include <listing/listing.hpp>
+#include <dataclass/listing.hpp>
 #include <listing/repository.hpp>
 #include <parser/listings.hpp>
 #include <service/tools.hpp>

@@ -6,7 +6,8 @@
 #include <core/xml.hpp>
 #include <core/utility.hpp>
 #include <database/value.hpp>
-#include <listing/listing.hpp>
+#include <dataclass/types.hpp>
+#include <dataclass/listing.hpp>
 #include <pugixml.hpp>
 #include <string>
 #include <unordered_map>
@@ -40,7 +41,7 @@ namespace parser_n
         Listings() = delete;
         ~Listings() = default;
 
-        static std::vector<Listing> parse(int64_t websiteID, const xml_n::Document& document);
+        static std::pair<ttl_t, std::vector<Listing>> parse(std::string_view host, std::string_view endpoint, const xml_n::Document& document);
 
     private:
 
@@ -60,7 +61,7 @@ namespace parser_n
         }
 
         static std::chrono::time_point<std::chrono::system_clock> computeExpirationTimepoint(int ttl);
-        static int parseTTL(const xml_node& ttl);
+        static ttl_t parseTTL(const xml_node& ttl);
         static size_t relevancy(std::string_view name, const aliases_t& aliases, const size_t currentBest);
         static std::string search(xml_node& node, const aliases_t& aliases);
     };

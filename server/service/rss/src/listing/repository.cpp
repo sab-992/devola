@@ -30,13 +30,16 @@ asio::awaitable<nlohmann::json> ListingRepository::fetchListings(const std::vect
         // 3.1) TODO: check in cache:
         //     3.1.1) TODO: if in cache and not expired, add it.
 
-        const auto& [last_updated, listings] = fetchWebsiteListings(host, endpoint, tx);
+        const auto& [last_updated, expire_at, listings] = fetchWebsiteListings(host, endpoint, tx);
         if (last_updated.empty() or listings.empty())
             websiteListings= co_await saveWebsiteListingsToDatabase(host, endpoint, tx);
-        else if (isExpired(listings[0].expire_at))
+        else if (isExpired(fromPGSQLFormat(expire_at))) {
+            // TODO: remove when updateWebsiteListingsDatabase is completed
+            m_light->log(log_n::Level_en::WARNING, "Website", host, "listings are expired. Expiry date:", expire_at);
             websiteListings = co_await updateWebsiteListingsDatabase(host, endpoint, tx);
+        }
         else
-            websiteListings = listingsToJSON(host, last_updated, listings);
+            websiteListings = listingsToJSON(host, last_updated, expire_at, listings);
 
         // 3.4) TODO: save in cache
         // saveWebsiteListingsToCache(host, endpoint, websiteListings);
@@ -64,13 +67,13 @@ asio::awaitable<http_n::Response> ListingRepository::fetchFromURL(std::string_vi
     co_return co_await http()->async_receive(co_await http()->async_send(request));
 }
 
-std::pair<std::string, std::vector<Listing>> ListingRepository::fetchWebsiteListings(std::string_view host, std::string_view endpoint, Transaction& tx) {
+std::tuple<std::string, std::string, std::vector<Listing>> ListingRepository::fetchWebsiteListings(std::string_view host, std::string_view endpoint, Transaction& tx) {
     using namespace http_n;
     using namespace database_n;
 
     auto websiteExistsQuery = Query().setTarget("websites")
                                      .setType(Query::Type_en::TARGETED)
-                                     .setProjection({ "last_updated", "listings.*" })
+                                     .setProjection({ "last_updated", "expire_at", "listings.*" })
                                      .setCardinality(Query::Cardinality_en::MULTIPLE)
                                      .setFilter({{ "host",     { "=", Value(host) }},
                                                  { "endpoint", { "=", Value(endpoint) }}})
@@ -78,7 +81,8 @@ std::pair<std::string, std::vector<Listing>> ListingRepository::fetchWebsiteList
                                                 "listings",
                                                 std::nullopt,
                                                 std::nullopt,
-                                                {{"websites.id", "=", "listings.website_id"}}}).build();
+                                                {{"websites.host", "=", "listings.website_host"},
+                                                 {"websites.endpoint", "=", "listings.website_endpoint"}}}).build();
 
     Result websiteExistsResult = database()->Read(websiteExistsQuery, &tx);
 
@@ -86,23 +90,29 @@ std::pair<std::string, std::vector<Listing>> ListingRepository::fetchWebsiteList
         throw Exception(websiteExistsResult.error().value());
 
     if (websiteExistsResult.isEmpty())
-        return { "", {} };
+        return { "", "",  {} };
 
     const auto& recordsOpt = websiteExistsResult.records();
     std::vector<Listing> listings;
     for (const auto& record : recordsOpt.value())
         listings.emplace_back(Listing::fromDatabaseFormat(record));
 
-    return { recordsOpt.value().at(0).at("last_updated").asString(), listings };
+    return { recordsOpt.value().at(0).at("last_updated").asString(),
+             recordsOpt.value().at(0).at("expire_at").asString(),
+             listings };
 }
 
 bool ListingRepository::isExpired(const std::chrono::time_point<std::chrono::system_clock>& expiryTimestamp) const {
     return expiryTimestamp < Time::now();
 }
 
-nlohmann::json ListingRepository::listingsToJSON(std::string_view host, std::string_view lastUpdated, const std::vector<Listing>& listings) const {
+nlohmann::json ListingRepository::listingsToJSON(std::string_view host,
+                                                 std::string_view lastUpdated,
+                                                 std::string_view expireAt,
+                                                 const std::vector<Listing>& listings) const {
     json websiteListings;
     websiteListings["website_name"] = host;
+    websiteListings["expire_at"] = Time::convertToSecondsSinceEpoch(Time::timepoint("%Y-%m-%d %H:%M:%S", expireAt));
     websiteListings["last_updated"] = Time::convertToSecondsSinceEpoch(Time::timepoint("%Y-%m-%d %H:%M:%S", lastUpdated));
 
     json listingsJSON = json::array();
@@ -118,27 +128,28 @@ asio::awaitable<nlohmann::json> ListingRepository::saveWebsiteListingsToDatabase
     using namespace database_n;
 
     Response feed = co_await fetchFromURL(host, endpoint);
+    const auto& [ttl, listings] = parser_n::Listings::parse(host, endpoint, feed.body<xml_n::Document>());
+    const auto& expireAt = toPGSQLFormat(Time::now() + std::chrono::minutes(ttl));
 
     auto websiteQuery = Query().setTarget("websites")
                                .setType(Query::Type_en::TARGETED)
-                               .setProjection({ "id", "last_updated" })
+                               .setProjection({ "last_updated", "expire_at" })
                                .setCardinality(Query::Cardinality_en::SINGLE)
-                               .setData({ { "host",     Value(host) },
-                                          { "endpoint", Value(endpoint) } }).build();
+                               .setData({ { "host",      Value(host) },
+                                          { "endpoint",  Value(endpoint) },
+                                          { "expire_at", Value(expireAt) } }).build();
 
     Result result = database()->Create(websiteQuery, &tx);
 
     if (not result.isOK())
         throw Exception(result.error().value());
-
-    if (not result.records()->at(0).contains("id"))
-        throw Exception("Cannot parse listings without website ID");
     else if (not result.records()->at(0).contains("last_updated"))
         throw Exception("Cannot parse listings without last updated timestamp");
 
-    const std::vector<Listing>& listings = parser_n::Listings::parse(result.records()->at(0).at("id").asInt64(), feed.body<xml_n::Document>());
-
-    nlohmann::json websiteListings = listingsToJSON(host, result.records()->at(0).at("last_updated").asString(), listings);
+    nlohmann::json websiteListings = listingsToJSON(host,
+                                                    result.records()->at(0).at("last_updated").asString(),
+                                                    result.records()->at(0).at("expire_at").asString(),
+                                                    listings);
 
     auto listingsQuery = Query().setTarget("insert_listings_batch")
                                 .setType(Query::Type_en::PROCEDURE)
@@ -154,5 +165,5 @@ asio::awaitable<nlohmann::json> ListingRepository::saveWebsiteListingsToDatabase
 
 asio::awaitable<nlohmann::json> ListingRepository::updateWebsiteListingsDatabase(std::string_view host, std::string_view endpoint, Transaction& tx) {
     // TODO
-    co_return listingsToJSON(host, "", {});
+    co_return listingsToJSON(host, "", "", {});
 }

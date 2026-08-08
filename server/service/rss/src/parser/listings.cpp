@@ -5,13 +5,13 @@ std::chrono::time_point<std::chrono::system_clock> parser_n::Listings::computeEx
     return Time::now() + std::chrono::minutes(ttl);
 }
 
-std::vector<Listing> parser_n::Listings::parse(int64_t websiteID, const xml_n::Document& document) {
+std::pair<ttl_t, std::vector<Listing>> parser_n::Listings::parse(std::string_view host, std::string_view endpoint, const xml_n::Document& document) {
     xml_node channelNode = document.find_node([](const xml_node& node) -> bool { return strcmp(node.name(), "channel") == 0; });
 
     if (not channelNode)
         throw InvalidArgument("Invalid XML format", "XML document");
 
-    unsigned int ttl = UINT_MAX;
+    ttl_t ttl = UINT_MAX;
     std::vector<Listing> listings;
 
     for (xml_node node = channelNode.first_child(); node; node = node.next_sibling()) {
@@ -26,16 +26,16 @@ std::vector<Listing> parser_n::Listings::parse(int64_t websiteID, const xml_n::D
             if (not addRelevantNodes(node, listing, ITEM_NODES_ALIASES))
                 continue;
 
-            listing.website_id = websiteID;
-            listing.expire_at = computeExpirationTimepoint(ttl);
+            listing.website_host = host;
+            listing.website_endpoint = endpoint;
             listings.emplace_back(listing);
         }
     }
 
-    return listings;
+    return { ttl, listings };
 }
 
-int parser_n::Listings::parseTTL(const xml_node& node) {
+ttl_t parser_n::Listings::parseTTL(const xml_node& node) {
     const uint8_t TTL_INCREASE = 5;
     const int MAX_TTL = 1440;
     int ttl = std::stoi(node.first_child().value());

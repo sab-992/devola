@@ -74,7 +74,7 @@ asio::awaitable<http_n::Response> RSS::recommend(const Session& session, const h
     // fetch subscribed urls of the user
     // fetch listings using urls
 
-    // Maybe start background task on background thread:
+    // for each website + endpoint combo -> start background task on background thread:
         // 1) RSS -> Send resumes to MATCHER process
         //     1.1) Each resume will have this structure: "<tag>:<resume>[END];". (tag refers to words given by the user to identify the resume)
 
@@ -113,8 +113,8 @@ asio::awaitable<http_n::Response> RSS::recommendations(const Session& session, c
 
     // 1 task contains 1 or more results. As results is the recommendation for each listing of ONE website.
     // Therefore it needs:
-        // "task" table -> PK on ("user_id" and "uuid") = FK on "user_id", INDEX on "uuid", "started_at", "status", "last_update"
-        // "result" table -> PK on ("user_id" and "id") = "id" : generated, FK on "user_id", FK and INDEX on "task_uuid", FK on "host", "result".
+        // "task" table -> PK on ("user_uuid" and "uuid") = FK on "user_uuid", "uuid", "started_at", "status", "last_update"
+        // "result" table -> PK on ("id") = "id", INDEX on ("user_uuid", "task_uuid") : generated, FK on "user_uuid", FK "task_uuid", FK on "host", "result".
 
     // 2) Fetch user's lists of tasks (containing results)
     co_return  http_n::Response().setStatus(network_n::Code::OK).build();
