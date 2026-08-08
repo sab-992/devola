@@ -14,8 +14,16 @@
 #include <unordered_map>
 
 
-#define ENDPOINT(METHOD, PATH, HANDLER) \
+#define ENDPOINT_GET_MACRO(_1, _2, _3, _4, NAME, ...) NAME
+
+#define ENDPOINT_3(METHOD, PATH, HANDLER) \
     EndpointRegistrar(this, METHOD, PATH) = std::bind_front(HANDLER, this)
+
+#define ENDPOINT_4(METHOD, PATH, HANDLER, OBJ) \
+    EndpointRegistrar(this, METHOD, PATH) = std::bind_front(HANDLER, OBJ)
+
+#define ENDPOINT(...) \
+    ENDPOINT_GET_MACRO(__VA_ARGS__, ENDPOINT_4, ENDPOINT_3)(__VA_ARGS__)
 
 #define ENDPOINT_L(METHOD, PATH) \
     EndpointRegistrar(this, METHOD, PATH) = [&](const http_n::server_n::Session& session, const http_n::Request& request) -> asio::awaitable<http_n::Response>
