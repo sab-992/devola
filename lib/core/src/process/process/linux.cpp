@@ -31,8 +31,7 @@
         if (m_pipe.empty())
             throw Exception(std::format("PID: {} => Impossible to send data, no pipe created.", m_pid));
 
-        auto fs = file_n::Service::instance();
-        File pipe = fs->open(m_pipe, file_n::flags_n::OpenMode_en::WRITE);
+        File pipe = file_n::Service::instance()->open(m_pipe, file_n::flags_n::OpenMode_en::WRITE);
         pipe.write(content);
     }
 
