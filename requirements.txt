@@ -1,2 +1,4 @@
 dotenv
 pyyaml
+bs4
+sentence_transformers
