@@ -54,16 +54,17 @@ class SentenceTransformerModel:
         return results
 
     # listings: list[Listing]
-    def compute_similarity(self, resume_embeddings: dict[str, Tensor], listings) -> tuple[list[int], list[dict[str, float]]]:
+    def compute_similarity(self, resume_embeddings: dict[str, Tensor], listings) -> tuple[list[int], list[list[dict[str, float]]]]:
         ids: list[int] = []
-        results: list[dict] = []
+        results: list[list[dict]] = []
         for i in range(len(listings)):
-            results.append({})
+            results.append([])
             listing_embedding = self.embed(listings[i].content_chunks)
             ids.append(listings[i].id)
 
-            for tag, resume_embedding in resume_embeddings.items():
-                results[i]["tag"] = tag
-                results[i]["score"] = util.cos_sim(listing_embedding, resume_embedding).mean().item()
+            for j, (tag, resume_embedding) in enumerate(resume_embeddings.items()):
+                results[i].append({})
+                results[i][j]["tag"] = tag
+                results[i][j]["score"] = util.cos_sim(listing_embedding, resume_embedding).mean().item()
 
         return ids, results
