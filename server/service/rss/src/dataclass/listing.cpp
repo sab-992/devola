@@ -1,10 +1,6 @@
 #include <dataclass/listing.hpp>
 
 
-std::chrono::time_point<std::chrono::system_clock> Listing::format(const std::string& format, std::string_view value) {
-    return std::chrono::floor<std::chrono::seconds>(Time::timepoint(format, value));
-}
-
 Listing Listing::fromDatabaseFormat(const database_n::record_t& record) {
     return { record.at("id").asInt64(),
              record.at("website_host").asString(),
@@ -39,9 +35,9 @@ void Listing::setAttribute(std::string_view attribute, std::string_view value) {
     else if (attribute == "link")
         link = value;
     else if (attribute == "created_at")
-        created_at = format("%a, %d %b %Y %H:%M:%S %z", value);
+        created_at = Time::timepoint("%a, %d %b %Y %H:%M:%S %z", value);
     else if (attribute == "expire_at")
-        expire_at = format("%a, %d %b %Y %H:%M:%S %z", value);
+        expire_at = Time::timepoint("%a, %d %b %Y %H:%M:%S %z", value);
 }
 
 void Listing::normalize() {
@@ -60,8 +56,8 @@ nlohmann::json Listing::toJSON() const {
                                    { "location",         location },
                                    { "content",          content },
                                    { "link",             link },
-                                   { "created_at",       Time::toSecondsSinceEpoch(std::chrono::floor<std::chrono::seconds>(created_at)) },
-                                   { "expire_at",        Time::toSecondsSinceEpoch(std::chrono::floor<std::chrono::seconds>(expire_at)) }});
+                                   { "created_at",       Time::toSecondsSinceEpoch(created_at) },
+                                   { "expire_at",        Time::toSecondsSinceEpoch(expire_at) }});
 
     if (id.has_value() and id.value() >= 0)
         object["id"] = id;

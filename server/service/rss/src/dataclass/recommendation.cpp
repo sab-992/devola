@@ -28,8 +28,8 @@ nlohmann::json Recommendation::toJSON() const {
                                    { "status",           status },
                                    { "website_host",     website_host },
                                    { "website_endpoint", website_endpoint },
-                                   { "started_at",       Time::toSecondsSinceEpoch(std::chrono::floor<std::chrono::seconds>(started_at)) },
-                                   { "last_updated_at",  Time::toSecondsSinceEpoch(std::chrono::floor<std::chrono::seconds>(last_updated_at)) }});
+                                   { "started_at",       Time::toSecondsSinceEpoch(started_at) },
+                                   { "last_updated_at",  Time::toSecondsSinceEpoch(last_updated_at) }});
 
     return object;
 }

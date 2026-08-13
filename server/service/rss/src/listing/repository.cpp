@@ -25,10 +25,10 @@ std::string ListingRepository::createWebsite(std::string_view host, std::string_
     using namespace database_n;
 
     const auto websiteQuery = Query().setTarget("websites")
-                                        .setType(Query::Type_en::TARGETED)
-                                        .setProjection({ "last_updated_at" })
-                                        .setCardinality(Query::Cardinality_en::SINGLE)
-                                        .setData({ { "host",      Value(host) },
+                                     .setType(Query::Type_en::TARGETED)
+                                     .setProjection({ "last_updated_at" })
+                                     .setCardinality(Query::Cardinality_en::SINGLE)
+                                     .setData({ { "host",      Value(host) },
                                                    { "endpoint",  Value(endpoint) } }).build();
 
     const Result& result = database()->Create(websiteQuery, &tx);

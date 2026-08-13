@@ -143,7 +143,33 @@ database_n::Result PostgreSQL::Delete(const Query& query, Transaction* transacti
     if (query.type() != Query::Type_en::TARGETED)
         throw LogicException(std::format("{} expects TARGETED query:", FUNCTION_SIGNATURE));
 
-    return {};
+    std::unique_ptr<Transaction> ownedTransaction;
+    pgsql_n::Transaction& tx = beginTransaction(transaction, ownedTransaction);
+    try {
+        pqxx::params params;
+        pqxx::placeholders<> placeholders;
+
+        std::string sql = std::format("DELETE FROM {}", query.target());
+        sql += where(query, params, placeholders);
+
+        if (query.projection().has_value())
+            sql.append(std::format(" RETURNING {}", getProjection(query.projection().value())));
+
+        pqxx::result queryResult = tx.execute(sql, params);
+        if (not validateCardinality(queryResult, query.cardinality()))
+            return Result().setError(std::format("Expected ({} rows) but got: ({} rows)", to_underlying(query.cardinality()), queryResult.size()))
+                           .setStatus(Status_en::CARDINALITY_ERROR).build();
+
+        if (ownedTransaction)
+            tx.commit();
+
+        return success(queryResult);
+    } catch (std::exception& e) {
+        tx.abort();
+        m_light->log(log_n::Level_en::ERROR, EXTRA_LOGS, "ABORTED: error during deletion: ", e.what());
+        return Result().setError(e.what())
+                       .setStatus(Status_en::QUERY_ERROR).build();
+    }
 }
 
 std::pair<std::vector<std::string>, pqxx::params> PostgreSQL::extractParams(const record_t& record) const {
@@ -398,7 +424,50 @@ database_n::Result PostgreSQL::Update(const Query& query, Transaction* transacti
     if (query.type() != Query::Type_en::TARGETED)
         throw LogicException(std::format("{} expects TARGETED query:", FUNCTION_SIGNATURE));
 
-    return {};
+    std::unique_ptr<Transaction> ownedTransaction;
+    pgsql_n::Transaction& tx = beginTransaction(transaction, ownedTransaction);
+    try {
+        if (not query.data().has_value())
+            return Result().setError("No data to update")
+                           .setStatus(Status_en::QUERY_ERROR).build();
+
+        pqxx::params params;
+        pqxx::placeholders<> placeholders;
+        std::string setClause;
+
+        bool first = true;
+        for (const auto& [column, value] : query.data().value()) {
+            if (not first)
+                setClause += ", ";
+            std::string placeholder = placeholders.get();
+            placeholders.next();
+            addParam(params, value);
+            setClause += std::format("{} = {}", column, placeholder);
+            first = false;
+        }
+
+        std::string sql = std::format("UPDATE {} SET {}", query.target(), setClause);
+        sql += where(query, params, placeholders);
+
+        if (query.projection().has_value())
+            sql.append(std::format(" RETURNING {}", getProjection(query.projection().value())));
+
+        pqxx::result queryResult = tx.execute(sql, params);
+
+        if (not validateCardinality(queryResult, query.cardinality()))
+            return Result().setError(std::format("Expected ({} rows) but got: ({} rows)", to_underlying(query.cardinality()), queryResult.size()))
+                           .setStatus(Status_en::CARDINALITY_ERROR).build();
+
+        if (ownedTransaction)
+            tx.commit();
+
+        return success(queryResult);
+    } catch (std::exception& e) {
+        tx.abort();
+        m_light->log(log_n::Level_en::ERROR, EXTRA_LOGS, "ABORTED: error during update: ", e.what());
+        return Result().setError(e.what())
+                       .setStatus(Status_en::QUERY_ERROR).build();
+    }
 }
 
 bool PostgreSQL::validateCardinality(const pqxx::result& result, Cardinality_en expected) const {

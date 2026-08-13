@@ -22,8 +22,8 @@ std::vector<std::string> Resume::projection() {
 nlohmann::json Resume::toJSON() const {
     auto object = nlohmann::json({ { "tag",     tag },
                                    { "content", content },
-                                   { "created_at",      Time::toSecondsSinceEpoch(std::chrono::floor<std::chrono::seconds>(created_at)) },
-                                   { "last_updated_at", Time::toSecondsSinceEpoch(std::chrono::floor<std::chrono::seconds>(last_updated_at)) }});
+                                   { "created_at",      Time::toSecondsSinceEpoch(created_at) },
+                                   { "last_updated_at", Time::toSecondsSinceEpoch(created_at) }});
 
     return object;
 }

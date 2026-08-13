@@ -20,7 +20,7 @@ std::string RecommendationRepository::createTask(std::string_view userUUID, cons
     else if (createTaskResult.isEmpty())
         throw Exception("Task UUID is needed to start a recommendation task");
 
-    const std::string taskUUID = createTaskResult.records().value()[0].at("task_uuid").asString();
+    const std::string taskUUID = createTaskResult.records().value()[0].at("uuid").asString();
     // =============================  In asio::post  ================================
     const Process& p = m_registry->start("python", { std::format("{}/extern/matcher.py", SERVICE_DIRECTORY) }, true);
 
@@ -72,7 +72,9 @@ std::string RecommendationRepository::createTask(std::string_view userUUID, cons
     const auto updateTaskQuery = Query().setTarget("tasks")
                                         .setType(Query::Type_en::TARGETED)
                                         .setCardinality(Query::Cardinality_en::NONE)
-                                        .setData({ { "status", "completed" }}).build();
+                                        .setData({ { "status",          "completed" },
+                                                   { "last_updated_at", toPGSQLFormat(Time::now()) }})
+                                        .setFilter({ {"uuid", {"=", taskUUID } } }).build();
 
     const Result& updateTaskResult = database()->Update(updateTaskQuery);
 
