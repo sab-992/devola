@@ -1,0 +1,22 @@
+
+networks:
+  app-network:
+    external: true
+services:
+  user_postgres:
+    build:
+      context: ../../../docker
+      dockerfile: pg_sql.Dockerfile
+    container_name: user_postgres
+    env_file:
+    - ../settings/.env
+    networks:
+    - app-network
+    restart: unless-stopped
+    volumes:
+    - user_postgres_vol:/var/lib/postgresql/data
+    - ../database/user_postgres:/docker-entrypoint-initdb.d
+volumes:
+  user_postgres_vol:
+    driver: local
+    name: user_postgres_vol

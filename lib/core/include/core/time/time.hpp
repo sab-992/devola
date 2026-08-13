@@ -17,9 +17,10 @@ public:
     time_n::timerId_t startTimer(const time_n::TimerOptions& options);
     void stopTimer(time_n::timerId_t identifier);
 
-    static double convertToSecondsSinceEpoch(const std::chrono::time_point<std::chrono::system_clock>& timepoint);
+    static std::chrono::time_point<std::chrono::system_clock> fromSecondSinceEpoch(double timepoint);
     static std::chrono::time_point<std::chrono::system_clock> now();
     static std::chrono::time_point<std::chrono::system_clock> timepoint(const std::string& specification, std::string_view time);
+    static double toSecondsSinceEpoch(const std::chrono::time_point<std::chrono::system_clock>& timepoint);
     static std::string toUTC(const std::chrono::time_point<std::chrono::system_clock>& time);
 
     template<typename Duration=std::chrono::seconds>

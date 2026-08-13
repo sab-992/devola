@@ -29,7 +29,7 @@ namespace parser_n
                                                                        { "category",    { "category" } },
                                                                        { "company",     { "companyName", "company" } },
                                                                        { "location",    { "location", "region" } },
-                                                                       { "publication", { "pubDate", "published", "dc:date", "updated" } },
+                                                                       { "created_at",  { "pubDate", "published", "dc:date", "updated", "publication" } },
                                                                        { "content",     { "content:encoded", "description", "content", "summary" } },
                                                                        { "link",        { "link" } }};
 
@@ -41,7 +41,7 @@ namespace parser_n
         Listings() = delete;
         ~Listings() = default;
 
-        static std::pair<ttl_t, std::vector<Listing>> parse(std::string_view host, std::string_view endpoint, const xml_n::Document& document);
+        static std::vector<Listing> parse(std::string_view host, std::string_view endpoint, const xml_n::Document& document);
 
     private:
 
@@ -60,7 +60,7 @@ namespace parser_n
             return true;
         }
 
-        static std::chrono::time_point<std::chrono::system_clock> computeExpirationTimepoint(int ttl);
+        static std::chrono::time_point<std::chrono::system_clock> computeExpirationTimepoint(ttl_t ttl);
         static ttl_t parseTTL(const xml_node& ttl);
         static size_t relevancy(std::string_view name, const aliases_t& aliases, const size_t currentBest);
         static std::string search(xml_node& node, const aliases_t& aliases);

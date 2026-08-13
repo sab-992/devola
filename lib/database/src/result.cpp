@@ -51,3 +51,7 @@ database_n::Result& database_n::Result::setStatus(Status_en status) {
     m_status = status;
     return *this;
 }
+
+size_t database_n::Result::size() const {
+    return m_records->size();
+}

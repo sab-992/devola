@@ -4,8 +4,8 @@
 int main() {
     auto light = log_n::Light::instance();
     try {
-        nlohmann::json configJSON = readConfigJSON(std::format("{}/settings/launch.json", SERVICE_DIRECTORY));
-        std::unique_ptr<RSS> server = RSS::create(configJSON);
+        const nlohmann::json& configJSON = readConfigJSON(std::format("{}/settings/launch.json", SERVICE_DIRECTORY));
+        std::unique_ptr<RSSService> server = RSSService::create(configJSON);
 
         server->setDatabase(PostgreSQL::instance(configJSON["postgres"]));
         // TODO: server->setCache(Redis::instance(configJSON["redis"]));

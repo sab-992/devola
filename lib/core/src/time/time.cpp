@@ -10,8 +10,10 @@ Time::~Time() {
         stopTimer(id);
 }
 
-double Time::convertToSecondsSinceEpoch(const std::chrono::time_point<std::chrono::system_clock>& timepoint) {
-    return std::chrono::duration<double>(timepoint.time_since_epoch()).count();
+std::chrono::time_point<std::chrono::system_clock> Time::fromSecondSinceEpoch(double seconds) {
+    return  std::chrono::time_point<std::chrono::system_clock>(
+                std::chrono::duration_cast<std::chrono::system_clock::duration>(
+                    std::chrono::duration<double>(seconds)));
 }
 
 time_n::timerId_t Time::nextID() {
@@ -52,6 +54,10 @@ std::chrono::time_point<std::chrono::system_clock> Time::timepoint(const std::st
 std::shared_ptr<time_n::Timer> Time::timer(time_n::timerId_t identifier) {
     validateTimer(identifier);
     return m_timers.at(identifier);
+}
+
+double Time::toSecondsSinceEpoch(const std::chrono::time_point<std::chrono::system_clock>& timepoint) {
+    return std::chrono::duration<double>(timepoint.time_since_epoch()).count();
 }
 
 std::string Time::toUTC(const std::chrono::time_point<std::chrono::system_clock>& time) {

@@ -13,9 +13,10 @@ Listing Listing::fromDatabaseFormat(const database_n::record_t& record) {
              record.at("category").asString(),
              record.at("company").asString(),
              record.at("location").asString(),
-             fromPGSQLFormat(record.at("publication").asString()),
              record.at("content").asString(),
-             record.at("link").asString() };
+             record.at("link").asString(),
+             fromPGSQLFormat(record.at("created_at").asString()),
+             fromPGSQLFormat(record.at("expire_at").asString()) };
 }
 
 void Listing::setAttribute(std::string_view attribute, std::string_view value) {
@@ -33,12 +34,14 @@ void Listing::setAttribute(std::string_view attribute, std::string_view value) {
         company = value;
     else if (attribute == "location")
         location = value;
-    else if (attribute == "publication")
-        publication = format("%a, %d %b %Y %H:%M:%S %z", value);
     else if (attribute == "content")
         content = value;
     else if (attribute == "link")
         link = value;
+    else if (attribute == "created_at")
+        created_at = format("%a, %d %b %Y %H:%M:%S %z", value);
+    else if (attribute == "expire_at")
+        expire_at = format("%a, %d %b %Y %H:%M:%S %z", value);
 }
 
 void Listing::normalize() {
@@ -48,16 +51,17 @@ void Listing::normalize() {
     company = title.substr(0, title.find(":"));
 }
 
-nlohmann::json Listing::ToDatabaseFormat() const {
+nlohmann::json Listing::toJSON() const {
     auto object = nlohmann::json({ { "website_host",     website_host },
                                    { "website_endpoint", website_endpoint },
                                    { "title",            title },
                                    { "category",         category },
                                    { "company",          company },
                                    { "location",         location },
-                                   { "publication",      Time::convertToSecondsSinceEpoch(std::chrono::floor<std::chrono::seconds>(publication)) },
                                    { "content",          content },
-                                   { "link",             link } });
+                                   { "link",             link },
+                                   { "created_at",       Time::toSecondsSinceEpoch(std::chrono::floor<std::chrono::seconds>(created_at)) },
+                                   { "expire_at",        Time::toSecondsSinceEpoch(std::chrono::floor<std::chrono::seconds>(expire_at)) }});
 
     if (id.has_value() and id.value() >= 0)
         object["id"] = id;

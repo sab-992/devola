@@ -32,6 +32,7 @@ namespace database_n
         bool isOK() const;
         std::optional<std::vector<record_t>> records() const;
         Status_en status() const;
+        size_t size() const;
 
         Result& setAffected(size_t affected);
         Result& setError(std::string message);

@@ -1,7 +1,7 @@
 #include <core/http/detail/session.hpp>
 
 
-http_n::server_n::Session::Session(http_n::sslSocket_t&& socket) : m_socket(std::move(socket)), m_sslEstablished(false) {
+http_n::server_n::Session::Session(const Private&, http_n::sslSocket_t&& socket) : m_isClosing(false), m_socket(std::move(socket)), m_sslEstablished(false) {
     m_remoteEndpoint = Converter::toString(m_socket.next_layer().remote_endpoint());
 }
 
@@ -11,15 +11,28 @@ std::string http_n::server_n::Session::alpnExtension() {
     return http_n::Http::readALPNExtension(m_socket);
 }
 
-asio::awaitable<void> http_n::server_n::Session::error(network_n::Code errorCode) {
+std::shared_ptr<http_n::server_n::Session> http_n::server_n::Session::create(sslSocket_t&& socket) {
+    return std::make_shared<Session>(Private(), std::move(socket));
+}
+
+void http_n::server_n::Session::error(network_n::Code errorCode) {
     http_n::Response response;
     response.setStatus(errorCode).build();
-    co_await write(response);
+    write(response);
 }
 
 asio::awaitable<void> http_n::server_n::Session::handshake() {
     co_await m_socket.async_handshake(asio::ssl::stream_base::server, asio::use_awaitable);
     m_sslEstablished = true;
+}
+
+void http_n::server_n::Session::onWriteCompleted(std::shared_ptr<std::string> stringResponse, const std::error_code& ec, std::size_t size) {
+    if (not ec and size != stringResponse->size())
+        return;
+    else if (ec)
+        m_light->log(log_n::Level_en::ERROR, FUNCTION_SIGNATURE, "Error during socket write:", ec);
+
+    shutdown();
 }
 
 asio::awaitable<std::string> http_n::server_n::Session::read() {
@@ -30,8 +43,10 @@ asio::awaitable<std::string> http_n::server_n::Session::read() {
     co_return data;
 }
 
-asio::awaitable<void> http_n::server_n::Session::shutdown() {
-    co_await m_socket.async_shutdown(asio::use_awaitable);
+void http_n::server_n::Session::shutdown() {
+    if (m_isClosing) return;
+    m_isClosing = true;
+    m_socket.async_shutdown([self = shared_from_this()](const asio::error_code& ec){ if (self->m_socket.lowest_layer().is_open()) self->m_socket.lowest_layer().close(); });
 }
 
 void http_n::server_n::Session::validateSSLContext() const {
@@ -39,7 +54,7 @@ void http_n::server_n::Session::validateSSLContext() const {
         throw Exception("SSL context was not established.");
 }
 
-asio::awaitable<void> http_n::server_n::Session::write(http_n::Response& response) {
+void http_n::server_n::Session::write(http_n::Response& response) {
     validateSSLContext();
 
     const std::string CHUNKED = "chunked";
@@ -50,11 +65,11 @@ asio::awaitable<void> http_n::server_n::Session::write(http_n::Response& respons
     if (response.header(TRANSFER_ENCODING) != CHUNKED and response.header(CONTENT_LENGTH) != RESPONSE_BODY_SIZE)
         response.setHeader(CONTENT_LENGTH, RESPONSE_BODY_SIZE);
 
-    const std::string stringResponse = response.toString();
-    co_await asio::async_write(m_socket, asio::buffer(stringResponse), asio::use_awaitable);
-    m_light->log(log_n::Level_en::INFO, "Sent", stringResponse.size(), "bytes to", std::format("[{}].", m_remoteEndpoint));
+    auto stringResponse = std::make_shared<std::string>(response.toString());
+    asio::async_write(m_socket, asio::buffer(*stringResponse), std::bind_front(&Session::onWriteCompleted, shared_from_this(), stringResponse));
+    m_light->log(log_n::Level_en::INFO, "Sent", stringResponse->size(), "bytes to", std::format("[{}].", m_remoteEndpoint));
 }
 
-asio::awaitable<void> http_n::server_n::Session::write(http_n::Response&& response) {
-    co_await write(response);
+void http_n::server_n::Session::write(http_n::Response&& response) {
+    write(response);
 }

@@ -1,0 +1,23 @@
+{
+    "version": "1.0.0",
+    "configuration": {
+        "debug": {
+            "server": {
+                "port": 55556
+            },
+            "postgres": {
+                "host": "localhost",
+                "port": "5432"
+            }
+        },
+        "production": {
+            "server": {
+                "port": 443
+            },
+            "postgres": {
+                "host": "localhost",
+                "port": "5432"
+            }
+        }
+    }
+}

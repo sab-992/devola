@@ -13,6 +13,12 @@ namespace xml_n
         Document(std::string_view document="");
         ~Document() = default;
 
+        Document(const Document&) = delete;
+        Document& operator=(const Document&) = delete;
+
+        Document(Document&&) noexcept = default;
+        Document& operator=(Document&&) noexcept = default;
+
         bool operator==(const Document& other);
         bool operator!=(const Document& other);
 

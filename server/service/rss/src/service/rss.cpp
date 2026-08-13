@@ -1,115 +1,125 @@
 #include <service/rss.hpp>
 
 
-RSS::RSS(const Private_s&, const json& configJSON) : m_configJSON(configJSON), Basic("RSS", configJSON["server"]["port"]) {
+RSSService::RSSService(const Private_s&, const json& configJSON) : m_configJSON(configJSON), Basic("RSSService", configJSON["server"]["port"]) {
     setStartSequence([&](Basic*){
-        assert(this->m_database && "[RSS]: No database given");
-        // TODO: assert(this->m_cache && "[RSS]: No cache given");
-        m_listingRepos = std::make_unique<ListingRepository>(tools());
+        assert(this->m_database && "[RSSService]: No database given");
+        // TODO: assert(this->m_cache && "[RSSService]: No cache given");
 
+        m_listingRepos = std::make_unique<ListingRepository>(tools());
+        m_recommendationRepos = std::make_unique<RecommendationRepository>(tools());
+        m_resumeRepos = std::make_unique<ResumeRepository>(tools());
+        m_subscriptionRepos = std::make_unique<SubscriptionRepository>(tools());
+
+        // m_resumeRepos->createResume("019ff822-d264-7764-b780-de1dd9ab188f", {{"tag", "c++"}, {"content", file_n::Service::instance()->open("/home/rysa/Downloads/dev/ai/claude/testing data/resume.txt", file_n::flags_n::OpenMode_en::READ).read()}});
+        // m_resumeRepos->createResume("019ff822-d264-7764-b780-de1dd9ab188f", {{"tag", "random"}, {"content", file_n::Service::instance()->open("/home/rysa/Downloads/dev/ai/claude/testing data/resume2.txt", file_n::flags_n::OpenMode_en::READ).read()}});
     });
     setEndpoints();
 }
 
-RSS::~RSS() {}
+RSSService::~RSSService() {}
 
-std::unique_ptr<RSS> RSS::create(const json& configJSON) {
-    return std::make_unique<RSS>(Private_s(), configJSON);
+asio::awaitable<http_n::Response> RSSService::addResumes(const Session& session, const http_n::Request& request) {
+    json userInfo;
+    if (not validateUserIdentity(request, userInfo))
+        co_return Response().setStatus(Code::UNAUTHORIZED).build();
+
+    const json& body = request.body<json>();
+    if (not body.contains("resumes") or not body["resumes"].is_array())
+        co_return Response().setStatus(Code::BAD_REQUEST).build();
+
+    bool added = false;
+    for (const auto& resumeJSON : body["resumes"]) {
+        if (not resumeJSON.is_object())
+            continue;
+
+        m_resumeRepos->createResume(userInfo["uuid"].get<std::string>(), resumeJSON);
+        added = true;
+    }
+
+    if (not added)
+        co_return Response().setStatus(Code::BAD_REQUEST).build();
+
+    co_return Response().setStatus(Code::CREATED).build();
 }
 
-std::string RSS::pathPrefix() const {
+std::unique_ptr<RSSService> RSSService::create(const json& configJSON) {
+    return std::make_unique<RSSService>(Private_s(), configJSON);
+}
+
+std::string RSSService::pathPrefix() const {
     return "/rss";
 }
 
-void RSS::setCache(std::shared_ptr<Database_i> cache) {
+void RSSService::setCache(std::shared_ptr<Database_i> cache) {
     m_cache = cache;
 }
 
-void RSS::setDatabase(std::shared_ptr<Database_i> database) {
+void RSSService::setDatabase(std::shared_ptr<Database_i> database) {
     m_database = database;
 }
 
-void RSS::setEndpoints() {
-    ENDPOINT("GET", "/feed", &RSS::fetchFeeds);
-    ENDPOINT("POST", "/recommend", &RSS::recommend);
-    ENDPOINT("GET", "/recommendations", &RSS::recommendations);
+void RSSService::setEndpoints() {
+    ENDPOINT("GET",  "/feed",            &RSSService::fetchFeeds);
+    ENDPOINT("GET",  "/recommendations", &RSSService::recommendations);
+
+    ENDPOINT("POST", "/recommend",       &RSSService::recommend);
+
+    ENDPOINT("PUT",  "/subscribe",       &RSSService::subscribe);
+    ENDPOINT("PUT",  "/resumes",         &RSSService::addResumes);
 }
 
-rss::ServerTools RSS::tools() {
+rss::ServerTools RSSService::tools() {
     return { m_cache, m_database, m_http };
 }
 
-asio::awaitable<http_n::Response> RSS::fetchFeeds(const Session& session, const http_n::Request& request) {
-    using namespace http_n;
+asio::awaitable<http_n::Response> RSSService::fetchFeeds(const Session& session, const http_n::Request& request) {
     using namespace database_n;
 
-    // 1) Validate JWT and get user id.
-    // 1.1) If JWT is not valid --> Return Unauthorized.
-    // 1.2) If JWT valid but expired --> Return "Refresh token".
+    json userInfo;
+    if (not validateUserIdentity(request, userInfo))
+        co_return Response().setStatus(Code::UNAUTHORIZED).build();
 
-    // 2) TODO: Fetch subscribed urls from DB.
-    // 2.1) TODO: If no urls --> Return empty.
-    std::vector<std::string> subscribedURLs = { "https://weworkremotely.com/categories/remote-customer-support-jobs.rss",
-                                                "https://remotive.com/remote-jobs/feed/software-development",
-                                                "https://himalayas.app/jobs/rss",
-                                                "https://jobicy.com/jobs/feed?industry=engineering" };
+    const auto& subscriptions = m_subscriptionRepos->fetchSubscriptions(userInfo["uuid"].get<std::string>());
 
     auto response = Response();
-    if (subscribedURLs.empty())
-        co_return response.setStatus(network_n::Code::OK).build();
+    if (subscriptions.empty())
+        co_return response.setStatus(Code::OK).build();
 
-    json body = co_await m_listingRepos->fetchListings(subscribedURLs);
+    json body = co_await m_listingRepos->fetchListings(subscriptions);
 
-    co_return response.setStatus(network_n::Code::OK)
+    co_return response.setStatus(Code::OK)
                       .setBody<nlohmann::json>(body).build();
 }
 
-asio::awaitable<http_n::Response> RSS::recommend(const Session& session, const http_n::Request& request) {
-    // TODO
-    // 1) Validate JWT and get user id.
-    // 1.1) If JWT is not valid --> Return Unauthorized.
-    // 1.2) If JWT valid but expired --> Return "Refresh token".
+asio::awaitable<http_n::Response> RSSService::recommend(const Session& session, const http_n::Request& request) {
+    json userInfo;
+    if (not validateUserIdentity(request, userInfo))
+        co_return Response().setStatus(Code::UNAUTHORIZED).build();
 
-    // fetch resumes of the user
-    // fetch subscribed urls of the user
-    // fetch listings using urls
+    const std::string& userUUID = userInfo["uuid"].get<std::string>();
+    const std::vector<Resume>& resumes = m_resumeRepos->fetchResumes(userUUID);
+    const auto& subscriptions = m_subscriptionRepos->fetchSubscriptions(userUUID);
 
-    // for each website + endpoint combo -> start background task on background thread:
-        // 1) RSS -> Send resumes to MATCHER process
-        //     1.1) Each resume will have this structure: "<tag>:<resume>[END];". (tag refers to words given by the user to identify the resume)
+    if (subscriptions.empty())
+        co_return Response().setStatus(Code::BAD_REQUEST).build();
+    else if (resumes.empty())
+        co_return Response().setStatus(Code::BAD_REQUEST).build();
 
-        // 2) MATCHER -> Send to RSS process "OK"
+    json websiteListings = co_await m_listingRepos->fetchListings(subscriptions);
 
-        // 3) RSS -> Sends listings to MATCHER process
-        //     3.1) Each listing will have this structure: "<listing id>:<listing>[END];"
+    const std::string& taskUUID = m_recommendationRepos->createTask(userUUID, resumes, websiteListings, subscriptions);
 
-        // 4) MATCHER -> for each listing:
-        //     4.1) Clean listing from HTML junk.
-        //     4.2) Chunk listing
-        //     4.3) Compute embedding
-        //     4.4) for each resume:
-        //         4.4.1) Chunk resume
-        //         4.4.2) Compute embedding
-        //         4.4.3) Compute cosine similarity of both
-        //         4.4.4) Store result in local array
-        //     4.5) Get top 3 resumes + scores for the listing and Save them in response
-
-        // 5) MATCHER -> Send To RSS response
-        //     5.1) Response will look like this:
-        //         { "listing_ids": [...],
-        //         "scores": [[{"tag": "...", "score": ... }], ...]}
-        //         5.1.1) Listing ids and scores are separate because when the user will get the result, RSS will have to grab the link of the listing corresponding to the score. an easy way to do that would be to fetch all ids needed and then match them to the scores and send the information.
-
-        // 6) RSS -> Saves response in response database and maybe add host FK to send to the client too.
-
-    co_return  http_n::Response().setStatus(network_n::Code::OK).build();
+    co_return Response().setStatus(Code::CREATED)
+                        .setBody<json>({ { "task_uuid", taskUUID }}).build();
 }
 
-asio::awaitable<http_n::Response> RSS::recommendations(const Session& session, const http_n::Request& request) {
-    // TODO
-    // 1) Validate JWT and get user id.
-    // 1.1) If JWT is not valid --> Return Unauthorized.
-    // 1.2) If JWT valid but expired --> Return "Refresh token".
+asio::awaitable<http_n::Response> RSSService::recommendations(const Session& session, const http_n::Request& request) {
+    json userInfo;
+    if (not validateUserIdentity(request, userInfo))
+        co_return Response().setStatus(Code::UNAUTHORIZED).build();
+
+    const std::string& userUUID = userInfo["uuid"].get<std::string>();
 
     // 1 task contains 1 or more results. As results is the recommendation for each listing of ONE website.
     // Therefore it needs:
@@ -117,5 +127,31 @@ asio::awaitable<http_n::Response> RSS::recommendations(const Session& session, c
         // "result" table -> PK on ("id") = "id", INDEX on ("user_uuid", "task_uuid") : generated, FK on "user_uuid", FK "task_uuid", FK on "host", "result".
 
     // 2) Fetch user's lists of tasks (containing results)
-    co_return  http_n::Response().setStatus(network_n::Code::OK).build();
+
+    // Website --> host, endpoint --> Already in result
+    // Listing --> Company, title, link, recommendations: [{tag, score}]
+    co_return Response().setStatus(Code::OK).build();
+}
+
+asio::awaitable<http_n::Response> RSSService::subscribe(const Session& session, const http_n::Request& request) {
+    json userInfo;
+    if (not validateUserIdentity(request, userInfo))
+        co_return Response().setStatus(Code::UNAUTHORIZED).build();
+
+    const nlohmann::json& body = request.body<nlohmann::json>();
+    const std::vector<std::string>& urls = body["urls"].get<std::vector<std::string>>();
+
+    m_subscriptionRepos->createSubscriptions(userInfo["uuid"].get<std::string>(), urls);
+    co_await m_listingRepos->createWebsiteListings(urls);
+
+    co_return Response().setStatus(Code::CREATED).build();
+}
+
+bool RSSService::validateUserIdentity(const http_n::Request& request, json& claims) const {
+    try {
+        claims = JWT::verify(JWT::getToken(request));
+    } catch (const std::exception& e) {
+        return false;
+    }
+    return true;
 }

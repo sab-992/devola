@@ -49,25 +49,23 @@ void http_n::server_n::Basic::clean() {
 asio::awaitable<void> http_n::server_n::Basic::handleClient(asio::ip::tcp::socket&& socket) {
     using namespace http_n;
     try {
-        Session session(asio::ssl::stream<asio::ip::tcp::socket>(std::move(socket), m_sslContext));
+        auto session = Session::create(asio::ssl::stream<asio::ip::tcp::socket>(std::move(socket), m_sslContext));
 
-        co_await session.handshake();
+        co_await session->handshake();
 
         Request request;
-        request.setProtocol(network_n::version_n::Factory::create(session.alpnExtension()));
-        request.set(co_await session.read()).build();
+        request.setProtocol(network_n::version_n::Factory::create(session->alpnExtension()));
+        request.set(co_await session->read()).build();
 
         const std::string& method = request.method();
         const std::string& endpoint = request.APIEndpoint();
 
         if (not m_endpoints.contains(method))
-            co_await session.error(network_n::Code::NOT_FOUND);
+            session->error(network_n::Code::NOT_FOUND);
         else if (not m_endpoints[method].contains(endpoint))
-            co_await session.error(network_n::Code::NOT_ALLOWED);
+            session->error(network_n::Code::NOT_ALLOWED);
         else
-            co_await session.write(co_await m_endpoints[method][endpoint](session, request));
-
-        co_await session.shutdown();
+            session->write(co_await m_endpoints[method][endpoint](*session, request));
 
     } catch (std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, m_extraLogInformation, "Exception in worker thread. Function:", std::format("[{}]", FUNCTION_SIGNATURE), "Reason: ", e.what());

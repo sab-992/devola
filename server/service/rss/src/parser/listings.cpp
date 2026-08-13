@@ -1,11 +1,11 @@
 #include <parser/listings.hpp>
 
 
-std::chrono::time_point<std::chrono::system_clock> parser_n::Listings::computeExpirationTimepoint(int ttl){
+std::chrono::time_point<std::chrono::system_clock> parser_n::Listings::computeExpirationTimepoint(ttl_t ttl){
     return Time::now() + std::chrono::minutes(ttl);
 }
 
-std::pair<ttl_t, std::vector<Listing>> parser_n::Listings::parse(std::string_view host, std::string_view endpoint, const xml_n::Document& document) {
+std::vector<Listing> parser_n::Listings::parse(std::string_view host, std::string_view endpoint, const xml_n::Document& document) {
     xml_node channelNode = document.find_node([](const xml_node& node) -> bool { return strcmp(node.name(), "channel") == 0; });
 
     if (not channelNode)
@@ -28,11 +28,13 @@ std::pair<ttl_t, std::vector<Listing>> parser_n::Listings::parse(std::string_vie
 
             listing.website_host = host;
             listing.website_endpoint = endpoint;
+            listing.expire_at = computeExpirationTimepoint(ttl);
+
             listings.emplace_back(listing);
         }
     }
 
-    return { ttl, listings };
+    return listings;
 }
 
 ttl_t parser_n::Listings::parseTTL(const xml_node& node) {
