@@ -25,27 +25,27 @@ class Deploy(Command, ServiceUpdater):
         return "deploy"
 
     def command_explicit(self, args: Namespace) -> list[list[str]]:
-        commands = [["docker", "ps"]]
+        commands: list[list[str]] = [["docker", "ps"]]
 
         if args.output:
-            commands += ["docker", "logs", "-f", f"{str(args.output)}"]
+            commands.append(["docker", "logs", "-f", f"{str(args.output)}"])
 
         return commands
 
     def details(self) -> str:
         return "Deploy the application in docker containers."
 
-    def setup(self, args: Namespace) -> str:
+    def setup(self, args: Namespace) -> None:
         self.update_services()
         self.__deploy(args)
 
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         pass
 
     def __deploy(self, args: Namespace):
         log("Starting development environment...", False, Color.PURPLE)
 
-        root_folder_path = self.__fs.find_root_folder()
+        root_folder_path = str(self.__fs.find_root_folder())
         docker_folder = f"{root_folder_path}/docker"
         self.create_base_docker_file(args, docker_folder)
 

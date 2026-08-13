@@ -38,10 +38,10 @@ class Service(Command):
     def details(self) -> str:
         return "Add a service and all the necessary start files."
 
-    def setup(self, args: Namespace) -> str:
+    def setup(self, args: Namespace) -> None:
         pass
 
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         pass
 
     def __add_database(self, args: Namespace):
@@ -59,7 +59,7 @@ class Service(Command):
         target_service_directory = f"{path}/{name}"
 
         database_dir = self.__fs.make_directory(target_service_directory, "database")
-        database_files_dir = self.__fs.make_directory(database_dir, db_id)
+        self.__fs.make_directory(database_dir, db_id)
 
         # If skipped writing, we send a warning message
         if (self.__fs.write(folder_path=f"{target_service_directory}/docker", file_name=f"docker-compose.database.{db_id}.yml", content=self.__fs.database_compose(db, name, db_id), skip_if_exists=True)):
@@ -81,7 +81,7 @@ class Service(Command):
 
             # Service Folder
             new_service_directory_path = self.__fs.make_directory(path, name)
-            root_folder = self.__fs.find_root_folder()
+            root_folder = str(self.__fs.find_root_folder())
 
             libraries: set[str] = set()
 
@@ -91,13 +91,14 @@ class Service(Command):
             docker_dir = self.__fs.make_directory(new_service_directory_path, "docker")
             settings_dir = self.__fs.make_directory(new_service_directory_path, "settings")
 
-            self.__update_default_nginx_file(name, root_folder)
+            self.__update_default_nginx_file(root_folder)
             self.__fs.write(folder_path=f"{root_folder}/nginx/conf.d", file_name=f"{name}.conf", content=self.__fs.nginx(name))
 
-            self.__fs.write(new_service_directory_path, file_name=f".gitignore", content=self.__fs.git_ignore(name), skip_if_exists=True)
-            self.__fs.write(new_service_directory_path, file_name="main.cpp", content=self.__fs.cpp(name), skip_if_exists=True)
-            self.__fs.write(new_service_directory_path, file_name="CMakeLists.txt", content=self.__fs.cmake(name, libraries))
+            self.__fs.write(folder_path=new_service_directory_path, file_name=f".gitignore", content=self.__fs.git_ignore(name), skip_if_exists=True)
+            self.__fs.write(folder_path=new_service_directory_path, file_name="main.cpp", content=self.__fs.cpp(name), skip_if_exists=True)
+            self.__fs.write(folder_path=new_service_directory_path, file_name="CMakeLists.txt", content=self.__fs.cmake(name, libraries))
 
+            self.__fs.write(folder_path=settings_dir, file_name=f"launch.json", content="", skip_if_exists=True)
             self.__fs.write(folder_path=settings_dir, file_name=f".env", content="", skip_if_exists=True)
             self.__fs.write(folder_path=settings_dir, file_name="libraries.txt", content="", skip_if_exists=True)
 
@@ -108,7 +109,7 @@ class Service(Command):
         except Exception as e:
             log(f"Something went wrong while creating the new service: {e}", True, Color.RED)
 
-    def __update_default_nginx_file(self, service_name: str, root_folder: str):
+    def __update_default_nginx_file(self, root_folder: str):
         nginx_dir = f"{root_folder}/nginx"
         content = self.__fs.read(f"{nginx_dir}/nginx.conf")
 

@@ -37,11 +37,11 @@ class CMake(Command, Directory, ServiceUpdater):
                "For windows, make sure you have postgres installed, and that the path in " \
                "\"settings/config.py\" for the POSTGRE_INSTALLATION_PATH matches your current installation path."
 
-    def setup(self, args: Namespace) -> str:
+    def setup(self, args: Namespace) -> None:
         self.update_services()
         self.set_working_directory(self.build_directory())
 
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         self.reset_working_directory()
 
 class Make(Command, Directory, ServiceUpdater):
@@ -68,11 +68,11 @@ class Make(Command, Directory, ServiceUpdater):
     def details(self) -> str:
         return "Use the environment made by the 'cmake' command and build/compiles the application."
 
-    def setup(self, args: Namespace) -> str:
+    def setup(self, args: Namespace) -> None:
         self.update_services()
         self.set_working_directory(self.build_directory())
 
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         self.reset_working_directory()
 
 class MakeAll(Command, Directory, ServiceUpdater):
@@ -92,11 +92,11 @@ class MakeAll(Command, Directory, ServiceUpdater):
     def details(self) -> str:
         return "Combines the 'cmake' command and the 'make' command to prepare the application environment and build it."
 
-    def setup(self, args: Namespace) -> str:
+    def setup(self, args: Namespace) -> None:
         self.update_services()
         self.set_working_directory(self.build_directory())
 
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         self.reset_working_directory()
 
 class MakeTest(Command, Directory, ServiceUpdater):
@@ -121,9 +121,9 @@ class MakeTest(Command, Directory, ServiceUpdater):
     def details(self) -> str:
         return "Compiles the google tests."
 
-    def setup(self, args: Namespace) -> str:
+    def setup(self, args: Namespace) -> None:
         self.update_services()
         self.set_working_directory(self.build_directory())
 
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         self.reset_working_directory()

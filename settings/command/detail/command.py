@@ -77,18 +77,18 @@ class Command(ABC):
     def reset_working_directory(self) -> None:
         os.chdir(self.initial_working_dir)
 
-    def set_working_directory(self, working_dir: Namespace) -> None:
+    def set_working_directory(self, working_dir: str) -> None:
         os.chdir(working_dir)
 
     @abstractmethod
-    def setup(self, args: Namespace) -> str:
+    def setup(self, args: Namespace) -> None:
         """
         Sets the environment for the command.
         """
         pass
 
     @abstractmethod
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         """
         Restores the environment after the command.
         """

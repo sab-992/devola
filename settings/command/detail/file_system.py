@@ -129,8 +129,8 @@ networks:
         extra_options: dict[str, str] = json.loads(self.read(path))
         return [*sum(extra_options.items(), ())]
 
-    def find_root_folder(self):
-        current_path = Path.cwd()
+    def find_root_folder(self) -> Path:
+        current_path = Path(os.path.abspath(__file__))
 
         for parent in [current_path] + list(current_path.parents):
             current_path = parent / ROOT_FOLDER_NAME

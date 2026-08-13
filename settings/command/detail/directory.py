@@ -13,7 +13,7 @@ class Directory():
         return self.uniformizePath(build_directory_path)
 
     def root_directory(self) -> str:
-        return FileSystem().find_root_folder()
+        return str(FileSystem().find_root_folder())
 
     def uniformizePath(self, path: str):
         return str(Path(path))

@@ -19,18 +19,11 @@ class Install(Command):
         return "install"
 
     def command_explicit(self, args: Namespace) -> list[list[str]]:
-        cmd = [];
         match platform.system():
-            case "Windows":
-                if (USE_VCPKG):
-                    cmd = [["vcpkg",  "install", "libpq"]]
-                else:
-                    cmd = [["choco", "install", "postgresql", "--yes"]]
             case "Linux":
-                cmd = [UPDATE_PACKAGE_REPOS_COMMAND.split(" "), f"{INSTALL_COMMAND} {LIBPQXX_PACKAGE}".split(" ")]
+                return [UPDATE_PACKAGE_REPOS_COMMAND.split(" "), f"{INSTALL_COMMAND} {LIBPQXX_PACKAGE}".split(" ")]
             case _:
                 raise NotSupportedOperatingSystem()
-        return cmd
 
     def details(self) -> str:
         return "Installs dependencies needed for the project.\n\n" \
@@ -40,8 +33,8 @@ class Install(Command):
                "For Windows, you can chose either to install using 'chocolatey' (default) or 'vcpkg'.\n" \
                "In order to do this, go in the config.py and change 'USE_VCPKG' to 'True' to use either one of them."
 
-    def setup(self, args: Namespace) -> str:
+    def setup(self, args: Namespace) -> None:
         Postgres().setup()
 
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         pass

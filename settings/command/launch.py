@@ -32,8 +32,8 @@ class Launch(Command, Directory):
     def details(self) -> str:
         return "Starts the application."
 
-    def setup(self, args: Namespace) -> str:
+    def setup(self, args: Namespace) -> None:
         self.set_working_directory(self.build_directory())
 
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         self.reset_working_directory()
