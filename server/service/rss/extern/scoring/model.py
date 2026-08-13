@@ -1,7 +1,8 @@
-import json
 import threading
-from sentence_transformers import SentenceTransformer, util
+
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from sentence_transformers import SentenceTransformer, util
+from torch.types import Number
 from torch.fft import Tensor
 from typing import Optional
 
@@ -64,7 +65,9 @@ class SentenceTransformerModel:
 
             for j, (tag, resume_embedding) in enumerate(resume_embeddings.items()):
                 results[i].append({})
-                results[i][j]["tag"] = tag
-                results[i][j]["score"] = util.cos_sim(listing_embedding, resume_embedding).mean().item()
+                score: Number = util.cos_sim(listing_embedding, resume_embedding).mean().item()
+                if score > 0:
+                    results[i][j]["tag"] = tag
+                    results[i][j]["score"] = score
 
         return ids, results
