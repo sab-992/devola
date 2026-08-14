@@ -10,9 +10,6 @@ RSSService::RSSService(const Private_s&, const json& configJSON) : m_configJSON(
         m_recommendationRepos = std::make_shared<RecommendationRepository>(tools());
         m_resumeRepos = std::make_unique<ResumeRepository>(tools());
         m_subscriptionRepos = std::make_unique<SubscriptionRepository>(tools());
-
-        // m_resumeRepos->createResume("019ff822-d264-7764-b780-de1dd9ab188f", {{"tag", "c++"}, {"content", file_n::Service::instance()->open("/home/rysa/Downloads/dev/ai/claude/testing data/resume.txt", file_n::flags_n::OpenMode_en::READ).read()}});
-        // m_resumeRepos->createResume("019ff822-d264-7764-b780-de1dd9ab188f", {{"tag", "random"}, {"content", file_n::Service::instance()->open("/home/rysa/Downloads/dev/ai/claude/testing data/resume2.txt", file_n::flags_n::OpenMode_en::READ).read()}});
     });
     setEndpoints();
 }
