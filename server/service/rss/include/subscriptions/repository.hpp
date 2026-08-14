@@ -1,6 +1,7 @@
 #pragma once
 
 #include <service/tools.hpp>
+#include <utility/url.hpp>
 
 
 class SubscriptionRepository {
@@ -18,4 +19,6 @@ public:
 
 private:
     ServerTools m_tools;
+
+    std::shared_ptr<database_n::Database_i> database();
 };

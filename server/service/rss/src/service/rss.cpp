@@ -145,8 +145,8 @@ asio::awaitable<http_n::Response> RSSService::subscribe(const Session& session, 
     const nlohmann::json& body = request.body<nlohmann::json>();
     const std::vector<std::string>& urls = body["urls"].get<std::vector<std::string>>();
 
-    m_subscriptionRepos->createSubscriptions(userInfo["uuid"].get<std::string>(), urls);
     co_await m_listingRepos->createWebsiteListings(urls);
+    m_subscriptionRepos->createSubscriptions(userInfo["uuid"].get<std::string>(), urls);
 
     co_return Response().setStatus(Code::CREATED).build();
 }

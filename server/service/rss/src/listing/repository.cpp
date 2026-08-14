@@ -29,7 +29,7 @@ std::string ListingRepository::createWebsite(std::string_view host, std::string_
                                      .setProjection({ "last_updated_at" })
                                      .setCardinality(Query::Cardinality_en::SINGLE)
                                      .setData({ { "host",      Value(host) },
-                                                   { "endpoint",  Value(endpoint) } }).build();
+                                                { "endpoint",  Value(endpoint) } }).build();
 
     const Result& result = database()->Create(websiteQuery, &tx);
 
