@@ -32,7 +32,12 @@ nlohmann::json RecommendationRepository::buildJSONRecommendationBody(const std::
             std::visit(overloads{[&](bool arg) { object[col] = arg; },
                                  [&](int64_t arg) { object[col] = arg; },
                                  [&](double arg) { object[col] = arg; },
-                                 [&](const std::string& arg) { object[col] = arg; },
+                                 [&](const std::string& arg) {
+                                    if (col == "started_at" or col == "last_updated_at")
+                                        object[col] = Time::toSecondsSinceEpoch(fromPGSQLFormat(arg));
+                                    else
+                                        object[col] = arg;
+                                 },
                                  [&](auto&& arg) {}}, val.raw());
         }
 
@@ -67,10 +72,9 @@ nlohmann::json RecommendationRepository::fetchTaskResults(std::string_view userU
     using namespace database_n;
     const Result& result = database()->Read(Query().setTarget("tasks")
                                                    .setType(Query::Type_en::TARGETED)
-                                                   .setProjection({ "tr.*" })
+                                                   .setProjection({ "uuid", "status", "started_at", "last_updated_at" })
                                                    .setCardinality(Query::Cardinality_en::MULTIPLE)
-                                                   .setFilter({ { "tasks.user_uuid", { "=", Value(userUUID) }} })
-                                                   .addJoin({ Query::JoinType_en::CROSS, "get_task_results(tasks.uuid)", std::nullopt, "tr"}).build());
+                                                   .setFilter({ { "tasks.user_uuid", { "=", Value(userUUID) }} }).build());
 
     if (not result.isOK())
         throw Exception(result.error().value());
@@ -111,7 +115,7 @@ void RecommendationRepository::runTask(std::string_view userUUID,
                                         .setCardinality(Query::Cardinality_en::NONE)
                                         .setData({ { "status",          "completed" },
                                                    { "last_updated_at", toPGSQLFormat(Time::now()) }})
-                                        .setFilter({ {"uuid", {"=", taskUUID } } }).build();
+                                        .setFilter({ { "uuid", {"=", taskUUID } } }).build();
 
     const Result& updateTaskResult = database()->Update(updateTaskQuery);
 
