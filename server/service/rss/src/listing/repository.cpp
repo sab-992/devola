@@ -7,16 +7,15 @@ std::shared_ptr<database_n::Database_i> ListingRepository::cache() {
     return m_tools.cache;
 }
 
-asio::awaitable<void> ListingRepository::createListings(std::string_view host, std::string_view endpoint, std::string_view last_updated_at, Transaction& tx) {
+void ListingRepository::createListings(std::string_view host, std::string_view endpoint, const json& websiteListings, Transaction& tx) {
     using namespace http_n;
     using namespace database_n;
 
-    const Response& feed = co_await fetchFromURL(host, endpoint);
-    const nlohmann::json& websiteListings = listingsToJSON(host, last_updated_at, parser_n::Listings::parse(host, endpoint, feed.body<xml_n::Document>()));
     const auto listingsQuery = Query().setTarget("insert_listings_batch")
                                       .setType(Query::Type_en::PROCEDURE)
                                       .setCardinality(Query::Cardinality_en::NONE)
                                       .setData({ { "payload", Value(websiteListings["listings"].dump()) } }).build();
+
     const Result& result = database()->Other(listingsQuery, &tx);
 }
 
@@ -49,7 +48,9 @@ asio::awaitable<void> ListingRepository::createWebsiteListings(const std::vector
     for (const auto& url : urls) {
         const auto& [host, endpoint] = parseURL(url);
         const auto& last_updated_at = createWebsite(host, endpoint, tx);
-        co_await createListings(host, endpoint, last_updated_at, tx);
+        const Response& feed = co_await fetchFromURL(host, endpoint);
+        const nlohmann::json& websiteListings = listingsToJSON(host, last_updated_at, parser_n::Listings::parse(host, endpoint, feed.body<xml_n::Document>()));
+        createListings(host, endpoint, websiteListings, tx);
     }
     tx.get<pgsql_n::Transaction>().commit();
 }
@@ -78,10 +79,8 @@ asio::awaitable<nlohmann::json> ListingRepository::fetchListings(const std::vect
         const auto& [last_updated_at, listings] = fetchWebsiteListings(host, endpoint, tx);
         if (not listings.empty() and not last_updated_at.empty())
             websiteListings = listingsToJSON(host, last_updated_at, listings);
-        else {
-            const auto& [updatedTimestamp, listings] = co_await updateWebsiteListingsDatabase(host, endpoint, tx);
-            websiteListings = listingsToJSON(host, updatedTimestamp, listings);
-        }
+        else
+            websiteListings = co_await updateWebsiteListingsDatabase(host, endpoint, tx);
 
         // 3.4) TODO: save in cache
         // saveWebsiteListingsToCache(host, endpoint, websiteListings);
@@ -156,8 +155,21 @@ nlohmann::json ListingRepository::listingsToJSON(std::string_view host, std::str
     return websiteListings;
 }
 
-asio::awaitable<std::pair<std::string, std::vector<Listing>>> ListingRepository::updateWebsiteListingsDatabase(std::string_view host, std::string_view endpoint, Transaction& tx) {
-    // TODO
-    m_light->log(log_n::Level_en::WARNING, "Website", host, "listings are expired.");
-    co_return std::make_pair("", std::vector<Listing>());
+asio::awaitable<nlohmann::json> ListingRepository::updateWebsiteListingsDatabase(std::string_view host, std::string_view endpoint, Transaction& tx) {
+    using namespace database_n;
+
+    const Result& updateWebsiteResult = database()->Update(Query().setTarget("websites")
+                                                                  .setType(Query::Type_en::TARGETED)
+                                                                  .setProjection({ "last_updated_at" })
+                                                                  .setCardinality(Query::Cardinality_en::SINGLE)
+                                                                  .setData({{ "last_updated_at", Value(toPGSQLFormat(Time::now())) }})
+                                                                  .setFilter({ { "host",     { "=", Value(host) }},
+                                                                               { "endpoint", { "=", Value(endpoint) }} }).build());
+
+    const http_n::Response& feed = co_await fetchFromURL(host, endpoint);
+    const nlohmann::json& websiteListings = listingsToJSON(host, updateWebsiteResult.records()->at(0).at("last_updated_at").asString(),
+                                                                 parser_n::Listings::parse(host, endpoint, feed.body<xml_n::Document>()));
+    createListings(host, endpoint, websiteListings, tx);
+
+    co_return websiteListings;
 }
