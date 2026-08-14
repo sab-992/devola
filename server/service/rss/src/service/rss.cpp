@@ -7,7 +7,7 @@ RSSService::RSSService(const Private_s&, const json& configJSON) : m_configJSON(
         // TODO: assert(this->m_cache && "[RSSService]: No cache given");
 
         m_listingRepos = std::make_unique<ListingRepository>(tools());
-        m_recommendationRepos = std::make_unique<RecommendationRepository>(tools());
+        m_recommendationRepos = std::make_shared<RecommendationRepository>(tools());
         m_resumeRepos = std::make_unique<ResumeRepository>(tools());
         m_subscriptionRepos = std::make_unique<SubscriptionRepository>(tools());
 
@@ -61,6 +61,7 @@ void RSSService::setDatabase(std::shared_ptr<Database_i> database) {
 
 void RSSService::setEndpoints() {
     ENDPOINT("GET",  "/feed",            &RSSService::fetchFeeds);
+    ENDPOINT("GET",  "/recommendation",  &RSSService::recommendation);
     ENDPOINT("GET",  "/recommendations", &RSSService::recommendations);
 
     ENDPOINT("POST", "/recommend",       &RSSService::recommend);
@@ -108,10 +109,24 @@ asio::awaitable<http_n::Response> RSSService::recommend(const Session& session, 
 
     json websiteListings = co_await m_listingRepos->fetchListings(subscriptions);
 
-    const std::string& taskUUID = m_recommendationRepos->createTask(userUUID, resumes, websiteListings, subscriptions);
-
-    co_return Response().setStatus(Code::CREATED)
+    const std::string& taskUUID = m_recommendationRepos->createTask(userUUID);
+    asio::post(m_ioContext.get_executor(), std::bind_front(&RecommendationRepository::runTask, m_recommendationRepos, userUUID,
+                                                                                                                      taskUUID,
+                                                                                                                      resumes,
+                                                                                                                      websiteListings,
+                                                                                                                      subscriptions));
+    co_return Response().setStatus(Code::OK)
                         .setBody<json>({ { "task_uuid", taskUUID }}).build();
+}
+
+asio::awaitable<http_n::Response> RSSService::recommendation(const Session& session, const http_n::Request& request) {
+    json userInfo;
+    if (not validateUserIdentity(request, userInfo))
+        co_return Response().setStatus(Code::UNAUTHORIZED).build();
+
+    const auto& body = m_recommendationRepos->fetchTaskResult(userInfo["uuid"].get<std::string>(), request.body<json>()["task_uuid"].get<std::string>());
+
+    co_return Response().setBody<json>(body).setStatus(Code::OK).build();
 }
 
 asio::awaitable<http_n::Response> RSSService::recommendations(const Session& session, const http_n::Request& request) {
@@ -119,18 +134,10 @@ asio::awaitable<http_n::Response> RSSService::recommendations(const Session& ses
     if (not validateUserIdentity(request, userInfo))
         co_return Response().setStatus(Code::UNAUTHORIZED).build();
 
-    const std::string& userUUID = userInfo["uuid"].get<std::string>();
+    const auto& body = m_recommendationRepos->fetchTaskResults(userInfo["uuid"].get<std::string>());
 
-    // 1 task contains 1 or more results. As results is the recommendation for each listing of ONE website.
-    // Therefore it needs:
-        // "task" table -> PK on ("user_uuid" and "uuid") = FK on "user_uuid", "uuid", "started_at", "status", "last_update"
-        // "result" table -> PK on ("id") = "id", INDEX on ("user_uuid", "task_uuid") : generated, FK on "user_uuid", FK "task_uuid", FK on "host", "result".
 
-    // 2) Fetch user's lists of tasks (containing results)
-
-    // Website --> host, endpoint --> Already in result
-    // Listing --> Company, title, link, recommendations: [{tag, score}]
-    co_return Response().setStatus(Code::OK).build();
+    co_return Response().setBody<json>(body).setStatus(Code::OK).build();
 }
 
 asio::awaitable<http_n::Response> RSSService::subscribe(const Session& session, const http_n::Request& request) {

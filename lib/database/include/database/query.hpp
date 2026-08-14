@@ -19,6 +19,7 @@ namespace database_n
 
         enum class Type_en : uint8_t {
             TARGETED,
+            FUNCTION,
             INNER_QUERY,
             PROCEDURE
         };
@@ -73,6 +74,7 @@ namespace database_n
         Cardinality_en cardinality() const;
         const std::optional<record_t>& data() const;
         const std::optional<filter_t>& filter() const;
+        const std::optional<std::vector<Value>>& functionData() const;
         const std::optional<Options>& options() const;
         const std::optional<std::vector<std::string>>& projection() const;
         const std::string& target() const;
@@ -81,6 +83,7 @@ namespace database_n
         Query& setCardinality(Cardinality_en cardinality);
         Query& setData(record_t data);
         Query& setFilter(filter_t filter);
+        Query& setFunctionData(std::vector<Value> data);
         Query& setOptions(Options options);
         Query& setProjection(std::vector<std::string> projection);
         Query& setTarget(std::string_view target);
@@ -108,5 +111,6 @@ namespace database_n
         std::optional<Options> m_options;
         std::optional<std::vector<std::string>> m_projection;
         std::optional<std::pair<std::shared_ptr<Query>, std::string>> m_source;
+        std::optional<std::vector<database_n::Value>> m_functionData;
     };
 }

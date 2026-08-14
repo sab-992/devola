@@ -185,11 +185,24 @@ std::pair<std::vector<std::string>, pqxx::params> PostgreSQL::extractParams(cons
 }
 
 std::string PostgreSQL::from(const Query& query, pqxx::params& params, pqxx::placeholders<>& placeholders) const {
-    if (not query.source().has_value())
+    if (query.source().has_value()) {
+        const auto& [subquery, alias] = query.source().value();
+        return std::format("({}) AS {}", selectSql(*subquery, params, placeholders), alias);
+    }
+
+    if (query.type() != Query::Type_en::FUNCTION)
         return query.target();
 
-    const auto& [subquery, alias] = query.source().value();
-    return std::format("({}) AS {}", selectSql(*subquery, params, placeholders), alias);
+    if (not query.functionData().has_value())
+        throw LogicException("FUNCTION query requires function data to pass in parameter.");
+
+    std::string clause = std::format("{}(", query.target());
+    for (const auto& elem : query.functionData().value()) {
+        clause += placeholders.get();
+        addParam(params, elem);
+        placeholders.next();
+    }
+    return clause + ")";
 }
 
 std::string PostgreSQL::getProjection(const std::vector<std::string>& projection) const {
@@ -243,7 +256,7 @@ std::string PostgreSQL::join(const Query& query, pqxx::params& params, pqxx::pla
 
     std::string result;
     for (const auto& j : query.joins().value()) {
-        std::string joinTarget = j.source.has_value() ? std::format("({}) AS {}", selectSql(*j.source.value(), params, placeholders), j.alias.value()) : j.target.value();
+        std::string joinTarget = j.source.has_value() ? std::format("({}) AS {}", selectSql(*j.source.value(), params, placeholders), j.alias.value()) : j.alias.has_value() ? std::format("{} {}", j.target.value(), j.alias.value()) : j.target.value();
         result += std::format(" {} JOIN {}", joinTypeToStr(j.type), joinTarget);
         if (j.type != Query::JoinType_en::CROSS and not j.on.empty())
             result += std::format(" ON {}", onCondition(j.on));
@@ -361,15 +374,19 @@ std::string PostgreSQL::projection(const Query& query) const {
 }
 
 database_n::Result PostgreSQL::Read(const Query& query, Transaction* transaction) {
-    if (query.type() != Query::Type_en::TARGETED)
-        throw LogicException(std::format("{} expects TARGETED query:", FUNCTION_SIGNATURE));
+    if (query.type() != Query::Type_en::TARGETED and query.type() != Query::Type_en::FUNCTION)
+        throw LogicException(std::format("{} expects TARGETED or FUNCTION query:", FUNCTION_SIGNATURE));
 
     std::unique_ptr<Transaction> ownedTransaction;
     pgsql_n::Transaction& tx = beginTransaction(transaction, ownedTransaction);
     try {
         pqxx::params params;
         pqxx::placeholders<> placeholders;
-        pqxx::result queryResult = tx.execute(std::format("{};", selectSql(query, params, placeholders)), params);
+        std::string sql = std::format("{};", selectSql(query, params, placeholders));
+
+        m_light->log(log_n::Level_en::SPECIAL, EXTRA_LOGS, "SQL COMMAND:", sql);
+
+        pqxx::result queryResult = tx.execute(sql, params);
 
         if (not validateCardinality(queryResult, query.cardinality()))
             return Result().setError(std::format("Expected ({} rows) but got: ({} rows)", to_underlying(query.cardinality()), queryResult.size()))
@@ -381,7 +398,7 @@ database_n::Result PostgreSQL::Read(const Query& query, Transaction* transaction
         return success(queryResult);
     } catch (std::exception& e) {
         tx.abort();
-        m_light->log(log_n::Level_en::ERROR, EXTRA_LOGS, "ABORTED: error during insertion: ", e.what());
+        m_light->log(log_n::Level_en::ERROR, EXTRA_LOGS, "ABORTED: error during read: ", e.what());
         return Result().setError(e.what())
                        .setStatus(Status_en::QUERY_ERROR).build();
     }

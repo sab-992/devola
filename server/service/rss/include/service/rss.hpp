@@ -38,13 +38,14 @@ private:
     json m_configJSON;
     std::shared_ptr<Database_i> m_database;
     std::unique_ptr<ListingRepository> m_listingRepos;
-    std::unique_ptr<RecommendationRepository> m_recommendationRepos;
+    std::shared_ptr<RecommendationRepository> m_recommendationRepos;
     std::unique_ptr<ResumeRepository> m_resumeRepos;
     std::unique_ptr<SubscriptionRepository> m_subscriptionRepos;
 
     asio::awaitable<http_n::Response> addResumes(const Session& session, const http_n::Request& request);
     asio::awaitable<http_n::Response> fetchFeeds(const Session& session, const http_n::Request& request);
     asio::awaitable<http_n::Response> recommend(const Session& session, const http_n::Request& request);
+    asio::awaitable<http_n::Response> recommendation(const Session& session, const http_n::Request& request);
     asio::awaitable<http_n::Response> recommendations(const Session& session, const http_n::Request& request);
     asio::awaitable<http_n::Response> subscribe(const Session& session, const http_n::Request& request);
     bool validateUserIdentity(const http_n::Request& request, json& claims) const;

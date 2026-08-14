@@ -42,6 +42,10 @@ const std::optional<database_n::Query::filter_t>& database_n::Query::filter() co
     return m_filter;
 }
 
+const std::optional<std::vector<database_n::Value>>& database_n::Query::functionData() const {
+    return m_functionData;
+}
+
 const std::optional<std::vector<database_n::Query::Join>>& database_n::Query::joins() const {
     return m_joins;
 }
@@ -75,6 +79,11 @@ database_n::Query& database_n::Query::setData(record_t data) {
 
 database_n::Query& database_n::Query::setFilter(filter_t filter) {
     m_filter = std::move(filter);
+    return *this;
+}
+
+database_n::Query& database_n::Query::setFunctionData(std::vector<Value> data) {
+    m_functionData = std::move(data);
     return *this;
 }
 
