@@ -5,10 +5,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconButton } from '@angular/material/button';
-import { isPlatformBrowser } from '@angular/common';
+import { ThemeService } from '@services/theme/theme';
 
 type Mode = 'login' | 'register';
-type Theme = 'light' | 'dark';
+
 
 /** Cross-field validator: password and confirmPassword must match. */
 function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
@@ -23,7 +23,6 @@ const MIN_PASSWORD_LENGTH: number = 8;
 
 interface UIControllers {
     mode: WritableSignal<Mode>;
-    theme: WritableSignal<Theme>;
 
     hideConfirmPassword: WritableSignal<boolean>;
     hideLoginPassword: WritableSignal<boolean>;
@@ -53,12 +52,10 @@ export class Authentication {
     private readonly m_formBuilder = inject(FormBuilder);
     private readonly m_platformID = inject(PLATFORM_ID);
     private readonly ui: UIControllers = { mode: signal<Mode>('login'),
-                                           theme: signal<Theme>(this.getInitialTheme()),
                                            hideConfirmPassword: signal(true),
                                            hideLoginPassword: signal(true),
                                            hideRegisterPassword: signal(true),
                                            submitting: signal(false) };
-
 
 
     readonly loginForm = this.m_formBuilder.nonNullable.group({ username: ['', [Validators.required, Validators.minLength(MIN_NAME_LENGTH)]],
@@ -71,16 +68,8 @@ export class Authentication {
                                                                    last_name:       ['', [Validators.required, Validators.minLength(MIN_NAME_LENGTH)]] },
                                                                  { validators: passwordsMatchValidator });
 
-    constructor() {
-        effect(() => {
-            const current = this.theme();
-
-            if (!isPlatformBrowser(this.m_platformID))
-                return;
-
-            localStorage.setItem('devola-theme', current);
-            document.documentElement.setAttribute('data-theme', current);
-        });
+    constructor(private themeService: ThemeService) {
+        effect(this.themeService.saveTheme.bind(this.themeService));
     }
 
     get mode() {
@@ -88,7 +77,7 @@ export class Authentication {
     }
 
     get theme() {
-        return this.ui.theme;
+        return this.themeService.theme;
     }
 
     get hideConfirmPassword() {
@@ -124,7 +113,7 @@ export class Authentication {
     }
 
     toggleTheme(): void {
-        this.theme.update((t) => (t === 'light' ? 'dark' : 'light'));
+        this.themeService.toggle();
     }
 
     toggleLoginPasswordVisibility(event: Event): void {
@@ -170,14 +159,5 @@ export class Authentication {
 
         console.log('Register submitted', payload);
         this.submitting.set(false);
-    }
-
-    private getInitialTheme(): Theme {
-        if (!isPlatformBrowser(this.m_platformID))
-            return "light";
-
-        const stored = localStorage.getItem('devola-theme') as Theme | null;
-        if (stored === 'light' || stored === 'dark') return stored;
-        return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
 }
