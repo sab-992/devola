@@ -6,22 +6,14 @@
         </div>
 
         <div class="auth-brand__grid" aria-hidden="true">
-            @for (node of [1,2,3,4,5,6,7,8,9,10,11,12]; track node) {
+            @for (node of nodes; track node) {
             <span class="auth-brand__node"></span>
             }
         </div>
     </aside>
 
     <main class="auth-panel">
-        <button type="button" mat-icon-button class="theme-toggle"
-            [attr.aria-label]="theme() === 'light' ? 'Switch to dark mode' : 'Switch to light mode'"
-            (click)="toggleTheme()">
-            @if (theme() === 'light') {
-            <mat-icon>dark_mode</mat-icon>
-            } @else {
-            <mat-icon>light_mode</mat-icon>
-            }
-        </button>
+        <app-theme class="theme-toggle" />
 
         <div class="auth-card">
             <div class="mode-switch" role="tablist" aria-label="Authentication mode">
@@ -37,7 +29,7 @@
             </div>
 
             <form class="auth-form" [formGroup]="currentForm()"
-                (ngSubmit)="mode() === 'login' ? submitLogin() : submitRegister()" novalidate>
+                (ngSubmit)="submit()" novalidate>
 
                 <h2 class="auth-form__title">
                     {{ mode() === 'login' ? 'Welcome back' : 'Create your account' }}
@@ -46,25 +38,18 @@
                     {{ mode() === 'login' ? 'Log in to pick up where you left off.' : 'It takes less than a minute.' }}
                 </p>
 
-                <mat-error class="error-margins">
+                <mat-form-field style="margin-bottom: 0px;" appearance="outline" class="auth-field">
+                    <mat-label>Username</mat-label>
+                    <input class="label-padding" matInput formControlName="username" />
+                    <mat-error class="error-margins">
                     @if (currentForm().controls.username.hasError('required') && currentForm().controls.username.touched) {
                         Username is required
                     } @else if (mode() !== 'login' && currentForm().controls.username.hasError('minlength') && currentForm().controls.username.touched) {
-                        Use at least {{ MIN_NAME_LENGTH }} characters
+                        Use at least {{ minNameLength }} characters
                     }
-                </mat-error>
-                <mat-form-field appearance="outline" class="auth-field">
-                    <mat-label>Username</mat-label>
-                    <input class="label-padding" matInput formControlName="username" />
+                    </mat-error>
                 </mat-form-field>
 
-                <mat-error class="error-margins">
-                    @if (currentForm().controls.password.hasError('required') && currentForm().controls.password.touched) {
-                        Password is required
-                    } @else if (mode() !== 'login' && currentForm().controls.password.hasError('minlength') && currentForm().controls.password.touched) {
-                        Use at least {{ MIN_PASSWORD_LENGTH }} characters
-                    }
-                </mat-error>
                 <mat-form-field appearance="outline" class="auth-field">
                     <mat-label>Password</mat-label>
                     <input class="label-padding" matInput
@@ -78,14 +63,16 @@
                         <mat-icon>{{ (mode() === 'login' ? hideLoginPassword() : hideRegisterPassword()) ?
                             'visibility_off' : 'visibility' }}</mat-icon>
                     </button>
+                    <mat-error class="error-margins">
+                        @if (currentForm().controls.password.hasError('required') && currentForm().controls.password.touched) {
+                            Password is required
+                        } @else if (mode() !== 'login' && currentForm().controls.password.hasError('minlength') && currentForm().controls.password.touched) {
+                            Use at least {{ minPasswordLength }} characters
+                        }
+                    </mat-error>
                 </mat-form-field>
 
                 @if (mode() !== 'login') {
-                    <mat-error class="error-margins">
-                    @if (registerForm.hasError('passwordMismatch') && registerForm.controls.confirmPassword.touched) {
-                        Passwords don't match
-                    }
-                    </mat-error>
                     <mat-form-field appearance="outline" class="auth-field">
                         <mat-label>Confirm password</mat-label>
                         <input class="label-padding" matInput [type]="hideConfirmPassword() ? 'password' : 'text'"
@@ -95,41 +82,47 @@
                             (click)="toggleConfirmPasswordVisibility($event)">
                             <mat-icon>{{ hideConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
                         </button>
+                        <mat-error class="error-margins">
+                            @if (registerForm.get('confirmPassword')?.hasError('passwordMismatch')) {
+                                Passwords don't match
+                            }
+                        </mat-error>
                     </mat-form-field>
 
-                    <mat-error class="error-margins">
-                        @if (registerForm.controls.first_name.hasError('required') && registerForm.controls.first_name.touched) {
-                            Your first name is required
-                        } @else if (registerForm.controls.first_name.hasError('minlength') && registerForm.controls.first_name.touched) {
-                            Use at least {{ MIN_NAME_LENGTH }} characters
-                        }
-                    </mat-error>
                     <mat-form-field appearance="outline" class="auth-field">
                         <mat-label>First name</mat-label>
                         <input class="label-padding" matInput type="text" formControlName="first_name" autocomplete="name" />
+                        <mat-error class="error-margins">
+                            @if (registerForm.controls.first_name.hasError('required') && registerForm.controls.first_name.touched) {
+                                Your first name is required
+                            } @else if (registerForm.controls.first_name.hasError('minlength') && registerForm.controls.first_name.touched) {
+                                Use at least {{ minNameLength }} characters
+                            }
+                        </mat-error>
                     </mat-form-field>
-                    <mat-error class="error-margins">
-                        @if (registerForm.controls.last_name.hasError('required') && registerForm.controls.last_name.touched) {
-                            Your last name is required
-                        } @else if (registerForm.controls.last_name.hasError('minlength') && registerForm.controls.last_name.touched) {
-                            Use at least {{ MIN_NAME_LENGTH }} characters
-                        }
-                    </mat-error>
+
                     <mat-form-field appearance="outline" class="auth-field">
                         <mat-label>Last name</mat-label>
                         <input class="label-padding" matInput type="text" formControlName="last_name" autocomplete="name" />
+                        <mat-error class="error-margins">
+                            @if (registerForm.controls.last_name.hasError('required') && registerForm.controls.last_name.touched) {
+                                Your last name is required
+                            } @else if (registerForm.controls.last_name.hasError('minlength') && registerForm.controls.last_name.touched) {
+                                Use at least {{ minNameLength }} characters
+                            }
+                        </mat-error>
                     </mat-form-field>
 
-                    <mat-error class="error-margins">
-                        @if (registerForm.controls.email.hasError('required') && registerForm.controls.email.touched) {
-                            Email is required
-                        } @else if (registerForm.controls.email.hasError('email') && registerForm.controls.email.touched) {
-                            Enter a valid email
-                        }
-                    </mat-error>
                     <mat-form-field appearance="outline" class="auth-field">
                         <mat-label>Email</mat-label>
                         <input class="label-padding" matInput type="email" formControlName="email" autocomplete="email" placeholder="you@example.com" />
+                        <mat-error class="error-margins">
+                            @if (registerForm.controls.email.hasError('required') && registerForm.controls.email.touched) {
+                                Email is required
+                            } @else if (registerForm.controls.email.hasError('email') && registerForm.controls.email.touched) {
+                                Enter a valid email
+                            }
+                        </mat-error>
                     </mat-form-field>
                 }
 

@@ -49,7 +49,7 @@
 }
 
 .error-margins {
-    margin: 0px 0px 3px 0px;
+    margin: 2px 0px 5px 0px;
 }
 
 h1,
@@ -116,11 +116,12 @@ h2 {
 
     &__grid {
         position: absolute;
-        right: -2rem;
-        bottom: -2rem;
+        right: 5.5rem;
+        bottom: 8rem;
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.5rem;
+        grid-template-columns: repeat(7, 1fr);
+        column-gap: 6rem;
+        row-gap: 10rem;
         opacity: 0.5;
 
         @media (max-width: 860px) {
@@ -172,7 +173,6 @@ h2 {
     position: absolute;
     top: 1.5rem;
     right: 1.5rem;
-    color: var(--text-secondary);
 }
 
 .auth-card {
@@ -228,6 +228,7 @@ h2 {
 
 .auth-form {
     display: flex;
+    gap: 10px;
     flex-direction: column;
 
     &__title {
@@ -255,6 +256,7 @@ h2 {
 
     &__submit {
         height: 3rem;
+        margin-top: 1rem;
         border-radius: 0.6rem;
         font-weight: 600;
         letter-spacing: 0.01em;
@@ -289,11 +291,15 @@ h2 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
     .auth-brand__node,
     .mode-switch__indicator,
     :host {
         animation: none !important;
         transition: none !important;
     }
+}
+
+::ng-deep .mat-mdc-form-field-hint-wrapper,
+::ng-deep .mat-mdc-form-field-error-wrapper {
+  padding-left: 0 !important;
 }

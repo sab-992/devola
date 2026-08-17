@@ -1,21 +1,33 @@
-import { Component, effect, inject, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { Component, inject, signal, WritableSignal } from '@angular/core';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconButton } from '@angular/material/button';
 import { ThemeService } from '@services/theme/theme';
+import { ThemeComponent } from '@components/theme/theme';
+import { UserService } from '@services/user/user';
+
 
 type Mode = 'login' | 'register';
 
+function passwordsMustMatch(control: AbstractControl): ValidationErrors | null {
+    const password = control.get('password');
+    const confirmPassword = control.get('confirmPassword');
 
-/** Cross-field validator: password and confirmPassword must match. */
-function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
-    const password = control.get('password')?.value;
-    const confirmPassword = control.get('confirmPassword')?.value;
-    if (!password || !confirmPassword) return null;
-    return password === confirmPassword ? null : { passwordMismatch: true };
+    if (!password || !confirmPassword) // Page or Form is not loaded yet.
+        return null;
+
+    if (password.value !== confirmPassword.value) {
+        confirmPassword.setErrors({ passwordMismatch: true });
+        return { passwordMismatch: true };
+    }
+
+    if (confirmPassword.hasError('passwordMismatch'))
+        confirmPassword.setErrors(null);
+
+    return null;
 }
 
 const MIN_NAME_LENGTH: number = 2;
@@ -30,7 +42,6 @@ interface UIControllers {
     submitting: WritableSignal<boolean>;
 }
 
-
 @Component({
     selector: 'app-authentication',
     standalone: true,
@@ -41,6 +52,7 @@ interface UIControllers {
         MatButtonModule,
         MatIconModule,
         MatIconButton,
+        ThemeComponent
     ],
     templateUrl: './authentication.html',
     styleUrl: './authentication.scss',
@@ -48,15 +60,14 @@ interface UIControllers {
         '[attr.data-theme]': 'theme()',
     },
 })
-export class Authentication {
+export class AuthenticationPage {
+    private readonly m_userService = inject(UserService);
     private readonly m_formBuilder = inject(FormBuilder);
-    private readonly m_platformID = inject(PLATFORM_ID);
     private readonly ui: UIControllers = { mode: signal<Mode>('login'),
                                            hideConfirmPassword: signal(true),
                                            hideLoginPassword: signal(true),
                                            hideRegisterPassword: signal(true),
                                            submitting: signal(false) };
-
 
     readonly loginForm = this.m_formBuilder.nonNullable.group({ username: ['', [Validators.required, Validators.minLength(MIN_NAME_LENGTH)]],
                                                                 password: ['', [Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]] });
@@ -66,98 +77,65 @@ export class Authentication {
                                                                    confirmPassword: ['', [Validators.required]],
                                                                    first_name:      ['', [Validators.required, Validators.minLength(MIN_NAME_LENGTH)]],
                                                                    last_name:       ['', [Validators.required, Validators.minLength(MIN_NAME_LENGTH)]] },
-                                                                 { validators: passwordsMatchValidator });
+                                                                 { validators: passwordsMustMatch });
 
-    constructor(private themeService: ThemeService) {
-        effect(this.themeService.saveTheme.bind(this.themeService));
+    constructor(private themeService: ThemeService) {}
+
+    public get hideConfirmPassword()  { return this.ui.hideConfirmPassword; }
+    public get hideLoginPassword()    { return this.ui.hideLoginPassword; }
+    public get hideRegisterPassword() { return this.ui.hideRegisterPassword; }
+    public get mode()                 { return this.ui.mode; }
+    public get nodes() { return Array.from({ length: 35 }, (_, i) => i + 1); }
+
+    public get submitting()           { return this.ui.submitting; }
+    public get theme()                { return this.themeService.theme; }
+    public get minNameLength()      { return MIN_NAME_LENGTH; }
+    public get minPasswordLength()  { return MIN_PASSWORD_LENGTH; }
+
+    public currentForm() {
+        return this.isLogin() ? this.loginForm : this.registerForm;
     }
 
-    get mode() {
-        return this.ui.mode;
-    }
-
-    get theme() {
-        return this.themeService.theme;
-    }
-
-    get hideConfirmPassword() {
-        return this.ui.hideConfirmPassword;
-    }
-
-    get hideLoginPassword() {
-        return this.ui.hideLoginPassword;
-    }
-
-    get hideRegisterPassword() {
-        return this.ui.hideRegisterPassword;
-    }
-
-    get submitting() {
-        return this.ui.submitting;
-    }
-
-    get MIN_NAME_LENGTH() {
-        return MIN_NAME_LENGTH;
-    }
-
-    get MIN_PASSWORD_LENGTH() {
-        return MIN_PASSWORD_LENGTH;
-    }
-
-    switchMode(next: Mode): void {
-        this.mode.set(next);
-    }
-
-    currentForm() {
-        return this.mode() == "login" ? this.loginForm : this.registerForm;
-    }
-
-    toggleTheme(): void {
-        this.themeService.toggle();
-    }
-
-    toggleLoginPasswordVisibility(event: Event): void {
-        event.preventDefault();
-        this.hideLoginPassword.update((v) => !v);
-    }
-
-    toggleRegisterPasswordVisibility(event: Event): void {
-        event.preventDefault();
-        this.hideRegisterPassword.update((v) => !v);
-    }
-
-    toggleConfirmPasswordVisibility(event: Event): void {
-        event.preventDefault();
-        this.hideConfirmPassword.update((v) => !v);
-    }
-
-    submitLogin(): void {
-        if (this.loginForm.invalid) {
-            this.loginForm.markAllAsTouched();
-            return;
-        }
-        this.submitting.set(true);
-        const payload = this.loginForm.getRawValue();
-
-        // TODO: add authentication service
-
-        console.log('Login submitted', payload);
-        this.submitting.set(false);
-    }
-
-    submitRegister(): void {
-        if (this.registerForm.invalid) {
-            this.registerForm.markAllAsTouched();
+    public submit(): void {
+        const form = this.currentForm();
+        if (form.invalid) {
+            form.markAllAsTouched();
             return;
         }
 
-        this.submitting.set(true);
-        const payload = this.registerForm.getRawValue();
+        this.ui.submitting.set(true);
+        try {
+            if (this.isLogin())
+                this.m_userService.login(this.loginForm.getRawValue());
+            else
+                console.log('Register submitted', this.registerForm.getRawValue());
+        } catch (error) {
+            form.reset();
+            form.markAllAsTouched();
+        }
+        this.ui.submitting.set(false);
+    }
 
+    public switchMode(next: Mode): void {
+        this.ui.mode.set(next);
+    }
 
-        // TODO: add authentication service
+    public toggleConfirmPasswordVisibility(event: Event): void {
+        event.preventDefault();
+        this.ui.hideConfirmPassword.update((v) => !v);
+    }
 
-        console.log('Register submitted', payload);
-        this.submitting.set(false);
+    public toggleLoginPasswordVisibility(event: Event): void {
+        event.preventDefault();
+        this.ui.hideLoginPassword.update((v) => !v);
+    }
+
+    public toggleRegisterPasswordVisibility(event: Event): void {
+        event.preventDefault();
+        this.ui.hideRegisterPassword.update((v) => !v);
+    }
+
+    private isLogin() : boolean {
+        return this.ui.mode() == "login";
     }
 }
