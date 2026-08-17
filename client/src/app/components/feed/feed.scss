@@ -1,0 +1,429 @@
+// Devola — Job listings
+// Fonts: same as the auth page — Space Grotesk (display) + Inter (body), linked in index.html.
+
+:host {
+    // ---- Palette (from brand brief) ----
+    --sky-reflection: #74b3ce;
+    --pacific-cyan: #508991;
+    --deep-space-blue: #172a3a;
+    --dark-teal: #004346;
+    --mint-leaf: #09bc8a;
+
+    // ---- Light theme (default) ----
+    --bg: #f6faf9;
+    --surface: #ffffff;
+    --surface-muted: #eef4f3;
+    --border: rgba(23, 42, 58, 0.12);
+    --text-primary: var(--deep-space-blue);
+    --text-secondary: rgba(23, 42, 58, 0.62);
+    --accent: var(--mint-leaf);
+    --accent-contrast: #ffffff;
+    --field-fill: #ffffff;
+    --shadow: 0 24px 60px -28px rgba(23, 42, 58, 0.35);
+
+    display: block;
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-primary);
+    background: var(--bg);
+    transition: background-color 0.25s ease, color 0.25s ease;
+
+    &[data-theme='dark'] {
+        --bg: var(--deep-space-blue);
+        --surface: #1c3548;
+        --surface-muted: #203a4d;
+        --border: rgba(116, 179, 206, 0.18);
+        --text-primary: #eaf3f5;
+        --text-secondary: rgba(234, 243, 245, 0.64);
+        --accent: var(--mint-leaf);
+        --accent-contrast: #04241f;
+        --field-fill: #16293a;
+        --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.55);
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+h2,
+h3 {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    letter-spacing: -0.01em;
+}
+
+// ---------- Header ----------
+.jobs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem clamp(1.25rem, 4vw, 3rem) 0;
+
+    &__mark {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        font-size: 1.15rem;
+        letter-spacing: -0.02em;
+    }
+
+    &__dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--mint-leaf);
+        box-shadow: 0 0 0 4px rgba(9, 188, 138, 0.22);
+    }
+}
+
+.padding-fix {
+    padding: 0px 10px;
+}
+
+// ---------- Toolbar ----------
+.jobs-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1.5rem clamp(1.25rem, 4vw, 3rem) 0;
+}
+
+.jobs-search {
+    flex: 2 1 16rem;
+}
+
+.jobs-filter {
+    flex: 1 1 11rem;
+}
+
+.jobs-clear {
+    align-self: center;
+    color: var(--text-secondary);
+}
+
+.jobs-count {
+    margin: 0.25rem clamp(1.25rem, 4vw, 3rem) 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+// ---------- Body layout ----------
+.jobs-body {
+    display: grid;
+    grid-template-columns: minmax(20rem, 26rem) 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    padding: 0 clamp(1.25rem, 4vw, 3rem) 2.5rem;
+
+    @media (max-width: 960px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+// ---------- Listing list ----------
+.jobs-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: calc(100vh - 13rem);
+    overflow-y: auto;
+    padding-right: 0.25rem;
+
+    @media (max-width: 960px) {
+        max-height: none;
+        overflow-y: visible;
+    }
+}
+
+.job-card {
+    width: 100%;
+    text-align: left;
+    padding: 1.1rem 1.2rem;
+    border-radius: 0.85rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    font-family: inherit;
+    color: inherit;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+
+    &:hover {
+        border-color: var(--pacific-cyan);
+        transform: translateY(-1px);
+    }
+
+    &.is-active {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    &__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    &__category {
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--accent);
+    }
+
+    &__posted {
+        font-size: 0.76rem;
+        color: var(--text-secondary);
+    }
+
+    &__title {
+        margin: 0 0 0.2rem;
+        font-size: 1.02rem;
+    }
+
+    &__company {
+        margin: 0 0 0.75rem;
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+    }
+
+    &__meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+    }
+
+    &__location {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+
+        mat-icon {
+            font-size: 1rem;
+            width: 1rem;
+            height: 1rem;
+        }
+    }
+
+    &__closes {
+        font-weight: 600;
+        color: var(--pacific-cyan);
+    }
+}
+
+.jobs-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    border: 1px dashed var(--border);
+    border-radius: 0.85rem;
+
+    mat-icon {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+        opacity: 0.6;
+    }
+}
+
+// ---------- Detail panel ----------
+.job-detail {
+    position: relative;
+    min-height: 24rem;
+    max-height: calc(100vh - 13rem);
+    overflow-y: auto;
+    padding: 2rem clamp(1.5rem, 3vw, 2.5rem);
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+
+    @media (max-width: 960px) {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        max-height: none;
+        border-radius: 0;
+        transform: translateX(100%);
+        transition: transform 0.25s ease;
+
+        &.is-open {
+            transform: translateX(0);
+        }
+    }
+
+    &__close {
+        display: none;
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        color: var(--text-secondary);
+
+        @media (max-width: 960px) {
+            display: inline-flex;
+        }
+    }
+
+    &__placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 20rem;
+        gap: 0.6rem;
+        color: var(--text-secondary);
+        text-align: center;
+
+        mat-icon {
+            font-size: 2.25rem;
+            width: 2.25rem;
+            height: 2.25rem;
+            opacity: 0.5;
+        }
+    }
+
+    &__header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    &__category {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--accent);
+    }
+
+    h2 {
+        margin: 0.35rem 0 0.25rem;
+        font-size: 1.55rem;
+    }
+
+    &__company {
+        margin: 0 0 1.25rem;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    &__apply {
+        height: 2.75rem;
+        border-radius: 0.6rem;
+        font-weight: 600;
+    }
+
+    &__posted {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+    }
+}
+
+// Injected job-description HTML: the markup is authored by each source site, so styling
+// stays deliberately generic and only lightly branded rather than assuming exact classes.
+.job-detail__content {
+    font-size: 0.94rem;
+    line-height: 1.65;
+    color: var(--text-primary);
+
+    ::ng-deep {
+        h3 {
+            font-size: 1.05rem;
+            margin: 1.5rem 0 0.6rem;
+        }
+
+        p {
+            margin: 0 0 0.9rem;
+        }
+
+        ul {
+            margin: 0 0 1rem;
+            padding-left: 1.2rem;
+
+            li {
+                margin-bottom: 0.4rem;
+            }
+        }
+
+        a {
+            color: var(--pacific-cyan);
+        }
+
+        strong {
+            color: var(--text-primary);
+        }
+
+        .content-pay-transparency {
+            margin: 1.25rem 0;
+            padding: 1rem 1.2rem;
+            border-radius: 0.7rem;
+            background: var(--surface-muted);
+            border: 1px solid var(--border);
+
+            h3 {
+                margin-top: 0;
+            }
+
+            .pay-range {
+                font-family: 'Space Grotesk', sans-serif;
+                font-weight: 600;
+                font-size: 1.1rem;
+                color: var(--accent);
+            }
+        }
+
+        .content-conclusion {
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+    }
+}
+
+// ---------- Material component theming (M3 token overrides, scoped to this page) ----------
+:host {
+    --mdc-outlined-text-field-outline-color: var(--border);
+    --mdc-outlined-text-field-hover-outline-color: var(--pacific-cyan);
+    --mdc-outlined-text-field-focus-outline-color: var(--accent);
+    --mdc-outlined-text-field-label-text-color: var(--text-secondary);
+    --mdc-outlined-text-field-focus-label-text-color: var(--accent);
+    --mdc-outlined-text-field-input-text-color: var(--text-primary);
+    --mdc-outlined-text-field-container-shape: 0.6rem;
+
+    --mdc-filled-button-container-color: var(--accent);
+    --mdc-filled-button-label-text-color: var(--accent-contrast);
+    --mdc-filled-button-container-shape: 0.6rem;
+
+    --mdc-icon-button-icon-color: var(--text-secondary);
+    --mat-select-panel-background-color: var(--surface);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .job-card,
+    .job-detail {
+        transition: none !important;
+    }
+}
