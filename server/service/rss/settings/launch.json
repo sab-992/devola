@@ -3,7 +3,7 @@
     "configuration": {
         "debug": {
             "server": {
-                "port": 55555
+                "port": 8020
             },
             "postgres": {
                 "host": "localhost",

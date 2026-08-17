@@ -69,8 +69,11 @@ void http_n::Request::parse(std::string_view stringRequest) {
 std::pair<std::string_view, uint16_t> http_n::Request::parseHostURL(std::string_view host) {
     size_t separatorIndex = host.find(':');
 
-    if (trim(host).empty() or separatorIndex == std::string::npos)
+    if (trim(host).empty())
         return { "", m_port };
+
+    if (separatorIndex == std::string::npos)
+        return { host, m_port };
 
     return { host.substr(0, separatorIndex), static_cast<uint16_t>(std::stoi(std::string(host.substr(separatorIndex + 1)))) };
 }

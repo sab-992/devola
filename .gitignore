@@ -2,6 +2,7 @@
 pyrefly.toml
 *.crt
 *.key
+*.pem
 */out/*
 */build/*
 build
