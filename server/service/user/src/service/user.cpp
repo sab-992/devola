@@ -9,6 +9,7 @@ UserService::UserService(const Private_s&, const json& configJSON) : m_configJSO
 
     setEndpoints();
 }
+
 UserService::~UserService() {}
 
 asio::awaitable<http_n::Response> UserService::authenticate(const Session& session, const http_n::Request& request) {
