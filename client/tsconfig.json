@@ -31,6 +31,9 @@
             ],
             "@environments/*": [
                 "./src/environments/*"
+            ],
+            "@utility/*": [
+                "./src/app/utility/*"
             ]
         }
     },
