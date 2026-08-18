@@ -32,10 +32,12 @@ private:
     std::shared_ptr<Database_i> m_database;
     std::unique_ptr<UserRepository> m_userRepos;
 
+    asio::awaitable<Response> authenticate(const Session& session, const http_n::Request& request);
     asio::awaitable<Response> login(const Session& session, const http_n::Request& request);
     asio::awaitable<Response> logout(const Session& session, const http_n::Request& request);
     asio::awaitable<Response> refresh(const Session& session, const http_n::Request& request);
     asio::awaitable<Response> register_(const Session& session, const http_n::Request& request);
     void setEndpoints();
     user::ServerTools tools();
+    bool validateUserIdentity(const http_n::Request& request, json& claims) const;
 };

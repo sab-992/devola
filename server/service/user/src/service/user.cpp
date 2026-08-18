@@ -11,12 +11,12 @@ UserService::UserService(const Private_s&, const json& configJSON) : m_configJSO
 }
 UserService::~UserService() {}
 
-std::string UserService::pathPrefix() const {
-    return "/user";
-}
+asio::awaitable<http_n::Response> UserService::authenticate(const Session& session, const http_n::Request& request) {
+    json userInfo;
+    if (not validateUserIdentity(request, userInfo))
+        co_return Response().setStatus(Code::UNAUTHORIZED).build();
 
-void UserService::setDatabase(std::shared_ptr<Database_i> database) {
-    m_database = database;
+    co_return Response().setStatus(Code::OK).build();
 }
 
 std::unique_ptr<UserService> UserService::create(const json& configJSON) {
@@ -42,6 +42,10 @@ asio::awaitable<http_n::Response> UserService::logout(const Session& session, co
     co_return Response().build();
 }
 
+std::string UserService::pathPrefix() const {
+    return "/user";
+}
+
 asio::awaitable<http_n::Response> UserService::refresh(const Session& session, const http_n::Request& request) {
     // TODO
     co_return Response().build();
@@ -52,13 +56,27 @@ asio::awaitable<http_n::Response> UserService::register_(const Session& session,
     co_return Response().setStatus(Code::CREATED).build();
 }
 
+void UserService::setDatabase(std::shared_ptr<Database_i> database) {
+    m_database = database;
+}
+
 void UserService::setEndpoints() {
-    ENDPOINT("POST", "/login",    &UserService::login);
-    ENDPOINT("POST", "/logout",   &UserService::logout);
-    ENDPOINT("POST", "/refresh",  &UserService::refresh);
-    ENDPOINT("POST", "/register", &UserService::register_);
+    ENDPOINT("POST", "/authenticate", &UserService::authenticate);
+    ENDPOINT("POST", "/login",        &UserService::login);
+    ENDPOINT("POST", "/logout",       &UserService::logout);
+    ENDPOINT("POST", "/refresh",      &UserService::refresh);
+    ENDPOINT("POST", "/register",     &UserService::register_);
 }
 
 user::ServerTools UserService::tools() {
     return { m_database };
+}
+
+bool UserService::validateUserIdentity(const http_n::Request& request, json& claims) const {
+    try {
+        claims = JWT::verify(JWT::getToken(request));
+    } catch (const std::exception& e) {
+        return false;
+    }
+    return true;
 }
