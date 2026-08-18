@@ -1,5 +1,5 @@
 import { Component, inject, signal, WritableSignal } from '@angular/core';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,6 +8,8 @@ import { MatIconButton } from '@angular/material/button';
 import { ThemeService } from '@services/theme/theme';
 import { ThemeComponent } from '@components/theme/theme';
 import { UserService } from '@services/user/user';
+import { HttpErrorResponse } from '@angular/common/http';
+import { SECOND_IN_MS } from '@utility/settings';
 
 
 type Mode = 'login' | 'register';
@@ -39,6 +41,7 @@ interface UIControllers {
     hideConfirmPassword: WritableSignal<boolean>;
     hideLoginPassword: WritableSignal<boolean>;
     hideRegisterPassword: WritableSignal<boolean>;
+    incorrectCredentials: WritableSignal<boolean>;
     submitting: WritableSignal<boolean>;
 }
 
@@ -63,11 +66,12 @@ interface UIControllers {
 export class AuthenticationPage {
     private readonly m_userService = inject(UserService);
     private readonly m_formBuilder = inject(FormBuilder);
-    private readonly ui: UIControllers = { mode: signal<Mode>('login'),
-                                           hideConfirmPassword: signal(true),
-                                           hideLoginPassword: signal(true),
+    private readonly ui: UIControllers = { hideConfirmPassword:  signal(true),
+                                           hideLoginPassword:    signal(true),
                                            hideRegisterPassword: signal(true),
-                                           submitting: signal(false) };
+                                           incorrectCredentials: signal(false),
+                                           mode:                 signal<Mode>('login'),
+                                           submitting:           signal(false) };
 
     readonly loginForm = this.m_formBuilder.nonNullable.group({ username: ['', [Validators.required, Validators.minLength(MIN_NAME_LENGTH)]],
                                                                 password: ['', [Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]] });
@@ -84,6 +88,7 @@ export class AuthenticationPage {
     public get hideConfirmPassword()  { return this.ui.hideConfirmPassword; }
     public get hideLoginPassword()    { return this.ui.hideLoginPassword; }
     public get hideRegisterPassword() { return this.ui.hideRegisterPassword; }
+    public get incorrectCredentials() { return this.ui.incorrectCredentials; }
     public get mode()                 { return this.ui.mode; }
     public get nodes() { return Array.from({ length: 35 }, (_, i) => i + 1); }
 
@@ -96,9 +101,30 @@ export class AuthenticationPage {
         return this.isLogin() ? this.loginForm : this.registerForm;
     }
 
+    private failedLogin(error: HttpErrorResponse) {
+        if (error.status !== 404)
+            throw new Error(error.message);
+
+        this.showIncorrectCredentials();
+    }
+
+    private isLogin() : boolean {
+        return this.ui.mode() == "login";
+    }
+
+    private showIncorrectCredentials() {
+        if (this.ui.incorrectCredentials())
+            return;
+
+        this.ui.incorrectCredentials.set(true);
+        setTimeout(() => { this.ui.incorrectCredentials.set(false); }, 5 * SECOND_IN_MS);
+    }
+
     public submit(): void {
         const form = this.currentForm();
         if (form.invalid) {
+            if (form.dirty && this.isLogin())
+                this.showIncorrectCredentials()
             form.markAllAsTouched();
             return;
         }
@@ -106,7 +132,7 @@ export class AuthenticationPage {
         this.ui.submitting.set(true);
         try {
             if (this.isLogin())
-                this.m_userService.login(this.loginForm.getRawValue());
+                this.m_userService.login(this.loginForm.getRawValue(), this.failedLogin.bind(this));
             else
                 console.log('Register submitted', this.registerForm.getRawValue());
         } catch (error) {
@@ -133,9 +159,5 @@ export class AuthenticationPage {
     public toggleRegisterPasswordVisibility(event: Event): void {
         event.preventDefault();
         this.ui.hideRegisterPassword.update((v) => !v);
-    }
-
-    private isLogin() : boolean {
-        return this.ui.mode() == "login";
     }
 }

@@ -38,6 +38,12 @@
                     {{ mode() === 'login' ? 'Log in to pick up where you left off.' : 'It takes less than a minute.' }}
                 </p>
 
+                <mat-error class="error-margins">
+                    @if (incorrectCredentials()) {
+                        Incorrect username/password.
+                    }
+                </mat-error>
+
                 <mat-form-field style="margin-bottom: 0px;" appearance="outline" class="auth-field">
                     <mat-label>Username</mat-label>
                     <input class="label-padding" matInput formControlName="username" />
