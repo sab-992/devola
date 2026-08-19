@@ -62,9 +62,8 @@ void RSSService::setEndpoints() {
     ENDPOINT("GET",  "/recommendations",             &RSSService::recommendations);
 
     ENDPOINT("POST", "/recommend",                   &RSSService::recommend);
-
-    ENDPOINT("PUT",  "/subscribe",                   &RSSService::subscribe);
-    ENDPOINT("PUT",  "/resumes",                     &RSSService::addResumes);
+    ENDPOINT("POST",  "/resumes",                    &RSSService::addResumes);
+    ENDPOINT("POST",  "/subscribe",                  &RSSService::subscribe);
 }
 
 rss::ServerTools RSSService::tools() {
