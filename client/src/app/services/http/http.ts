@@ -23,24 +23,24 @@ export class HttpService {
         return new Observable<T>();
     }
 
-    public patch<T, U>(path: string, body: T | null=null, withCredentials: boolean=true) : Observable<U> {
+    public patch<T, U=null>(path: string, body: U | null=null, withCredentials: boolean=true) : Observable<T> {
         if(isPlatformBrowser(this.m_platformID))
-            return this.m_http.patch<U>(path, body, { withCredentials: withCredentials });
+            return this.m_http.patch<T>(path, body, { withCredentials: withCredentials });
 
-        return new Observable<U>();
+        return new Observable<T>();
     }
 
-    public post<T, U>(path: string, body: T | null=null, withCredentials: boolean=true) : Observable<U> {
+    public post<T, U=null>(path: string, body: U | null=null, withCredentials: boolean=true) : Observable<T> {
         if(isPlatformBrowser(this.m_platformID))
-            return this.m_http.post<U>(path, body, { withCredentials: withCredentials });
+            return this.m_http.post<T>(path, body, { withCredentials: withCredentials });
 
-        return new Observable<U>();
+        return new Observable<T>();
     }
 
-    public put<T, U>(path: string, body: T | null=null, withCredentials: boolean=true) : Observable<U> {
+    public put<T, U=null>(path: string, body: U | null=null, withCredentials: boolean=true) : Observable<T> {
         if(isPlatformBrowser(this.m_platformID))
-            return this.m_http.put<U>(path, body, { withCredentials: withCredentials });
+            return this.m_http.put<T>(path, body, { withCredentials: withCredentials });
 
-        return new Observable<U>();
+        return new Observable<T>();
     }
 }
