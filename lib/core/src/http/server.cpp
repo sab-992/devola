@@ -62,10 +62,13 @@ asio::awaitable<void> http_n::server_n::Basic::handleClient(asio::ip::tcp::socke
 
         if (not m_endpoints.contains(method))
             session->error(network_n::Code::NOT_FOUND);
-        else if (not m_endpoints[method].contains(endpoint))
-            session->error(network_n::Code::NOT_ALLOWED);
-        else
-            session->write(co_await m_endpoints[method][endpoint](*session, request));
+        else {
+            const boundHandler_t& handler = m_endpoints[method].route(endpoint);
+            if (not handler)
+                session->error(network_n::Code::NOT_ALLOWED);
+            else
+                session->write(co_await handler(*session, request));
+        }
 
     } catch (std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, m_extraLogInformation, "Exception in worker thread. Function:", std::format("[{}]", FUNCTION_SIGNATURE), "Reason: ", e.what());
@@ -96,11 +99,11 @@ void http_n::server_n::Basic::run() {
     m_ioContext.run();
 }
 
-void http_n::server_n::Basic::setEndpoint(std::string method, const std::string& endpoint, handlers_t handler) {
+void http_n::server_n::Basic::setEndpoint(std::string method, const std::string& endpoint, handler_t handler) {
     if (not handler)
         throw InvalidArgument("No handler provided", "Endpoint handler");
 
-    m_endpoints[method][endpoint] = handler;
+    m_endpoints[method].addRoute(endpoint, handler);
 }
 
 void http_n::server_n::Basic::setStartSequence(const startSequence_t& function) {

@@ -16,7 +16,7 @@ RSSService::RSSService(const Private_s&, const json& configJSON) : m_configJSON(
 
 RSSService::~RSSService() {}
 
-asio::awaitable<http_n::Response> RSSService::addResumes(const Session& session, const http_n::Request& request) {
+asio::awaitable<http_n::Response> RSSService::addResumes(const Session& session, const http_n::Request& request, const pathParams_t&) {
     json userInfo;
     if (not validateUserIdentity(request, userInfo))
         co_return Response().setStatus(Code::UNAUTHORIZED).build();
@@ -57,21 +57,21 @@ void RSSService::setDatabase(std::shared_ptr<Database_i> database) {
 }
 
 void RSSService::setEndpoints() {
-    ENDPOINT("GET",  "/feed",            &RSSService::fetchFeeds);
-    ENDPOINT("GET",  "/recommendation",  &RSSService::recommendation);
-    ENDPOINT("GET",  "/recommendations", &RSSService::recommendations);
+    ENDPOINT("GET",  "/feed",                        &RSSService::fetchFeeds);
+    ENDPOINT("GET",  "/recommendation/{task_uuid}",  &RSSService::recommendation);
+    ENDPOINT("GET",  "/recommendations",             &RSSService::recommendations);
 
-    ENDPOINT("POST", "/recommend",       &RSSService::recommend);
+    ENDPOINT("POST", "/recommend",                   &RSSService::recommend);
 
-    ENDPOINT("PUT",  "/subscribe",       &RSSService::subscribe);
-    ENDPOINT("PUT",  "/resumes",         &RSSService::addResumes);
+    ENDPOINT("PUT",  "/subscribe",                   &RSSService::subscribe);
+    ENDPOINT("PUT",  "/resumes",                     &RSSService::addResumes);
 }
 
 rss::ServerTools RSSService::tools() {
     return { m_cache, m_database, m_http };
 }
 
-asio::awaitable<http_n::Response> RSSService::fetchFeeds(const Session& session, const http_n::Request& request) {
+asio::awaitable<http_n::Response> RSSService::fetchFeeds(const Session& session, const http_n::Request& request, const pathParams_t&) {
     using namespace database_n;
 
     json userInfo;
@@ -90,7 +90,7 @@ asio::awaitable<http_n::Response> RSSService::fetchFeeds(const Session& session,
                       .setBody<nlohmann::json>(body).build();
 }
 
-asio::awaitable<http_n::Response> RSSService::recommend(const Session& session, const http_n::Request& request) {
+asio::awaitable<http_n::Response> RSSService::recommend(const Session& session, const http_n::Request& request, const pathParams_t&) {
     json userInfo;
     if (not validateUserIdentity(request, userInfo))
         co_return Response().setStatus(Code::UNAUTHORIZED).build();
@@ -116,17 +116,20 @@ asio::awaitable<http_n::Response> RSSService::recommend(const Session& session, 
                         .setBody<json>({ { "task_uuid", taskUUID }}).build();
 }
 
-asio::awaitable<http_n::Response> RSSService::recommendation(const Session& session, const http_n::Request& request) {
+asio::awaitable<http_n::Response> RSSService::recommendation(const Session& session, const http_n::Request& request, const pathParams_t& params) {
     json userInfo;
     if (not validateUserIdentity(request, userInfo))
         co_return Response().setStatus(Code::UNAUTHORIZED).build();
 
-    const auto& body = m_recommendationRepos->fetchTaskResult(userInfo["uuid"].get<std::string>(), request.body<json>()["task_uuid"].get<std::string>());
+    if (not params.contains("task_uuid"))
+        co_return Response().setStatus(Code::BAD_REQUEST).build();
+
+    const auto& body = m_recommendationRepos->fetchTaskResult(userInfo["uuid"].get<std::string>(), params.at("task_uuid"));
 
     co_return Response().setBody<json>(body).setStatus(Code::OK).build();
 }
 
-asio::awaitable<http_n::Response> RSSService::recommendations(const Session& session, const http_n::Request& request) {
+asio::awaitable<http_n::Response> RSSService::recommendations(const Session& session, const http_n::Request& request, const pathParams_t&) {
     json userInfo;
     if (not validateUserIdentity(request, userInfo))
         co_return Response().setStatus(Code::UNAUTHORIZED).build();
@@ -137,7 +140,7 @@ asio::awaitable<http_n::Response> RSSService::recommendations(const Session& ses
     co_return Response().setBody<json>(body).setStatus(Code::OK).build();
 }
 
-asio::awaitable<http_n::Response> RSSService::subscribe(const Session& session, const http_n::Request& request) {
+asio::awaitable<http_n::Response> RSSService::subscribe(const Session& session, const http_n::Request& request, const pathParams_t&) {
     json userInfo;
     if (not validateUserIdentity(request, userInfo))
         co_return Response().setStatus(Code::UNAUTHORIZED).build();

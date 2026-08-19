@@ -16,8 +16,8 @@ namespace http_n
         class Session : public std::enable_shared_from_this<Session> {
             using tcp = asio::ip::tcp;
 
-
             struct Private {};
+
         public:
             Session(const Private&, sslSocket_t&&);
             ~Session();

@@ -42,12 +42,12 @@ private:
     std::unique_ptr<ResumeRepository> m_resumeRepos;
     std::unique_ptr<SubscriptionRepository> m_subscriptionRepos;
 
-    asio::awaitable<http_n::Response> addResumes(const Session& session, const http_n::Request& request);
-    asio::awaitable<http_n::Response> fetchFeeds(const Session& session, const http_n::Request& request);
-    asio::awaitable<http_n::Response> recommend(const Session& session, const http_n::Request& request);
-    asio::awaitable<http_n::Response> recommendation(const Session& session, const http_n::Request& request);
-    asio::awaitable<http_n::Response> recommendations(const Session& session, const http_n::Request& request);
-    asio::awaitable<http_n::Response> subscribe(const Session& session, const http_n::Request& request);
+    asio::awaitable<http_n::Response> addResumes(const Session& session, const http_n::Request& request, const pathParams_t& params);
+    asio::awaitable<http_n::Response> fetchFeeds(const Session& session, const http_n::Request& request, const pathParams_t& params);
+    asio::awaitable<http_n::Response> recommend(const Session& session, const http_n::Request& request, const pathParams_t& params);
+    asio::awaitable<http_n::Response> recommendation(const Session& session, const http_n::Request& request, const pathParams_t& params);
+    asio::awaitable<http_n::Response> recommendations(const Session& session, const http_n::Request& request, const pathParams_t& params);
+    asio::awaitable<http_n::Response> subscribe(const Session& session, const http_n::Request& request, const pathParams_t& params);
     bool validateUserIdentity(const http_n::Request& request, json& claims) const;
 
     void setEndpoints();

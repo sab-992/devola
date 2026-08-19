@@ -2,6 +2,7 @@
 
 
 #include <asio.hpp>
+#include <core/http/detail/routes.hpp>
 #include <core/http/detail/session.hpp>
 #include <core/http/detail/settings.hpp>
 #include <core/http/http.hpp>
@@ -33,8 +34,7 @@ namespace http_n
     namespace server_n
     {
         class Basic {
-            using handlers_t = std::function<asio::awaitable<http_n::Response>(const Session&, const Request&)>;
-            using endpoints_t = std::unordered_map<std::string, handlers_t>;
+            using endpoints_t = std::unordered_map<std::string, handler_t>;
             using startSequence_t = std::function<void(Basic*)>;
 
             const uint8_t BASE_THREADS = 2;
@@ -48,7 +48,7 @@ namespace http_n
             void run();
             void setStartSequence(const startSequence_t& function);
             void setThreadPoolSize(uint16_t size);
-            void setEndpoint(std::string method, const std::string& endpoint, handlers_t handler);
+            void setEndpoint(std::string method, const std::string& endpoint, handler_t handler);
             void stop();
 
         protected:
@@ -57,7 +57,7 @@ namespace http_n
             asio::io_context m_ioContext;
             asio::ssl::context m_sslContext;
             bool m_isRunning = false;
-            std::unordered_map<std::string, endpoints_t> m_endpoints;
+            std::unordered_map<std::string, http_n::server_n::RadixRouter> m_endpoints;
             uint16_t m_port;
             asio::signal_set m_signals;
             startSequence_t m_startSequence;
@@ -74,8 +74,8 @@ namespace http_n
                 EndpointRegistrar(Basic* server, const std::string& method, const std::string& path)
                 : m_server(server), m_method(method), m_endpoint(path) {}
 
-                void operator=(handlers_t&& handler) {
-                    m_server->setEndpoint(m_method, std::format("{}{}", m_server->pathPrefix(), m_endpoint), std::forward<handlers_t>(handler));
+                void operator=(handler_t&& handler) {
+                    m_server->setEndpoint(m_method, std::format("{}{}", m_server->pathPrefix(), m_endpoint), std::forward<handler_t>(handler));
                 }
 
             private:

@@ -7,7 +7,6 @@
 
 using commandsMap_t = std::unordered_map<std::string, std::function<void(const std::vector<std::string>&)>>;
 
-
 int main() {
     auto light = log_n::Light::instance();
     const std::vector<std::string> EXTRA_LOGS = { "MAIN" };
