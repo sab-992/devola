@@ -123,10 +123,12 @@ export class AuthenticationPage {
     public submit(): void {
         const form = this.currentForm();
         if (form.invalid) {
-            if (form.dirty && this.isLogin())
-                this.showIncorrectCredentials()
             form.markAllAsTouched();
-            return;
+            if (!form.dirty || !this.isLogin())
+                return;
+
+            form.reset();
+            this.showIncorrectCredentials()
         }
 
         this.ui.submitting.set(true);
@@ -136,13 +138,16 @@ export class AuthenticationPage {
             else
                 console.log('Register submitted', this.registerForm.getRawValue());
         } catch (error) {
-            form.reset();
+            if (this.isLogin())
+                form.reset();
+
             form.markAllAsTouched();
         }
         this.ui.submitting.set(false);
     }
 
     public switchMode(next: Mode): void {
+        this.ui.incorrectCredentials.set(false);
         this.ui.mode.set(next);
     }
 
