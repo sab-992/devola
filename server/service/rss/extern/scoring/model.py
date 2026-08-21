@@ -70,9 +70,7 @@ class SentenceTransformerModel:
 
             listing_embedding = self.embed(listings[i].content_chunks)
             for j, (tag, resume_embedding) in enumerate(resume_embeddings.items()):
-                results[i].append({})
                 score: Number = util.cos_sim(listing_embedding, resume_embedding).mean().item()
                 if score > 0:
-                    results[i][j]["tag"] = tag
-                    results[i][j]["score"] = score
+                    results[i].append({ "tag": tag, "score": score})
         return ids, results
