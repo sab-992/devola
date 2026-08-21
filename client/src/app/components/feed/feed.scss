@@ -1,88 +1,7 @@
-// Devola — Job listings
-// Fonts: same as the auth page — Space Grotesk (display) + Inter (body), linked in index.html.
-
-:host {
-    // ---- Palette (from brand brief) ----
-    --sky-reflection: #74b3ce;
-    --pacific-cyan: #508991;
-    --deep-space-blue: #172a3a;
-    --dark-teal: #004346;
-    --mint-leaf: #09bc8a;
-
-    // ---- Light theme (default) ----
-    --bg: #f6faf9;
-    --surface: #ffffff;
-    --surface-muted: #eef4f3;
-    --border: rgba(23, 42, 58, 0.12);
-    --text-primary: var(--deep-space-blue);
-    --text-secondary: rgba(23, 42, 58, 0.62);
-    --accent: var(--mint-leaf);
-    --accent-contrast: #ffffff;
-    --field-fill: #ffffff;
-    --shadow: 0 24px 60px -28px rgba(23, 42, 58, 0.35);
-
-    display: block;
-    min-height: 100vh;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: var(--text-primary);
-    background: var(--bg);
-    transition: background-color 0.25s ease, color 0.25s ease;
-
-    &[data-theme='dark'] {
-        --bg: var(--deep-space-blue);
-        --surface: #1c3548;
-        --surface-muted: #203a4d;
-        --border: rgba(116, 179, 206, 0.18);
-        --text-primary: #eaf3f5;
-        --text-secondary: rgba(234, 243, 245, 0.64);
-        --accent: var(--mint-leaf);
-        --accent-contrast: #04241f;
-        --field-fill: #16293a;
-        --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.55);
-    }
-}
-
-* {
-    box-sizing: border-box;
-}
-
-h2,
-h3 {
-    font-family: 'Space Grotesk', 'Inter', sans-serif;
-    letter-spacing: -0.01em;
-}
-
-// ---------- Header ----------
-.jobs-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem clamp(1.25rem, 4vw, 3rem) 0;
-
-    &__mark {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-family: 'Space Grotesk', sans-serif;
-        font-weight: 600;
-        font-size: 1.15rem;
-        letter-spacing: -0.02em;
-    }
-
-    &__dot {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        background: var(--mint-leaf);
-        box-shadow: 0 0 0 4px rgba(9, 188, 138, 0.22);
-    }
-}
-
 .padding-fix {
     padding: 0px 10px;
 }
 
-// ---------- Toolbar ----------
 .jobs-toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -110,7 +29,6 @@ h3 {
     color: var(--text-secondary);
 }
 
-// ---------- Body layout ----------
 .jobs-body {
     display: grid;
     grid-template-columns: minmax(20rem, 26rem) 1fr;
@@ -123,7 +41,6 @@ h3 {
     }
 }
 
-// ---------- Listing list ----------
 .jobs-list {
     list-style: none;
     margin: 0;
@@ -239,7 +156,6 @@ h3 {
     }
 }
 
-// ---------- Detail panel ----------
 .job-detail {
     position: relative;
     min-height: 24rem;
@@ -339,8 +255,6 @@ h3 {
     }
 }
 
-// Injected job-description HTML: the markup is authored by each source site, so styling
-// stays deliberately generic and only lightly branded rather than assuming exact classes.
 .job-detail__content {
     font-size: 0.94rem;
     line-height: 1.65;
@@ -402,7 +316,6 @@ h3 {
     }
 }
 
-// ---------- Material component theming (M3 token overrides, scoped to this page) ----------
 :host {
     --mdc-outlined-text-field-outline-color: var(--border);
     --mdc-outlined-text-field-hover-outline-color: var(--pacific-cyan);

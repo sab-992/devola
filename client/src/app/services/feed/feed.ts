@@ -106,10 +106,11 @@ export class FeedService {
 
     private getAllListings() {
         const byId = new Map<number, JobListing>();
-        for (const feed of this.feeds())
-            for (const listing of feed.listings)
-                if (!byId.has(listing.id))
-                    byId.set(listing.id, listing);
+        if (this.feeds() !== null)
+            for (const feed of this.feeds())
+                for (const listing of feed.listings)
+                    if (!byId.has(listing.id))
+                        byId.set(listing.id, listing);
 
         return Array.from(byId.values()).sort((a, b) => b.created_at - a.created_at);
     }

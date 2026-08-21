@@ -90,12 +90,11 @@ export class AuthenticationPage {
     public get hideRegisterPassword() { return this.ui.hideRegisterPassword; }
     public get incorrectCredentials() { return this.ui.incorrectCredentials; }
     public get mode()                 { return this.ui.mode; }
-    public get nodes() { return Array.from({ length: 35 }, (_, i) => i + 1); }
-
+    public get nodes()                { return Array.from({ length: 35 }, (_, i) => i + 1); }
     public get submitting()           { return this.ui.submitting; }
     public get theme()                { return this.themeService.theme; }
-    public get minNameLength()      { return MIN_NAME_LENGTH; }
-    public get minPasswordLength()  { return MIN_PASSWORD_LENGTH; }
+    public get minNameLength()        { return MIN_NAME_LENGTH; }
+    public get minPasswordLength()    { return MIN_PASSWORD_LENGTH; }
 
     public currentForm() {
         return this.isLogin() ? this.loginForm : this.registerForm;
@@ -106,6 +105,10 @@ export class AuthenticationPage {
             throw new Error(error.message);
 
         this.showIncorrectCredentials();
+    }
+
+    private failedRegister(error: HttpErrorResponse) {
+        throw new Error(error.message);
     }
 
     private isLogin() : boolean {
@@ -135,8 +138,10 @@ export class AuthenticationPage {
         try {
             if (this.isLogin())
                 this.m_userService.login(this.loginForm.getRawValue(), this.failedLogin.bind(this));
-            else
-                console.log('Register submitted', this.registerForm.getRawValue());
+            else {
+                const { confirmPassword, ...registerInformation } = this.registerForm.getRawValue();
+                this.m_userService.register(registerInformation, this.showAccountCreatedMessage.bind(this), this.failedRegister.bind(this));
+            }
         } catch (error) {
             if (this.isLogin())
                 form.reset();
@@ -164,5 +169,9 @@ export class AuthenticationPage {
     public toggleRegisterPasswordVisibility(event: Event): void {
         event.preventDefault();
         this.ui.hideRegisterPassword.update((v) => !v);
+    }
+
+    private showAccountCreatedMessage() {
+        // TODO
     }
 }

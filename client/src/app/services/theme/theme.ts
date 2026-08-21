@@ -1,5 +1,5 @@
 import { isPlatformBrowser } from '@angular/common';
-import { inject, PLATFORM_ID, Service, signal, WritableSignal } from '@angular/core';
+import { DOCUMENT, inject, PLATFORM_ID, Service, signal, WritableSignal } from '@angular/core';
 
 
 type Theme = 'light' | 'dark';
@@ -8,6 +8,7 @@ type Theme = 'light' | 'dark';
 export class ThemeService {
     private readonly m_platformID = inject(PLATFORM_ID);
     private readonly m_theme: WritableSignal<Theme> = signal<Theme>(this.getSavedTheme());
+    private m_document = inject(DOCUMENT);
 
     public get theme(): WritableSignal<Theme> {
         return this.m_theme;
@@ -24,7 +25,12 @@ export class ThemeService {
     }
 
     public toggle(): void {
-        this.theme.update((t) => (t === 'light' ? 'dark' : 'light'));
+        this.theme.update((t) => (t === "light" ? "dark" : "light"));
+        const htmlElement = this.m_document.documentElement;
+        if (this.theme() === "dark")
+            htmlElement.setAttribute('data-theme', 'dark');
+        else
+            htmlElement.removeAttribute('data-theme');
     }
 
     public getSavedTheme(): Theme {

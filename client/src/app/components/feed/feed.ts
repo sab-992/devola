@@ -5,15 +5,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule, MatSelectChange } from '@angular/material/select';
 import { ThemeService } from '@services/theme/theme';
-import { ThemeComponent } from '@components/theme/theme';
 import { FeedService } from '@services/feed/feed';
 import { TimeService } from '@services/time/time';
+import { HeaderComponent } from "@components/header/header";
 
 
 @Component({
     selector: 'app-feed',
     standalone: true,
-    imports: [MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatButtonModule, ThemeComponent],
+    imports: [MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatButtonModule, HeaderComponent],
     templateUrl: './feed.html',
     styleUrl: './feed.scss',
     host: {

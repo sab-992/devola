@@ -3,6 +3,7 @@ import { inject, Service, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '@environments/environment';
 import { Login } from '@models/login';
+import { Register } from '@models/register';
 import { HttpService } from '@services/http/http';
 import { catchError, of, tap } from 'rxjs';
 
@@ -35,14 +36,8 @@ export class UserService {
             this.m_http.post(this.buildPath("/logout")).subscribe({ next: this.handleLogout.bind(this), error: callback });
     }
 
-    private handleLogin() {
-        this.m_isAuthenticated.set(true);
-        this.m_router.navigate(['/feed']);
-    }
-
-    private handleLogout() {
-        this.m_isAuthenticated.set(false);
-        this.m_router.navigate(['/']);
+    public register(registerInformation: Register, callback: () => void, errorCallback: ErrorCallback | undefined=undefined) {
+        this.m_http.post(this.buildPath("/register"), registerInformation).subscribe({ next: callback, error: errorCallback });
     }
 
     private buildPath(path: string) {
@@ -59,5 +54,15 @@ export class UserService {
 
         this.m_isAuthenticated.set(false);
         this.m_router.navigate(["/"])
+    }
+
+    private handleLogin() {
+        this.m_isAuthenticated.set(true);
+        this.m_router.navigate(['/feed']);
+    }
+
+    private handleLogout() {
+        this.m_isAuthenticated.set(false);
+        this.m_router.navigate(['/']);
     }
 }
