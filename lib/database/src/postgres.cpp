@@ -382,11 +382,7 @@ database_n::Result PostgreSQL::Read(const Query& query, Transaction* transaction
     try {
         pqxx::params params;
         pqxx::placeholders<> placeholders;
-        std::string sql = std::format("{};", selectSql(query, params, placeholders));
-
-        m_light->log(log_n::Level_en::SPECIAL, EXTRA_LOGS, "SQL COMMAND:", sql);
-
-        pqxx::result queryResult = tx.execute(sql, params);
+        pqxx::result queryResult = tx.execute(std::format("{};", selectSql(query, params, placeholders)), params);
 
         if (not validateCardinality(queryResult, query.cardinality()))
             return Result().setError(std::format("Expected ({} rows) but got: ({} rows)", to_underlying(query.cardinality()), queryResult.size()))
