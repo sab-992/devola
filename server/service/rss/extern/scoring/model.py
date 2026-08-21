@@ -44,6 +44,9 @@ class SentenceTransformerModel:
 
         resume_embeddings: dict[str, Tensor] = {}
         for resume in resumes:
+            if not resume.content_chunks:
+                continue
+
             resume_embeddings[resume.tag] = self.embed(resume.content_chunks)
 
         results = []
@@ -60,14 +63,16 @@ class SentenceTransformerModel:
         results: list[list[dict]] = []
         for i in range(len(listings)):
             results.append([])
-            listing_embedding = self.embed(listings[i].content_chunks)
             ids.append(listings[i].id)
 
+            if not listings[i].content_chunks:
+                continue
+
+            listing_embedding = self.embed(listings[i].content_chunks)
             for j, (tag, resume_embedding) in enumerate(resume_embeddings.items()):
                 results[i].append({})
                 score: Number = util.cos_sim(listing_embedding, resume_embedding).mean().item()
                 if score > 0:
                     results[i][j]["tag"] = tag
                     results[i][j]["score"] = score
-
         return ids, results

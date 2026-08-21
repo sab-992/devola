@@ -3,6 +3,7 @@
 #include <core/process.hpp>
 #include <core/logging.hpp>
 #include <dataclass/resume.hpp>
+#include <dataclass/recommendation.hpp>
 #include <service/tools.hpp>
 
 
@@ -23,9 +24,9 @@ public:
 
     friend std::unique_ptr<RecommendationRepository> std::make_unique<RecommendationRepository>();
 
-    std::string createTask(std::string_view userUUID);
+    RecommendationTask createTask(std::string_view userUUID);
     json fetchTaskResult(std::string_view userUUID, std::string_view taskUUID);
-    json fetchTaskResults(std::string_view userUUID);
+    json fetchTasks(std::string_view userUUID);
     void runTask(std::string_view userUUID, std::string_view taskUUID, const std::vector<Resume>& resumes, const json& websiteListingsJSON, const std::vector<record_t>& subscriptions);
 
 private:
@@ -35,8 +36,8 @@ private:
 
     json buildJSONRecommendationBody(const std::vector<record_t>& records);
     std::shared_ptr<database_n::Database_i> database();
-    void sendResumes(processId_t processIdentifier, const std::vector<Resume>& resumes) const;
-    void sendWebsiteListings(processId_t processIdentifier, const json& websiteListingsJSON, const std::vector<record_t>& subscriptions) const;
+    bool sendResumes(processId_t processIdentifier, std::string_view taskUUID, const std::vector<Resume>& resumes) const;
+    bool sendWebsiteListings(processId_t processIdentifier, std::string_view taskUUID, const json& websiteListingsJSON, const std::vector<record_t>& subscriptions) const;
     json sortScores(const json& rawScores) const;
     json topNScores(const json& scoresArray, size_t N=N_SCORES_KEPT) const;
 };

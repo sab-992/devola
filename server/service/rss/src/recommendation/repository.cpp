@@ -3,24 +3,24 @@
 
 RecommendationRepository::RecommendationRepository(const ServerTools& tools) : m_tools(tools) {}
 
-std::string RecommendationRepository::createTask(std::string_view userUUID) {
+RecommendationTask RecommendationRepository::createTask(std::string_view userUUID) {
     using namespace database_n;
 
     const auto createTaskQuery = Query().setTarget("tasks")
-                                        .setProjection({ "uuid" })
+                                        .setProjection({ "*" })
                                         .setType(Query::Type_en::TARGETED)
                                         .setCardinality(Query::Cardinality_en::SINGLE)
                                         .setData({ { "user_uuid", userUUID },
-                                                   { "status", "running" }}).build();
+                                                   { "status", "pending" }}).build();
 
     const Result& createTaskResult = database()->Create(createTaskQuery);
 
     if (not createTaskResult.isOK())
         throw Exception(createTaskResult.error().value());
     else if (createTaskResult.isEmpty())
-        throw Exception("Task UUID is needed to start a recommendation task");
+        throw Exception("Created task's information is missing");
 
-    return createTaskResult.records().value()[0].at("uuid").asString();
+    return RecommendationTask::fromDatabaseFormat(createTaskResult.records().value()[0]);
 }
 
 nlohmann::json RecommendationRepository::buildJSONRecommendationBody(const std::vector<record_t>& records) {
@@ -68,7 +68,7 @@ nlohmann::json RecommendationRepository::fetchTaskResult(std::string_view userUU
     return buildJSONRecommendationBody(result.records().value());
 }
 
-nlohmann::json RecommendationRepository::fetchTaskResults(std::string_view userUUID) {
+nlohmann::json RecommendationRepository::fetchTasks(std::string_view userUUID) {
     using namespace database_n;
     const Result& result = database()->Read(Query().setTarget("tasks")
                                                    .setType(Query::Type_en::TARGETED)
@@ -91,39 +91,74 @@ void RecommendationRepository::runTask(std::string_view userUUID,
                                        const std::vector<record_t>& subscriptions) {
     using namespace database_n;
 
-    const Process& p = m_registry->start("python", { std::format("{}/extern/matcher.py", SERVICE_DIRECTORY) }, true);
+    // We don't check the result because this update do not matter to much.
+    database()->Update(Query().setTarget("tasks")
+                              .setType(Query::Type_en::TARGETED)
+                              .setCardinality(Query::Cardinality_en::NONE)
+                              .setData({ { "status",          "running" },
+                                         { "last_updated_at", toPGSQLFormat(Time::now()) }})
+                              .setFilter({ { "uuid", {"=", taskUUID } } }).build());
 
-    sendResumes(p.id(), resumes);
-    sendWebsiteListings(p.id(), websiteListingsJSON, subscriptions);
+    Transaction tx{pgsql_n::Transaction()};
+    try {
+        const Process& p = m_registry->start("python", { std::format("{}/extern/matcher.py", SERVICE_DIRECTORY) }, true);
 
-    const auto rawScores = nlohmann::json::parse(m_registry->receive(p.id(), NAMED_PIPE_NAME));
-    const auto& scores = sortScores(rawScores);
-    const auto createTaskResultQuery = Query().setTarget("task_results")
-                                              .setType(Query::Type_en::TARGETED)
-                                              .setCardinality(Query::Cardinality_en::NONE)
-                                              .setData({ { "user_uuid", userUUID },
-                                                         { "task_uuid", taskUUID },
-                                                         { "result", scores.dump() }}).build();
+        bool resumesOK = sendResumes(p.id(), taskUUID, resumes);
+        bool listingsOK = sendWebsiteListings(p.id(), taskUUID, websiteListingsJSON, subscriptions);
 
-    const Result& createTaskResultResult = database()->Create(createTaskResultQuery);
+        if (not resumesOK or
+            not listingsOK)
+            throw Exception(std::format("Error during resume matching for the task: \"{}\"", taskUUID));
 
-    if (not createTaskResultResult.isOK())
-        throw Exception(createTaskResultResult.error().value());
+        const std::string& matcherResponse = m_registry->receive(p.id(), NAMED_PIPE_NAME);
+        json rawScores;
+        try {
+            rawScores = json::parse(matcherResponse);
+        } catch (std::exception e) {
+            m_light->log(log_n::Level_en::ERROR, "Error during resume matching for the task:", std::format("(\"{}\")", taskUUID), "Info:", matcherResponse);
+            throw;
+        }
 
-    const auto updateTaskQuery = Query().setTarget("tasks")
-                                        .setType(Query::Type_en::TARGETED)
-                                        .setCardinality(Query::Cardinality_en::NONE)
-                                        .setData({ { "status",          "completed" },
-                                                   { "last_updated_at", toPGSQLFormat(Time::now()) }})
-                                        .setFilter({ { "uuid", {"=", taskUUID } } }).build();
+        const auto& scores = sortScores(rawScores);
+        const auto createTaskResultQuery = Query().setTarget("task_results")
+                                                .setType(Query::Type_en::TARGETED)
+                                                .setCardinality(Query::Cardinality_en::NONE)
+                                                .setData({ { "user_uuid", userUUID },
+                                                           { "task_uuid", taskUUID },
+                                                           { "result", scores.dump() }}).build();
 
-    const Result& updateTaskResult = database()->Update(updateTaskQuery);
+        const Result& createTaskResultResult = database()->Create(createTaskResultQuery, &tx);
 
-    if (not updateTaskResult.isOK())
-        throw Exception(updateTaskResult.error().value());
+        if (not createTaskResultResult.isOK())
+            throw Exception(createTaskResultResult.error().value());
+
+        const auto updateTaskQuery = Query().setTarget("tasks")
+                                            .setType(Query::Type_en::TARGETED)
+                                            .setCardinality(Query::Cardinality_en::NONE)
+                                            .setData({ { "status",        "completed" },
+                                                     { "last_updated_at", toPGSQLFormat(Time::now()) }})
+                                            .setFilter({ { "uuid", {"=", taskUUID } } }).build();
+
+        const Result& updateTaskResult = database()->Update(updateTaskQuery, &tx);
+
+        if (not updateTaskResult.isOK())
+            throw Exception(updateTaskResult.error().value());
+
+        tx.get<pgsql_n::Transaction>().commit();
+    } catch (std::exception e) {
+        m_light->log(log_n::Level_en::ERROR, "Error during task:", std::format("(\"{}\")", taskUUID), e.what(), "Reverting changes ...");
+        tx.get<pgsql_n::Transaction>().abort();
+
+        database()->Update(Query().setTarget("tasks")
+                                .setType(Query::Type_en::TARGETED)
+                                .setCardinality(Query::Cardinality_en::NONE)
+                                .setData({ { "status",          "failed" },
+                                           { "last_updated_at", toPGSQLFormat(Time::now()) }})
+                                .setFilter({ { "uuid", {"=", taskUUID } } }).build());
+    }
 }
 
-void RecommendationRepository::sendResumes(processId_t processIdentifier, const std::vector<Resume>& resumes) const {
+bool RecommendationRepository::sendResumes(processId_t processIdentifier, std::string_view taskUUID, const std::vector<Resume>& resumes) const {
     std::string resumeMessage;
     for (const auto& resume : resumes)
         resumeMessage += std::format("{}[SEP]{}[END]\n", resume.tag, resume.content);
@@ -131,16 +166,21 @@ void RecommendationRepository::sendResumes(processId_t processIdentifier, const 
     m_registry->send(processIdentifier, NAMED_PIPE_NAME, resumeMessage);
 
     std::string resumeResponse = m_registry->receive(processIdentifier, NAMED_PIPE_NAME);
-    if (resumeResponse != "OK")
-        m_light->log(log_n::Level_en::ERROR, "resumeResponse NOT OK");
+    if (resumeResponse == "OK")
+        return true;
+
+    m_light->log(log_n::Level_en::WARNING, "[TASK]", std::format("\"{}\"", taskUUID), "- Resumes have not been received correctly");
+    return false;
 }
 
-void RecommendationRepository::sendWebsiteListings(processId_t processIdentifier, const json& websiteListingsJSON, const std::vector<record_t>& subscriptions) const {
-    m_registry->send(processIdentifier, NAMED_PIPE_NAME, std::to_string(subscriptions.size()));
-    for (const auto& websiteJSON : websiteListingsJSON) {
-        if (websiteJSON.empty())
-            continue;
+bool RecommendationRepository::sendWebsiteListings(processId_t processIdentifier, std::string_view taskUUID, const json& websiteListingsJSON, const std::vector<record_t>& subscriptions) const {
+    std::vector<nlohmann::json> nonEmptyWebsiteListings;
+    for (const auto& websiteJSON : websiteListingsJSON)
+        if (not websiteJSON.empty())
+            nonEmptyWebsiteListings.emplace_back(websiteJSON);
 
+    m_registry->send(processIdentifier, NAMED_PIPE_NAME, std::to_string(nonEmptyWebsiteListings.size()));
+    for (const auto& websiteJSON : nonEmptyWebsiteListings) {
         std::string websiteListings;
         for (const auto& listing : websiteJSON["listings"])
             websiteListings += std::format("{}[SEP]{}[END]\n", listing["id"].get<int64_t>(), listing["content"].get<std::string>());
@@ -148,9 +188,14 @@ void RecommendationRepository::sendWebsiteListings(processId_t processIdentifier
         m_registry->send(processIdentifier, NAMED_PIPE_NAME, websiteListings);
         std::string websiteListingsResponse = m_registry->receive(processIdentifier, NAMED_PIPE_NAME);
 
-        if (websiteListingsResponse != "OK")
-            m_light->log(log_n::Level_en::ERROR, "websiteListingsResponse NOT OK");
+        if (websiteListingsResponse == "OK")
+            continue;
+
+        m_light->log(log_n::Level_en::WARNING, "[TASK]", std::format("\"{}\"", taskUUID), "-", std::format("{}'s", websiteJSON["host"].get<std::string>()), "listings have not been received correctly");
+        return false;
     }
+
+    return true;
 }
 
 nlohmann::json RecommendationRepository::sortScores(const json& rawScores) const {

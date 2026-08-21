@@ -42,19 +42,28 @@ def readySequence():
 def main():
     readySequence()
     pipe = NamedPipe("rss_matcher")
-
-    raw_resumes = pipe.read().split("[END]\n")
-    resumes: list[Resume] = ResumeParser.parse(raw_resumes)
-    pipe.write("OK")
+    resumes = []
+    try:
+        raw_resumes = pipe.read().split("[END]\n")
+        resumes: list[Resume] = ResumeParser.parse(raw_resumes)
+        pipe.write("OK")
+    except Exception as e:
+        pipe.write(str(e))
 
     website_listings: list[list[Listing]] = []
-    for i in range(int(pipe.read())):
-        raw_listings = pipe.read().split("[END]\n")
-        pipe.write("OK")
-        website_listings.append(ListingParser.parse(raw_listings))
+    try:
+        for i in range(int(pipe.read())):
+            raw_listings = pipe.read().split("[END]\n")
+            pipe.write("OK")
+            website_listings.append(ListingParser.parse(raw_listings))
+    except Exception as e:
+        pipe.write(str(e))
 
-    results = SentenceTransformerModel(BI_ENCODER_NAME).compute_scores(resumes, website_listings)
-    pipe.write(json.dumps([{ "listing_ids": result[0], "scores": result[1] } for result in results]))
+    try:
+        results = SentenceTransformerModel(BI_ENCODER_NAME).compute_scores(resumes, website_listings)
+        pipe.write(json.dumps([{ "listing_ids": result[0], "scores": result[1] } for result in results]))
+    except Exception as e:
+        pipe.write(str(e))
 
 
 if __name__ == "__main__":

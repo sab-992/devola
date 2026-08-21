@@ -105,14 +105,14 @@ asio::awaitable<http_n::Response> RSSService::recommend(const Session& session, 
 
     json websiteListings = co_await m_listingRepos->fetchListings(subscriptions);
 
-    const std::string& taskUUID = m_recommendationRepos->createTask(userUUID);
+    const RecommendationTask& task = m_recommendationRepos->createTask(userUUID);
     asio::post(m_ioContext.get_executor(), std::bind_front(&RecommendationRepository::runTask, m_recommendationRepos, userUUID,
-                                                                                                                      taskUUID,
+                                                                                                                      task.uuid,
                                                                                                                       resumes,
                                                                                                                       websiteListings,
                                                                                                                       subscriptions));
     co_return Response().setStatus(Code::OK)
-                        .setBody<json>({ { "task_uuid", taskUUID }}).build();
+                        .setBody<json>(task.toJSON()).build();
 }
 
 asio::awaitable<http_n::Response> RSSService::recommendation(const Session& session, const http_n::Request& request, const pathParams_t& params) {
@@ -133,7 +133,7 @@ asio::awaitable<http_n::Response> RSSService::recommendations(const Session& ses
     if (not validateUserIdentity(request, userInfo))
         co_return Response().setStatus(Code::UNAUTHORIZED).build();
 
-    const auto& body = m_recommendationRepos->fetchTaskResults(userInfo["uuid"].get<std::string>());
+    const auto& body = m_recommendationRepos->fetchTasks(userInfo["uuid"].get<std::string>());
 
 
     co_return Response().setBody<json>(body).setStatus(Code::OK).build();
