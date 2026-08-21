@@ -18,17 +18,32 @@ int main() {
         const std::vector<std::filesystem::directory_entry>& services = files->entries(SERVICE_DIRECTORY, file_n::flags_n::Entry_en::DIRECTORY);
 
         std::shared_ptr<process_n::Registry> registry = process_n::Registry::instance();
-        std::vector<processId_t> processes;
-        for (const auto& dir : services)
-            processes.emplace_back(registry->start(std::format("{}/server/{}", BUILD_DIRECTORY, std::string(dir.path().filename())), {}, false).id());
+        std::unordered_map<std::string, processId_t> serviceProcesses;
+        for (const auto& dir : services) {
+            const std::string& serviceName = dir.path().filename();
+            serviceProcesses.emplace(serviceName, registry->start(std::format("{}/server/{}", BUILD_DIRECTORY, serviceName), {}, false).id());
+        }
 
         bool running = true;
         commandsMap_t commands;
         commands["stop"] = [&](const std::vector<std::string>& params) {
-            for (auto id : processes)
-                registry->stop(id);
+            if (not params.empty()) {
+                if (not serviceProcesses.contains(params[0]))
+                    light->log(log_n::Level_en::WARNING, EXTRA_LOGS, "Service", std::format("\"{}\"", params[0]), "does not exist!");
+                else {
+                    registry->stop(serviceProcesses[params[0]]);
+                    serviceProcesses.erase(params[0]);
 
-            running = false;
+                    if (serviceProcesses.empty())
+                        running = false;
+                }
+            }
+            else {
+                for (const auto& [_, id] : serviceProcesses)
+                    registry->stop(id);
+
+                running = false;
+            }
         };
 
         sleep(1);
