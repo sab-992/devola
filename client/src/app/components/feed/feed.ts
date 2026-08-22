@@ -4,7 +4,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule, MatSelectChange } from '@angular/material/select';
-import { ThemeService } from '@services/theme/theme';
 import { FeedService } from '@services/feed/feed';
 import { TimeService } from '@services/time/time';
 import { HeaderComponent } from "@components/header/header";
@@ -15,18 +14,12 @@ import { HeaderComponent } from "@components/header/header";
     standalone: true,
     imports: [MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatButtonModule, HeaderComponent],
     templateUrl: './feed.html',
-    styleUrl: './feed.scss',
-    host: {
-        '[attr.data-theme]': 'theme()',
-    },
+    styleUrl: './feed.scss'
 })
 export class FeedPage implements OnInit {
-    private readonly themeService: ThemeService = inject(ThemeService);
     protected readonly feedService: FeedService = inject(FeedService);
 
     constructor() {
-        effect(this.themeService.saveTheme.bind(this.themeService));
-
         effect(() => {
             const id = this.feedService.selectedListingId();
 
@@ -40,10 +33,6 @@ export class FeedPage implements OnInit {
 
     public ngOnInit(): void {
         this.feedService.fetchFeed();
-    }
-
-    public get theme() {
-        return this.themeService.theme;
     }
 
     public clearFilters(): void {
@@ -80,10 +69,6 @@ export class FeedPage implements OnInit {
 
     public timeAgo(timestampSeconds: number): string {
         return TimeService.timeAgo(timestampSeconds);
-    }
-
-    public toggleTheme(): void {
-        this.themeService.toggle();
     }
 
     public updateCategory(change: MatSelectChange): void {

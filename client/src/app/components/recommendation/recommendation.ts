@@ -6,7 +6,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RecommendationRun, RecommendationResult } from '@models/recommendation';
 import { RecommendationService } from '@services/recommendation/recommendation';
-import { ThemeService } from '@services/theme/theme';
 import { TimeService } from '@services/time/time';
 import { HeaderComponent } from "@components/header/header";
 
@@ -17,14 +16,10 @@ import { HeaderComponent } from "@components/header/header";
     imports: [DecimalPipe, MatButtonModule, MatIconModule, MatProgressSpinnerModule, HeaderComponent],
     templateUrl: './recommendation.html',
     styleUrl: './recommendation.scss',
-    host: {
-        '[attr.data-theme]': 'theme()',
-    },
 })
 export class RecommendationPage implements OnInit {
     private readonly m_recommendationService = inject(RecommendationService);
     private readonly m_destroyRef = inject(DestroyRef);
-    private readonly m_themeService = inject(ThemeService);
 
     readonly runs = signal<RecommendationRun[]>([]);
     readonly loadingRuns = signal(true);
@@ -43,10 +38,6 @@ export class RecommendationPage implements OnInit {
 
     public ngOnInit(): void {
         this.loadRuns();
-    }
-
-    public get theme() {
-        return this.m_themeService.theme;
     }
 
     public retryRuns(): void {

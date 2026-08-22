@@ -1,4 +1,4 @@
-import { Component, effect } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ThemeService } from '@services/theme/theme';
 
@@ -9,16 +9,17 @@ import { ThemeService } from '@services/theme/theme';
     styleUrl: './theme.scss',
 })
 export class ThemeComponent {
+    private m_themeService: ThemeService = inject(ThemeService);
 
-    constructor(private themeService: ThemeService) {
-        effect(this.themeService.saveTheme.bind(this.themeService));
+    constructor() {
+        effect(this.m_themeService.saveTheme.bind(this.m_themeService));
     }
 
     get theme() {
-        return this.themeService.theme;
+        return this.m_themeService.theme;
     }
 
     toggleTheme(): void {
-        this.themeService.toggle();
+        this.m_themeService.toggle();
     }
 }

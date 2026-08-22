@@ -5,7 +5,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconButton } from '@angular/material/button';
-import { ThemeService } from '@services/theme/theme';
 import { ThemeComponent } from '@components/theme/theme';
 import { UserService } from '@services/user/user';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -58,10 +57,7 @@ interface UIControllers {
         ThemeComponent
     ],
     templateUrl: './authentication.html',
-    styleUrl: './authentication.scss',
-    host: {
-        '[attr.data-theme]': 'theme()',
-    },
+    styleUrl: './authentication.scss'
 })
 export class AuthenticationPage {
     private readonly m_userService = inject(UserService);
@@ -83,7 +79,7 @@ export class AuthenticationPage {
                                                                    last_name:       ['', [Validators.required, Validators.minLength(MIN_NAME_LENGTH)]] },
                                                                  { validators: passwordsMustMatch });
 
-    constructor(private themeService: ThemeService) {}
+    constructor() {}
 
     public get hideConfirmPassword()  { return this.ui.hideConfirmPassword; }
     public get hideLoginPassword()    { return this.ui.hideLoginPassword; }
@@ -92,7 +88,6 @@ export class AuthenticationPage {
     public get mode()                 { return this.ui.mode; }
     public get nodes()                { return Array.from({ length: 35 }, (_, i) => i + 1); }
     public get submitting()           { return this.ui.submitting; }
-    public get theme()                { return this.themeService.theme; }
     public get minNameLength()        { return MIN_NAME_LENGTH; }
     public get minPasswordLength()    { return MIN_PASSWORD_LENGTH; }
 
