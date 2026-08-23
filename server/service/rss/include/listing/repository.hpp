@@ -26,8 +26,8 @@ public:
 
     friend std::unique_ptr<ListingRepository> std::make_unique<ListingRepository>();
 
-    asio::awaitable<void> createWebsiteListings(const std::vector<std::string>& urls);
-    asio::awaitable<json> fetchListings(const std::vector<record_t>& subscribedURLs);
+    void createWebsites(const json& subscriptions, Transaction& tx);
+    asio::awaitable<json> fetchListings(const std::vector<record_t>& subscriptions);
 
 private:
     ServerTools m_tools;
@@ -35,7 +35,6 @@ private:
 
     std::shared_ptr<Database_i> cache();
     void createListings(std::string_view host, std::string_view endpoint, const json& websiteListings, Transaction& tx);
-    std::string createWebsite(std::string_view host, std::string_view endpoint, Transaction& tx);
     std::shared_ptr<Database_i> database();
     asio::awaitable<http_n::Response> fetchFromURL(std::string_view host, std::string_view endpoint);
     std::pair<std::string, std::vector<Listing>> fetchWebsiteListings(std::string_view host, std::string_view endpoint, Transaction& tx);

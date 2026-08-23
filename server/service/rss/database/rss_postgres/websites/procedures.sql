@@ -7,3 +7,13 @@ AS $$
     COMMIT;
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE PROCEDURE insert_websites(p_websites JSON)
+AS $$
+    BEGIN
+        INSERT INTO websites (host, endpoint) SELECT x.host, x.endpoint
+                                              FROM json_to_recordset(p_websites) AS x(host VARCHAR(253), endpoint VARCHAR(255))
+        ON CONFLICT (host, endpoint) DO NOTHING;
+END;
+$$ LANGUAGE plpgsql;

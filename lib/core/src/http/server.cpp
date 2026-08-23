@@ -52,11 +52,7 @@ asio::awaitable<void> http_n::server_n::Basic::handleClient(asio::ip::tcp::socke
         auto session = Session::create(asio::ssl::stream<asio::ip::tcp::socket>(std::move(socket), m_sslContext));
 
         co_await session->handshake();
-
-        Request request;
-        request.setProtocol(network_n::version_n::Factory::create(session->alpnExtension()));
-        request.set(co_await session->read()).build();
-
+        Request request = co_await session->read();
         const std::string& method = request.method();
         const std::string& endpoint = request.APIEndpoint();
 

@@ -1,6 +1,6 @@
 CREATE OR REPLACE PROCEDURE insert_listings_batch(payload jsonb)
-LANGUAGE plpgsql AS $$
-BEGIN
+AS $$
+    BEGIN
     INSERT INTO listings (website_host, website_endpoint, title, category, company, location, content, link, created_at, expire_at)
     SELECT x.website_host,
            x.website_endpoint,
@@ -22,5 +22,5 @@ BEGIN
                                           link             VARCHAR,
                                           created_at       DOUBLE PRECISION,
                                           expire_at        DOUBLE PRECISION);
-END;
-$$;
+    END;
+$$ LANGUAGE plpgsql ;

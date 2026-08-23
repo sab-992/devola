@@ -5,6 +5,7 @@
 #include <core/http/http.hpp>
 #include <core/http/request.hpp>
 #include <core/http/response.hpp>
+#include <core/network/interface/version.hpp>
 #include <core/logging/light.hpp>
 #include <core/utility/function.hpp>
 #include <core/utility/converter.hpp>
@@ -23,7 +24,7 @@ namespace http_n
             ~Session();
 
             asio::awaitable<void> handshake();
-            asio::awaitable<std::string> read();
+            asio::awaitable<Request> read();
             std::string alpnExtension();
             void write(http_n::Response& response);
             void write(http_n::Response&& response);

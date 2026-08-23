@@ -14,45 +14,35 @@ void ListingRepository::createListings(std::string_view host, std::string_view e
     const auto listingsQuery = Query().setTarget("insert_listings_batch")
                                       .setType(Query::Type_en::PROCEDURE)
                                       .setCardinality(Query::Cardinality_en::NONE)
-                                      .setData({ { "payload", Value(websiteListings["listings"].dump()) } }).build();
+                                      .setFunctionData({ websiteListings["listings"].dump() }).build();
 
     const Result& result = database()->Other(listingsQuery, &tx);
 }
 
-std::string ListingRepository::createWebsite(std::string_view host, std::string_view endpoint, Transaction& tx) {
+void ListingRepository::createWebsites(const json& subscriptions, Transaction& tx) {
     using namespace http_n;
     using namespace database_n;
 
-    const auto websiteQuery = Query().setTarget("websites")
-                                     .setType(Query::Type_en::TARGETED)
-                                     .setProjection({ "last_updated_at" })
-                                     .setCardinality(Query::Cardinality_en::SINGLE)
-                                     .setData({ { "host",      Value(host) },
-                                                { "endpoint",  Value(endpoint) } }).build();
+    for (const auto& websiteJSON : subscriptions) {
+        const std::string& host = websiteJSON["host"].get<std::string>();
+        const std::string& endpoint = websiteJSON["endpoint"].get<std::string>();
 
-    const Result& result = database()->Create(websiteQuery, &tx);
+        constexpr size_t MAX_WEBSITE_LEN  = 253;
+        if (host.size() > MAX_WEBSITE_LEN)
+            throw InvalidArgument(std::format("exceeds maximum size of {} characters", MAX_WEBSITE_LEN), "Hostname");
+
+        constexpr size_t MAX_ENDPOINT_LEN = 255;
+        if (endpoint.size() > MAX_ENDPOINT_LEN)
+            throw InvalidArgument(std::format("exceeds maximum size of {} characters", MAX_ENDPOINT_LEN), "Endpoint");
+    }
+
+    const Result& result = database()->Other(Query().setTarget("insert_websites")
+                                                    .setType(Query::Type_en::PROCEDURE)
+                                                    .setCardinality(Query::Cardinality_en::NONE)
+                                                    .setFunctionData({ subscriptions.dump() }).build(), &tx);
 
     if (not result.isOK())
         throw Exception(result.error().value());
-    else if (not result.records()->at(0).contains("last_updated_at"))
-        throw Exception("Cannot fetch listings without last updated timestamp");
-
-    return result.records()->at(0).at("last_updated_at").asString();
-}
-
-asio::awaitable<void> ListingRepository::createWebsiteListings(const std::vector<std::string>& urls) {
-    using namespace http_n;
-    using namespace database_n;
-
-    auto tx = Transaction(pgsql_n::Transaction());
-    for (const auto& url : urls) {
-        const auto& [host, endpoint] = parseURL(url);
-        const auto& last_updated_at = createWebsite(host, endpoint, tx);
-        const Response& feed = co_await fetchFromURL(host, endpoint);
-        const nlohmann::json& websiteListings = listingsToJSON(host, last_updated_at, parser_n::Listings::parse(host, endpoint, feed.body<xml_n::Document>()));
-        createListings(host, endpoint, websiteListings, tx);
-    }
-    tx.get<pgsql_n::Transaction>().commit();
 }
 
 std::shared_ptr<database_n::Database_i> ListingRepository::database() {
@@ -63,11 +53,11 @@ const std::unique_ptr<http_n::Http>& ListingRepository::http() {
     return m_tools.http;
 }
 
-asio::awaitable<nlohmann::json> ListingRepository::fetchListings(const std::vector<record_t>& subscribedURLs) {
+asio::awaitable<nlohmann::json> ListingRepository::fetchListings(const std::vector<record_t>& subscriptions) {
     json body = json::array();
 
     auto tx = Transaction(pgsql_n::Transaction());
-    for (const auto& record: subscribedURLs) {
+    for (const auto& record: subscriptions) {
         const std::string& host = record.at("website_host").asString();
         const std::string& endpoint = record.at("website_endpoint").asString();
 
@@ -93,14 +83,6 @@ asio::awaitable<nlohmann::json> ListingRepository::fetchListings(const std::vect
 }
 
 asio::awaitable<http_n::Response> ListingRepository::fetchFromURL(std::string_view host, std::string_view endpoint) {
-    constexpr size_t MAX_WEBSITE_LEN  = 253;
-    if (host.size() > MAX_WEBSITE_LEN)
-        throw InvalidArgument(std::format("exceeds maximum size of {} characters", MAX_WEBSITE_LEN), "Hostname");
-
-    constexpr size_t MAX_ENDPOINT_LEN = 255;
-    if (endpoint.size() > MAX_ENDPOINT_LEN)
-        throw InvalidArgument(std::format("exceeds maximum size of {} characters", MAX_ENDPOINT_LEN), "Endpoint");
-
     const auto request = http_n::Request().setMethod("GET")
                                           .setURL(host)
                                           .setAPIEndpoint(endpoint).build();

@@ -35,12 +35,15 @@ void http_n::server_n::Session::onWriteCompleted(std::shared_ptr<std::string> st
     shutdown();
 }
 
-asio::awaitable<std::string> http_n::server_n::Session::read() {
+asio::awaitable<http_n::Request> http_n::server_n::Session::read() {
     validateSSLContext();
-    std::string data;
-    std::size_t n_bytes = co_await async_read_until(m_socket, asio::dynamic_buffer(data), "\r\n\r\n", asio::use_awaitable);
-    m_light->log(log_n::Level_en::INFO, "Received", n_bytes, "bytes from", std::format("[{}].", m_remoteEndpoint));
-    co_return data;
+
+    std::shared_ptr<network_n::version_n::Version_i> version = network_n::version_n::Factory::create(alpnExtension());
+    const auto& [headers, body] = co_await version->async_receive(m_socket);
+    Request request(headers, body);
+    request.setProtocol(version);
+    m_light->log(log_n::Level_en::INFO, "Received", request.toString().size(), "bytes from", std::format("[{}].", m_remoteEndpoint));
+    co_return request;
 }
 
 void http_n::server_n::Session::shutdown() {

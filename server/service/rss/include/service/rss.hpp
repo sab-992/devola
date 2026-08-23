@@ -48,6 +48,7 @@ private:
     asio::awaitable<http_n::Response> recommendation(const Session& session, const http_n::Request& request, const pathParams_t& params);
     asio::awaitable<http_n::Response> recommendations(const Session& session, const http_n::Request& request, const pathParams_t& params);
     asio::awaitable<http_n::Response> subscribe(const Session& session, const http_n::Request& request, const pathParams_t& params);
+    asio::awaitable<http_n::Response> subscriptions(const Session& session, const http_n::Request& request, const pathParams_t& params);
     bool validateUserIdentity(const http_n::Request& request, json& claims) const;
 
     void setEndpoints();

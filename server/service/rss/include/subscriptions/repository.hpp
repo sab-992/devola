@@ -1,10 +1,12 @@
 #pragma once
 
+#include <nlohmann/json.hpp>
 #include <service/tools.hpp>
 #include <utility/url.hpp>
 
 
 class SubscriptionRepository {
+    using json = nlohmann::json;
     using record_t = database_n::record_t;
     using ServerTools = rss::ServerTools;
 
@@ -14,7 +16,7 @@ public:
 
     friend std::unique_ptr<SubscriptionRepository> std::make_unique<SubscriptionRepository>();
 
-    void createSubscriptions(std::string_view userUUID, const std::vector<std::string>& urls);
+    void saveSubscriptions(std::string_view userUUID, const json& subscriptions, Transaction& tx);
     std::vector<record_t> fetchSubscriptions(std::string_view userUUID);
 
 private:

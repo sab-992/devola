@@ -17,18 +17,17 @@ asio::awaitable<std::pair<network_n::Headers, network_n::Body>> http_n::version_
     size_t endOfHeadersPos = rawHeaders.find(END_OF_HEADERS_TOKEN);
     const std::string extractedPartOfBody = rawHeaders.substr(endOfHeadersPos + END_OF_HEADERS_TOKEN.size());
 
-    std::string rawBody;
     auto parser = headersParser();
     Headers headers(parser);
     headers.parse(rawHeaders.substr(0, endOfHeadersPos));
+    std::string rawBody;
     if (http1_1_n::HeadersParser::isContentChunked(headers))
-        co_await async_read_until(socket,  dynamic_buffer(rawBody), std::string_view(std::format("0{}", END_OF_HEADERS_TOKEN)), use_awaitable);
+        co_await async_read_until(socket, dynamic_buffer(rawBody), std::string_view(std::format("0{}", END_OF_HEADERS_TOKEN)), use_awaitable);
     else if (not headers.get("Content-Length").empty()) {
         unsigned long contentLength = std::stoul(headers.get("Content-Length"));
-        co_await async_read(socket, dynamic_buffer(rawBody), transfer_exactly(contentLength - extractedPartOfBody.size()), use_awaitable);
+        if (contentLength > extractedPartOfBody.size())
+            co_await async_read(socket, dynamic_buffer(rawBody), transfer_exactly(contentLength - extractedPartOfBody.size()), use_awaitable);
     }
-    else
-        throw Exception("Non chunked response has no content-length");
 
     Body body(bodyParser());
     body.parse(headers, extractedPartOfBody + rawBody);

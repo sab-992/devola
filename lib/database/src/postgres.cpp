@@ -335,11 +335,12 @@ database_n::Result PostgreSQL::Other(const Query& query, Transaction* transactio
     try {
         std::string values;
         pqxx::params params;
-        if (query.data().has_value()) {
-            params = extractParams(query.data().value()).second;
-
-            for (size_t i = 0; i < params.size(); i++)
-                values.append(i != 0 ? ", " : std::format("${}", i + 1));
+        if (query.functionData().has_value()) {
+            const auto& functionData = query.functionData().value();
+            for (size_t i = 0; i < functionData.size(); i++) {
+                addParam(params, functionData[i]);
+                values.append(i != 0 ? std::format(", ${}", i + 1) : std::format("${}", i + 1));
+            }
         }
 
         pqxx::result queryResult = tx.execute(std::format("CALL {}({})", query.target(), values), params);
@@ -354,7 +355,7 @@ database_n::Result PostgreSQL::Other(const Query& query, Transaction* transactio
         return success(queryResult);
     } catch (std::exception& e) {
         tx.abort();
-        m_light->log(log_n::Level_en::ERROR, EXTRA_LOGS, "ABORTED: error during insertion: ", e.what());
+        m_light->log(log_n::Level_en::ERROR, EXTRA_LOGS, "ABORTED: error during procedure: ", e.what());
         return Result().setError(e.what())
                        .setStatus(Status_en::QUERY_ERROR).build();
     }
