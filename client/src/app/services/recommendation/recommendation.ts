@@ -12,7 +12,7 @@ export class RecommendationService {
     private readonly m_http = inject(HttpService);
 
     public fetchResult(uuid: string): Observable<RecommendationResult[]> {
-        return this.m_http.get<RawRecommendationResult[]>(`${this.buildPath("/recommendation")}/${uuid}`).pipe(map((results) => results.map((result) => this.parseResult(result))));
+        return this.m_http.get<RawRecommendationResult[]>(`${this.buildPath("/recommendations")}/${uuid}`).pipe(map((results) => results.map((result) => this.parseResult(result))));
     }
 
     public fetchRuns(): Observable<RecommendationRun[]> {
@@ -20,7 +20,7 @@ export class RecommendationService {
     }
 
     public startRecommendation(): Observable<RecommendationRun> {
-        return this.m_http.post<RecommendationRun>(this.buildPath("/recommend"));
+        return this.m_http.post<RecommendationRun>(this.buildPath("/recommendations"));
     }
 
     private buildPath(path: string) {
