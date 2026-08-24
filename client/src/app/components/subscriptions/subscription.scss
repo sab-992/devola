@@ -1,0 +1,221 @@
+.padding-fix {
+    padding: 0px 10px;
+}
+
+.sub-body {
+    max-width: 150rem;
+    margin: 0 auto;
+    padding: 1.5rem clamp(1.25rem, 4vw, 3rem) 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sub-card {
+    padding: 1.5rem clamp(1.25rem, 3vw, 2rem);
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+
+    &__header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    &__title {
+        margin: 0 0 1rem;
+        font-size: 1.1rem;
+    }
+
+    &__count {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+    }
+
+    &__header .sub-card__title {
+        margin-bottom: 0;
+    }
+}
+
+.sub-feeds-card {
+    height: 60vh;
+}
+
+.sub-feeds {
+    height: 91%;
+    overflow-y: auto;
+}
+
+
+.sub-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 1rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.field-error {
+    font-size: 0.95rem;
+    color: var(--danger);
+}
+
+.add-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.75rem;
+
+    &__field {
+        flex: 1 1 12rem;
+    }
+
+    &__submit {
+        --mdc-outlined-text-field-container-shape: 16px;
+        height: 3.4rem;
+        margin-top: 0rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        @extend .action;
+    }
+}
+
+.feed-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.feed-row {
+    padding: 0.85rem 1rem;
+    border-radius: 0.7rem;
+    border: 1px solid var(--border);
+    background: var(--surface-muted);
+
+    &__info {
+        display: grid;
+        grid-template-columns: 0.5fr 2fr 0.5fr auto;
+        align-items: center;
+        gap: 0.25rem;
+
+        @media (max-width: 560px) {
+            grid-template-columns: 1fr;
+            gap: 0.2rem;
+        }
+    }
+
+    &__host {
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__endpoint {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__created {
+        justify-self: end;
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+
+        @media (max-width: 560px) {
+            justify-self: start;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.25rem;
+        color: var(--text-secondary);
+    }
+
+    &__edit {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 0.6rem;
+    }
+
+    &__field {
+        flex: 1 1 10rem;
+    }
+
+    &__edit-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.15rem;
+        margin-top: 0.25rem;
+        color: var(--text-secondary);
+    }
+}
+
+.danger {
+    &:hover {
+        color: var(--danger) !important;
+    }
+}
+
+.action {
+    &:hover {
+        color: var(--accent);
+    }
+}
+
+.action-border {
+    border-radius: 0.3rem;
+    border: 1px solid var(--text-primary);
+    &:hover {
+        border: 1px solid var(--accent);
+    }
+}
+
+.change-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem clamp(1.25rem, 4vw, 3rem);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -12px 30px -20px rgba(23, 42, 58, 0.35);
+
+    &__label {
+        font-size: 0.88rem;
+        color: var(--accent)
+    }
+
+    &__error {
+        font-size: 0.82rem;
+        color: var(--danger);
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-left: auto;
+    }
+}

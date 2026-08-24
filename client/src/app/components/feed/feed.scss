@@ -316,23 +316,6 @@
     }
 }
 
-:host {
-    --mdc-outlined-text-field-outline-color: var(--border);
-    --mdc-outlined-text-field-hover-outline-color: var(--pacific-cyan);
-    --mdc-outlined-text-field-focus-outline-color: var(--accent);
-    --mdc-outlined-text-field-label-text-color: var(--text-secondary);
-    --mdc-outlined-text-field-focus-label-text-color: var(--accent);
-    --mdc-outlined-text-field-input-text-color: var(--text-primary);
-    --mdc-outlined-text-field-container-shape: 0.6rem;
-
-    --mdc-filled-button-container-color: var(--accent);
-    --mdc-filled-button-label-text-color: var(--accent-contrast);
-    --mdc-filled-button-container-shape: 0.6rem;
-
-    --mdc-icon-button-icon-color: var(--text-secondary);
-    --mat-select-panel-background-color: var(--surface);
-}
-
 @media (prefers-reduced-motion: reduce) {
 
     .job-card,

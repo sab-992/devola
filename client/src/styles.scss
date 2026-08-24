@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 :root {
     // ---- Palette ----
     --sky-reflection: #74b3ce;
@@ -16,6 +18,7 @@
     --accent: var(--mint-leaf);
     --accent-contrast: #ffffff;
     --field-fill: #ffffff;
+    --danger: #d64545;
     --shadow: 0 24px 60px -28px rgba(23, 42, 58, 0.35);
 
     // ---- Dark theme ----
@@ -29,6 +32,7 @@
         --accent: var(--mint-leaf);
         --accent-contrast: #04241f;
         --field-fill: #16293a;
+        --danger: #d64545;
         --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.55);
     }
 }
@@ -51,4 +55,23 @@ h2,
 h3 {
     font-family: 'Space Grotesk', 'Inter', sans-serif;
     letter-spacing: -0.01em;
+}
+
+:root {
+    @include mat.form-field-overrides((outlined-container-shape: 0.3rem));
+
+    --mdc-outlined-text-field-outline-color: var(--border);
+    --mdc-outlined-text-field-hover-outline-color: var(--pacific-cyan);
+    --mdc-outlined-text-field-focus-outline-color: var(--accent);
+    --mdc-outlined-text-field-label-text-color: var(--text-secondary);
+    --mdc-outlined-text-field-focus-label-text-color: var(--accent);
+    --mdc-outlined-text-field-input-text-color: var(--text-primary);
+    --mdc-outlined-text-field-container-shape: 0.6rem;
+    --mdc-filled-button-container-color: var(--accent);
+    --mdc-filled-button-label-text-color: var(--accent-contrast);
+    --mdc-filled-button-container-shape: 0.6rem;
+    --mdc-icon-button-icon-color: var(--text-secondary);
+    --mat-select-panel-background-color: var(--surface);
+    --mat-form-field-container-height: 3rem;
+    --mat-form-field-error-text-color: var(--danger);
 }
