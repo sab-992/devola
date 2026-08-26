@@ -7,15 +7,18 @@
 #include <database/value.hpp>
 #include <chrono>
 #include <nlohmann/json.hpp>
+#include <vector>
+#include <ranges>
 
 
 struct Resume {
     std::string tag;
     std::string content;
-    std::chrono::time_point<std::chrono::system_clock> created_at;
+    std::vector<std::string> skills;
     std::chrono::time_point<std::chrono::system_clock> last_updated_at;
 
     nlohmann::json toJSON() const;
+    database_n::record_t toDatabaseFormat() const;
 
     static Resume fromDatabaseFormat(const database_n::record_t& record);
     static Resume fromJSON(const nlohmann::json& object);

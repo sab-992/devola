@@ -15,8 +15,10 @@ public:
 
     friend std::unique_ptr<ResumeRepository> std::make_unique<ResumeRepository>();
 
-    void createResume(std::string_view userUUID, const json& resume);
+    Resume createResume(std::string_view userUUID, const json& resume);
+    void deleteResume(std::string_view userUUID, std::string_view tag);
     std::vector<Resume> fetchResumes(std::string_view userUUID);
+    Resume updateResumeSkills(std::string_view userUUID, std::string_view resumeTag,  const std::vector<std::string>& updatedSkills);
 
 private:
     ServerTools m_tools;
