@@ -57,6 +57,26 @@ h3 {
     letter-spacing: -0.01em;
 }
 
+.danger {
+    &:hover {
+        color: var(--danger) !important;
+    }
+}
+
+.action {
+    &:hover {
+        color: var(--accent);
+    }
+}
+
+.action-border {
+    border-radius: 0.3rem;
+    border: 1px solid var(--text-primary);
+    &:hover {
+        border: 1px solid var(--accent);
+    }
+}
+
 :root {
     @include mat.form-field-overrides((outlined-container-shape: 0.3rem));
 
@@ -74,4 +94,10 @@ h3 {
     --mat-select-panel-background-color: var(--surface);
     --mat-form-field-container-height: 3rem;
     --mat-form-field-error-text-color: var(--danger);
+    --mdc-filled-button-disabled-container-color: var(--border);
+    --mdc-filled-button-disabled-label-text-color: var(--text-secondary);
+    --mdc-chip-elevated-container-color: var(--surface-muted);
+    --mdc-chip-label-text-color: var(--text-primary);
+    --mdc-chip-with-trailing-icon-trailing-icon-color: var(--text-secondary);
+    --mdc-chip-outline-color: var(--border);
 }
