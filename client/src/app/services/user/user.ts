@@ -6,6 +6,7 @@ import { Login } from '@models/login';
 import { Register } from '@models/register';
 import { HttpService } from '@services/http/http';
 import { catchError, of, tap } from 'rxjs';
+import { routes } from '@config/app.routes';
 
 
 type ErrorCallback = (error: HttpErrorResponse) => void;
@@ -53,7 +54,12 @@ export class UserService {
             throw new Error(`Error #${error.status} during authentication: ${error.message}`);
 
         this.m_isAuthenticated.set(false);
-        this.m_router.navigate(["/"])
+        const KNOWN_PATHS = routes.map(r => r.path).filter(p => p !== '**' && p !== undefined);
+        const currentPath = window.location.pathname.replace(/^\//, '');
+        const isKnownRoute = KNOWN_PATHS.includes(currentPath);
+
+        if (isKnownRoute)
+            this.m_router.navigate(["/"]);
     }
 
     private handleLogin() {
