@@ -3,6 +3,7 @@
 }
 
 .sub-body {
+    height: 90vh;
     max-width: 150rem;
     margin: 0 auto;
     padding: 1.5rem clamp(1.25rem, 4vw, 3rem) 2rem;
@@ -12,6 +13,7 @@
 }
 
 .sub-card {
+    height: 11rem;
     padding: 1.5rem clamp(1.25rem, 3vw, 2rem);
     border-radius: 1rem;
     border: 1px solid var(--border);
@@ -41,7 +43,7 @@
 }
 
 .sub-feeds-card {
-    height: 60vh;
+    height: 100%;
 }
 
 .sub-feeds {
