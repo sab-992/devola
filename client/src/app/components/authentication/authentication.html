@@ -1,6 +1,10 @@
 <div class="auth-page">
     <aside class="auth-brand">
-        <div class="auth-brand__mark"><span class="auth-brand__dot"></span> Devola</div>
+        <div style="display: flex; justify-content: space-between;">
+            <div class="auth-brand__mark"><span class="auth-brand__dot"></span> Devola</div>
+            <app-theme style="visibility: hidden;" />
+        </div>
+
         <div class="auth-brand__copy">
             <h1>Find your next role.</h1>
         </div>
@@ -13,7 +17,6 @@
     </aside>
 
     <main class="auth-panel">
-        <app-theme class="theme-toggle" />
 
         <div class="auth-card">
             <div class="mode-switch" role="tablist" aria-label="Authentication mode">

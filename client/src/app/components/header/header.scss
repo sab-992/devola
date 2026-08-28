@@ -1,8 +1,8 @@
-.header {
+.app-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem clamp(1.25rem, 4vw, 3rem) 0;
+    gap: 1.5rem;
+    padding: 0.85rem clamp(1.25rem, 4vw, 3rem);
 
     &__mark {
         display: inline-flex;
@@ -10,8 +10,11 @@
         gap: 0.5rem;
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 600;
-        font-size: 1.15rem;
+        font-size: 1.1rem;
         letter-spacing: -0.02em;
+        color: var(--text-primary);
+        text-decoration: none;
+        flex-shrink: 0;
     }
 
     &__dot {
@@ -21,5 +24,74 @@
         background: var(--mint-leaf);
         box-shadow: 0 0 0 4px rgba(9, 188, 138, 0.22);
     }
-}
 
+    &__nav {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        flex: 1;
+
+        @media (max-width: 720px) {
+            display: none;
+        }
+    }
+
+    &__link {
+        position: relative;
+        padding: 0.5rem 0.7rem;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: color 0.15s ease, background-color 0.15s ease;
+
+        &:hover {
+            color: var(--text-primary);
+            background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+        }
+
+        &.is-active {
+            color: var(--text-primary);
+            font-weight: 600;
+
+            &::after {
+                content: '';
+                position: absolute;
+                left: 0.7rem;
+                right: 0.7rem;
+                bottom: 0.15rem;
+                height: 2px;
+                border-radius: 999px;
+                background: var(--accent);
+            }
+        }
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-left: auto;
+    }
+
+    &__logout {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: var(--text-secondary);
+
+        @media (max-width: 720px) {
+            display: none;
+        }
+    }
+
+    &__menu-trigger {
+        display: none;
+        color: var(--text-secondary);
+
+        @media (max-width: 720px) {
+            display: inline-flex;
+        }
+    }
+}

@@ -13,7 +13,6 @@
 }
 
 .sub-card {
-    height: 11rem;
     padding: 1.5rem clamp(1.25rem, 3vw, 2rem);
     border-radius: 1rem;
     border: 1px solid var(--border);
@@ -72,6 +71,7 @@
     flex-wrap: wrap;
     align-items: flex-start;
     gap: 0.75rem;
+    height: fit-content;
 
     &__field {
         flex: 1 1 12rem;
@@ -179,18 +179,35 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    padding: 1rem clamp(1.25rem, 4vw, 3rem);
     background: var(--surface);
     border-top: 1px solid var(--border);
     box-shadow: 0 -12px 30px -20px rgba(23, 42, 58, 0.35);
 
+    @media (max-width: 720px) {
+        height: 5rem;
+        padding: 0.5rem clamp(1.25rem, 4vw, 3rem);
+    }
+    @media (min-width: 720px) {
+        padding: 1rem clamp(1.25rem, 4vw, 3rem);
+    }
+
     &__label {
-        font-size: 0.88rem;
-        color: var(--accent)
+        @media (min-width: 720px) {
+            font-size: 1.25rem;
+        }
+        @media (max-width: 720px) {
+            font-size: 0.88rem;
+        }
+        color: var(--danger)
     }
 
     &__error {
-        font-size: 0.82rem;
+        @media (min-width: 720px) {
+            font-size: 1.25rem;
+        }
+        @media (max-width: 720px) {
+            font-size: 0.88rem;
+        }
         color: var(--danger);
     }
 
@@ -198,7 +215,14 @@
         display: flex;
         align-items: center;
         gap: 0.6rem;
+        margin-top: 0;
         margin-left: auto;
+        @media (min-width: 720px) {
+            font-size: 1.25rem;
+        }
+        @media (max-width: 720px) {
+            font-size: 0.88rem;
+        }
     }
 }
 

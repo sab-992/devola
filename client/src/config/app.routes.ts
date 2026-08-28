@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import { Route, Routes } from '@angular/router';
 import { AuthenticationPage } from '@components/authentication/authentication'
 import { FeedPage } from '@components/feed/feed';
 import { NotFoundPage } from '@components/not-found/not-found';
@@ -9,9 +9,12 @@ import { authGuard } from '@guards/auth/auth-guard';
 import { nonAuthGuard } from '@guards/non-auth/non-auth-guard';
 
 
-export const routes: Routes = [{ path: "",               component: AuthenticationPage, canActivate: [nonAuthGuard] },
-                               { path: "feed",           component: FeedPage,           canActivate: [authGuard] },
-                               { path: "recommendation", component: RecommendationPage, canActivate: [authGuard] },
-                               { path: "subscription",   component: SubscriptionPage,   canActivate: [authGuard] },
-                               { path: "resume",         component: ResumePage,   canActivate: [authGuard] },
-                               { path: "**",             component: NotFoundPage }];
+interface NavigationRoute extends Route { label?: string;
+                                          icon?: string }
+
+export const routes: NavigationRoute[] = [{ path: "",               component: AuthenticationPage, canActivate: [nonAuthGuard] },
+                                          { path: "feed",           component: FeedPage,           canActivate: [authGuard], label: "Jobs",            icon: "work_outline" },
+                                          { path: "recommendation", component: RecommendationPage, canActivate: [authGuard], label: "Recommendations", icon: "insights" },
+                                          { path: "subscription",   component: SubscriptionPage,   canActivate: [authGuard], label: "Subscriptions",   icon: "rss_feed" },
+                                          { path: "resume",         component: ResumePage,         canActivate: [authGuard], label: "Resumes",         icon: "description" },
+                                          { path: "**",             component: NotFoundPage }];

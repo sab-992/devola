@@ -2,38 +2,40 @@
     <app-header />
 
     <div class="recs-body">
-        <section class="recs-list">
+        <section style="height: 97%; overflow: hidden;">
             <h1 class="recs-list__title">Recommendation runs</h1>
 
-            @if (loadingRuns()) {
-            <div class="recs-state">
-                <mat-spinner diameter="28" />
-            </div>
-            } @else if (runsError()) {
-            <div class="recs-state">
-                <p>{{ runsError() }}</p>
-                <button type="button" mat-button (click)="retryRuns()">Retry</button>
-            </div>
-            } @else {
-            <ul class="run-list">
-                @for (run of sortedRuns(); track run.uuid) {
-                <li>
-                    <button type="button" class="run-card" [class.is-active]="selectedRun()?.uuid === run.uuid"
-                        (click)="selectRun(run)">
-                        <span class="run-card__status" [class]="'status-' + run.status">
-                            {{ formatStatus(run.status) }}
-                        </span>
-                        <span class="run-card__started">Started {{ timeAgo(run.started_at) }}</span>
-                        <span class="run-card__updated">Updated {{ timeAgo(run.last_updated_at) }}</span>
-                    </button>
-                </li>
-                } @empty {
-                <li class="recs-state">
-                    <p>No recommendation runs yet.</p>
-                </li>
+            <div class="recs-list">
+                @if (loadingRuns()) {
+                <div class="recs-state">
+                    <mat-spinner diameter="28" />
+                </div>
+                } @else if (runsError()) {
+                <div class="recs-state">
+                    <p>{{ runsError() }}</p>
+                    <button type="button" mat-button (click)="retryRuns()">Retry</button>
+                </div>
+                } @else {
+                <ul class="run-list">
+                    @for (run of sortedRuns(); track run.uuid) {
+                    <li>
+                        <button type="button" class="run-card" [class.is-active]="selectedRun()?.uuid === run.uuid"
+                            (click)="selectRun(run)">
+                            <span class="run-card__status" [class]="'status-' + run.status">
+                                {{ formatStatus(run.status) }}
+                            </span>
+                            <span class="run-card__started">Started {{ timeAgo(run.started_at) }}</span>
+                            <span class="run-card__updated">Updated {{ timeAgo(run.last_updated_at) }}</span>
+                        </button>
+                    </li>
+                    } @empty {
+                    <li class="recs-state">
+                        <p>No recommendation runs yet.</p>
+                    </li>
+                    }
+                </ul>
                 }
-            </ul>
-            }
+            </div>
         </section>
 
         <section class="recs-detail">

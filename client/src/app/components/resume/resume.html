@@ -5,23 +5,23 @@
 
         <section class="resume-card add-resume-card">
             <div style="display: flex; align-items: center; justify-content: space-between;">
-            <h2 class="resume-card__title">Upload your resume</h2>
-            <div style="display: flex; justify-content: end;">
-                @if (saveError()) {
-                <p class="field-error">{{ saveError() }}</p>
-                }
-                @if (saveSuccess()) {
-                <p class="save-success">Resume saved.</p>
-                }
-                <button style="position: relative; right: 5px;" type="button" class="resume-save action action-border"
-                    [disabled]="!canSave()" (click)="save()">
-                    @if (saving()) {
-                    <mat-spinner diameter="20" />
-                    } @else {
-                    Save resume
+                <h2 class="resume-card__title">Upload your resume</h2>
+                <div style="display: flex; justify-content: end;">
+                    @if (saveError()) {
+                    <p class="field-error">{{ saveError() }}</p>
                     }
-                </button>
-            </div>
+                    @if (saveSuccess()) {
+                    <p class="save-success">Resume saved.</p>
+                    }
+                    <button style="position: relative; right: 5px;" type="button" class="resume-save action action-border"
+                        [disabled]="!canSave()" (click)="save()">
+                        @if (saving()) {
+                        <mat-spinner diameter="20" />
+                        } @else {
+                        Save resume
+                        }
+                    </button>
+                </div>
             </div>
 
 

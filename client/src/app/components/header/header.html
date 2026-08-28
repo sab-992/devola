@@ -1,4 +1,43 @@
-<header class="header">
-    <div class="header__mark"><span class="header__dot"></span>Devola</div>
+<header class="app-header">
+    <a routerLink="/" class="app-header__mark"><span class="app-header__dot"></span> Devola</a>
+
+    <nav class="app-header__nav" aria-label="Primary">
+        @for (item of routes; track item.path) {
+            @if (item.path) {
+                <a [routerLink]="buildPath(item.path)" routerLinkActive="is-active"
+                    [routerLinkActiveOptions]="{ exact: item.path === '/' }" class="app-header__link">
+                    {{ item.label }}
+                </a>
+            }
+        }
+    </nav>
+
+    <div class="app-header__actions">
+        <button type="button" mat-button class="app-header__logout danger" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            Log out
+        </button>
+
+        <button type="button" mat-icon-button class="app-header__menu-trigger" aria-label="Open menu"
+            [matMenuTriggerFor]="mobileMenu">
+            <mat-icon>menu</mat-icon>
+        </button>
+    </div>
+
     <app-theme />
+    <mat-menu #mobileMenu="matMenu">
+        @for (item of routes; track item.path) {
+            @if (item.path) {
+                <a mat-menu-item [routerLink]="buildPath(item.path)" routerLinkActive="is-active"
+                    [routerLinkActiveOptions]="{ exact: item.path === '/' }">
+                    <mat-icon>{{ item.icon }}</mat-icon>
+                    <span>{{ item.label }}</span>
+                </a>
+            }
+        }
+        <button type="button" mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Log out</span>
+        </button>
+    </mat-menu>
 </header>

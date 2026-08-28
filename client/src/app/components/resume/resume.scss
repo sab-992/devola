@@ -12,11 +12,11 @@
 }
 
 .add-resume-card {
-    height: 23rem;
+    height: 25rem;
 }
 
 .resume-card {
-    width: 90%;
+    width: 95%;
     overflow: auto;
     padding: 1.5rem clamp(1.25rem, 3vw, 2rem);
     border-radius: 1rem;
@@ -66,6 +66,7 @@
 }
 
 .dropzone {
+    height: 12rem;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -96,6 +97,9 @@
     }
 
     &__label {
+        @media (max-width: 720px) {
+            visibility: collapse;
+        }
         margin: 0;
         font-size: 0.92rem;
         color: var(--text-primary);
@@ -167,7 +171,7 @@
 }
 
 .saved-resumes {
-    height: 90%;
+    height: 88%;
     overflow: auto;
     list-style: none;
     margin: 0;
