@@ -15,11 +15,11 @@ export class ThemeComponent {
         effect(this.m_themeService.saveTheme.bind(this.m_themeService));
     }
 
-    get theme() {
-        return this.m_themeService.theme;
+    public isLightMode() {
+        return this.m_themeService.theme() === "light";
     }
 
-    toggleTheme(): void {
+    public toggleTheme(): void {
         this.m_themeService.toggle();
     }
 }

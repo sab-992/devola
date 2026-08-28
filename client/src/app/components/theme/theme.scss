@@ -18,3 +18,15 @@
         color: var(--accent-contrast);
     }
 }
+
+.light-hover {
+    &:hover {
+        color: #ffd000;
+    }
+}
+
+.dark-hover {
+    &:hover {
+        color: #5900ff;
+    }
+}
