@@ -8,7 +8,7 @@ int main() {
         std::unique_ptr<UserService> server = UserService::create(configJSON);
 
         server->setDatabase(PostgreSQL::instance(configJSON["postgres"]));
-
+        server->setThreadPoolSize(2);
         server->run();
 
         return 0;

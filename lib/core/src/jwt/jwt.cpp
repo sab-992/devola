@@ -1,19 +1,20 @@
 #include <core/jwt/jwt.hpp>
 
-std::string JWT::generate(const json& extra_claims) {
+
+void JWT::generate(const json& extra_claims, http_n::Response& response) {
     if (not extra_claims.is_object())
         throw InvalidArgument("must be a JSON object", "Extra claims");
 
     const auto now = std::chrono::system_clock::now();
     auto token_builder = jwt::create().set_type("JWT")
-                                        .set_issuer(ISSUER)
-                                        .set_issued_at(now)
-                                        .set_expires_at(now + TTL);
+                                      .set_issuer(ISSUER)
+                                      .set_issued_at(now)
+                                      .set_expires_at(now + TTL);
 
     for (auto it = extra_claims.begin(); it != extra_claims.end(); ++it)
         token_builder.set_payload_claim(it.key(), jwt::claim(it.value()));
 
-    return token_builder.sign(jwt::algorithm::hs256{secret()});
+    setToken(response, token_builder.sign(jwt::algorithm::hs256{secret()}));
 }
 
 std::string JWT::getToken(const http_n::Request& request) {
@@ -39,12 +40,19 @@ void JWT::setToken(http_n::Response& response, std::string_view token) {
     response.setHeader("Set-Cookie", std::format("{}={}; HttpOnly; Secure; SameSite=Strict; Path=/", TOKEN_COOKIE_NAME, token));
 }
 
-nlohmann::json JWT::verify(const std::string& token) {
-    auto decoded = jwt::decode(token);
-    auto verifier = jwt::verify().allow_algorithm(jwt::algorithm::hs256{secret()})
-                                    .with_issuer(ISSUER);
+nlohmann::json JWT::verify(std::string_view token) {
+    try {
+        auto decoded = jwt::decode(std::string(token));
+        auto verifier = jwt::verify().allow_algorithm(jwt::algorithm::hs256{secret()})
+                                     .with_issuer(ISSUER);
 
-    verifier.verify(decoded);
+        verifier.verify(decoded);
+        return json(decoded.get_payload_json());
+    } catch (const std::exception& e) {
+        throw InvalidToken(e.what());
+    }
+}
 
-    return json(decoded.get_payload_json());
+nlohmann::json JWT::verify(const http_n::Request& request) {
+    return verify(getToken(request));
 }

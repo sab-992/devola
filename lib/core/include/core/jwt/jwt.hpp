@@ -16,15 +16,19 @@ class JWT {
     using json = nlohmann::json;
 
 public:
-    static std::string generate(const json& extra_claims);
+    static void generate(const json& extra_claims, http_n::Response& response);
+
     static std::string getToken(const http_n::Request& request);
-    static void setToken(http_n::Response& response, std::string_view token);
-    static json verify(const std::string& token);
+
+    static json verify(std::string_view token);
+    static json verify(const http_n::Request& request);
 
 private:
     inline static const std::string TOKEN_COOKIE_NAME = "jwt";
     inline static const std::string ISSUER = "Devola";
     inline static const std::chrono::seconds TTL = std::chrono::hours(24);
+
+    static void setToken(http_n::Response& response, std::string_view token);
 
     static std::string secret();
 };

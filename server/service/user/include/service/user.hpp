@@ -2,9 +2,9 @@
 
 #include <core/http.hpp>
 #include <core/file.hpp>
-#include <core/jwt.hpp>
 #include <core/process.hpp>
 #include <core/utility.hpp>
+#include <core/jwt.hpp>
 #include <database/postgres.hpp>
 #include <user/repository.hpp>
 #include <service/tools.hpp>
@@ -39,5 +39,6 @@ private:
     asio::awaitable<Response> register_(const Session& session, const http_n::Request& request, const pathParams_t&);
     void setEndpoints();
     user::ServerTools tools();
+    json validateJWT(const http_n::Request& request) const;
     bool validateUserIdentity(const http_n::Request& request, json& claims) const;
 };

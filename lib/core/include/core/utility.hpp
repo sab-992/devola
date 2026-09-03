@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/utility/authentication.hpp>
 #include <core/utility/compare.hpp>
 #include <core/utility/converter.hpp>
 #include <core/utility/enum.hpp>

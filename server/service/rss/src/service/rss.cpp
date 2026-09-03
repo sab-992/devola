@@ -17,37 +17,39 @@ RSSService::RSSService(const Private_s&, const json& configJSON) : m_configJSON(
 RSSService::~RSSService() {}
 
 asio::awaitable<http_n::Response> RSSService::addResume(const Session& session, const http_n::Request& request, const pathParams_t&) {
-    json userInfo;
-    if (not validateUserIdentity(request, userInfo))
-        co_return Response().setStatus(Code::UNAUTHORIZED).build();
-
-    const json& requestBody = request.body<json>();
-    if (not requestBody.is_object())
-        co_return Response().setStatus(Code::BAD_REQUEST).build();
-
     try {
+        co_await authenticate(request, m_http);
+        const json& userInfo = JWT::verify(request);
+
+        const json& requestBody = request.body<json>();
+        if (not requestBody.is_object())
+            throw InvalidArgument("Body is not an object");
+
         const auto& addedResume = m_resumeRepos->createResume(userInfo["uuid"].get<std::string>(), requestBody);
         co_return Response().setBody(addedResume.toJSON())
                             .setStatus(Code::CREATED).build();
-    } catch (std::exception e) {
+    } catch (const Exception& e) {
+        co_return Response().setStatus(e.code()).build();
+    } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "while creating resume:", e.what());
         co_return Response().setStatus(Code::SERVER_ERROR).build();
     }
 }
 
 asio::awaitable<http_n::Response> RSSService::deleteResume(const Session& session, const http_n::Request& request, const pathParams_t& params) {
-    json userInfo;
-    if (not validateUserIdentity(request, userInfo))
-        co_return Response().setStatus(Code::UNAUTHORIZED).build();
-
-    if (not params.contains("tag"))
-        co_return Response().setStatus(Code::NOT_ALLOWED).build();
-
     try {
+        co_await authenticate(request, m_http);
+        const json& userInfo = JWT::verify(request);
+
+        if (not params.contains("tag"))
+            throw NotSupported("Path parameter: \"tag\" is missing");
+
         m_resumeRepos->deleteResume(userInfo["uuid"].get<std::string>(), params.at("tag"));
         co_return Response().setStatus(Code::NO_CONTENT).build();
-    } catch (std::exception e) {
-        m_light->log(log_n::Level_en::ERROR, "while deleting resume:", e.what());
+    } catch (const Exception& e) {
+        co_return Response().setStatus(e.code()).build();
+    } catch (const std::exception& e) {
+        m_light->log(log_n::Level_en::ERROR, "Unexpected error while deleting resume:", e.what());
         co_return Response().setStatus(Code::SERVER_ERROR).build();
     }
 }
@@ -90,82 +92,98 @@ rss::ServerTools RSSService::tools() {
 }
 
 asio::awaitable<http_n::Response> RSSService::feeds(const Session& session, const http_n::Request& request, const pathParams_t&) {
-    using namespace database_n;
+    try {
+        co_await authenticate(request, m_http);
+        const json& userInfo = JWT::verify(request);
 
-    json userInfo;
-    if (not validateUserIdentity(request, userInfo))
-        co_return Response().setStatus(Code::UNAUTHORIZED).build();
+        const auto& subscriptions = m_subscriptionRepos->fetchSubscriptions(userInfo["uuid"].get<std::string>());
 
-    const auto& subscriptions = m_subscriptionRepos->fetchSubscriptions(userInfo["uuid"].get<std::string>());
+        auto response = Response();
+        if (subscriptions.empty())
+            co_return response.setStatus(Code::OK).setBody<nlohmann::json>("[]").build();
 
-    auto response = Response();
-    if (subscriptions.empty())
-        co_return response.setStatus(Code::OK).build();
-
-    json body = co_await m_listingRepos->fetchListings(subscriptions);
-
-    co_return response.setStatus(Code::OK)
-                      .setBody<nlohmann::json>(body).build();
+        co_return response.setStatus(Code::OK)
+                          .setBody<nlohmann::json>(co_await m_listingRepos->fetchListings(subscriptions)).build();
+    } catch (const Exception& e) {
+        co_return Response().setStatus(e.code()).build();
+    } catch (const std::exception& e) {
+        m_light->log(log_n::Level_en::ERROR, "Unexpected error while fetching feeds:", e.what());
+        co_return Response().setStatus(Code::SERVER_ERROR).build();
+    }
 }
 
 asio::awaitable<http_n::Response> RSSService::recommend(const Session& session, const http_n::Request& request, const pathParams_t&) {
-    json userInfo;
-    if (not validateUserIdentity(request, userInfo))
-        co_return Response().setStatus(Code::UNAUTHORIZED).build();
+    try {
+        co_await authenticate(request, m_http);
+        const json& userInfo = JWT::verify(request);
 
-    const std::string& userUUID = userInfo["uuid"].get<std::string>();
-    const std::vector<Resume>& resumes = m_resumeRepos->fetchResumes(userUUID);
-    const auto& subscriptions = m_subscriptionRepos->fetchSubscriptions(userUUID);
+        const std::string& userUUID = userInfo["uuid"].get<std::string>();
+        const auto& subscriptions = m_subscriptionRepos->fetchSubscriptions(userUUID);
+        if (subscriptions.empty())
+            throw InvalidArgument("is empty", "User's subscription list");
 
-    if (subscriptions.empty())
-        co_return Response().setStatus(Code::BAD_REQUEST).build();
-    else if (resumes.empty())
-        co_return Response().setStatus(Code::BAD_REQUEST).build();
+        const std::vector<Resume>& resumes = m_resumeRepos->fetchResumes(userUUID);
+        if (resumes.empty())
+            throw InvalidArgument("is empty", "User's resume list");
 
-    json websiteListings = co_await m_listingRepos->fetchListings(subscriptions);
+        const json& websiteListings = co_await m_listingRepos->fetchListings(subscriptions);
 
-    const RecommendationTask& task = m_recommendationRepos->createTask(userUUID);
-    asio::post(m_ioContext.get_executor(), std::bind_front(&RecommendationRepository::runTask, m_recommendationRepos, userUUID,
-                                                                                                                      task.uuid,
-                                                                                                                      resumes,
-                                                                                                                      websiteListings,
-                                                                                                                      subscriptions));
-    co_return Response().setStatus(Code::OK)
-                        .setBody<json>(task.toJSON()).build();
+        const RecommendationTask& task = m_recommendationRepos->createTask(userUUID);
+        asio::post(m_ioContext.get_executor(), std::bind_front(&RecommendationRepository::runTask, m_recommendationRepos, userUUID,
+                                                                                                                          task.uuid,
+                                                                                                                          resumes,
+                                                                                                                          websiteListings,
+                                                                                                                          subscriptions));
+        co_return Response().setStatus(Code::OK)
+                            .setBody<json>(task.toJSON()).build();
+    } catch (const Exception& e) {
+        co_return Response().setStatus(e.code()).build();
+    } catch (const std::exception& e) {
+        m_light->log(log_n::Level_en::ERROR, "Unexpected error while starting recommendation task:", e.what());
+        co_return Response().setStatus(Code::SERVER_ERROR).build();
+    }
 }
 
 asio::awaitable<http_n::Response> RSSService::recommendation(const Session& session, const http_n::Request& request, const pathParams_t& params) {
-    json userInfo;
-    if (not validateUserIdentity(request, userInfo))
-        co_return Response().setStatus(Code::UNAUTHORIZED).build();
+    try {
+        co_await authenticate(request, m_http);
+        const json& userInfo = JWT::verify(request);
 
-    if (not params.contains("task_uuid"))
-        co_return Response().setStatus(Code::NOT_ALLOWED).build();
+        if (not params.contains("task_uuid"))
+            throw NotSupported("Path parameter: \"task_uuid\" is missing");
 
-    const auto& body = m_recommendationRepos->fetchTaskResult(userInfo["uuid"].get<std::string>(), params.at("task_uuid"));
+        const auto& body = m_recommendationRepos->fetchTaskResult(userInfo["uuid"].get<std::string>(), params.at("task_uuid"));
 
-    co_return Response().setBody<json>(body)
-                        .setStatus(Code::OK).build();
+        co_return Response().setBody<json>(body)
+                            .setStatus(Code::OK).build();
+    } catch (const Exception& e) {
+        co_return Response().setStatus(e.code()).build();
+    } catch (const std::exception& e) {
+        m_light->log(log_n::Level_en::ERROR, "Unexpected error while fetching recommendation task's result:", e.what());
+        co_return Response().setStatus(Code::SERVER_ERROR).build();
+    }
 }
 
 asio::awaitable<http_n::Response> RSSService::recommendations(const Session& session, const http_n::Request& request, const pathParams_t&) {
-    json userInfo;
-    if (not validateUserIdentity(request, userInfo))
-        co_return Response().setStatus(Code::UNAUTHORIZED).build();
+    try {
+        co_await authenticate(request, m_http);
+        const json& userInfo = JWT::verify(request);
 
-    const auto& body = m_recommendationRepos->fetchTasks(userInfo["uuid"].get<std::string>());
-
-
-    co_return Response().setBody<json>(body)
-                        .setStatus(Code::OK).build();
+        co_return Response().setBody<json>(m_recommendationRepos->fetchTasks(userInfo["uuid"].get<std::string>()))
+                            .setStatus(Code::OK).build();
+    } catch (const Exception& e) {
+        co_return Response().setStatus(e.code()).build();
+    } catch (const std::exception& e) {
+        m_light->log(log_n::Level_en::ERROR, "Unexpected error while fetching recommendation tasks:", e.what());
+        co_return Response().setStatus(Code::SERVER_ERROR).build();
+    }
 }
 
 asio::awaitable<http_n::Response> RSSService::resumes(const Session& session, const http_n::Request& request, const pathParams_t&) {
-    json userInfo;
-    if (not validateUserIdentity(request, userInfo))
-        co_return Response().setStatus(Code::UNAUTHORIZED).build();
-
     try {
+        co_await authenticate(request, m_http);
+        const json& userInfo = JWT::verify(request);
+
         const auto& resumes = m_resumeRepos->fetchResumes(userInfo["uuid"].get<std::string>());
 
         json body = json::array();
@@ -174,7 +192,9 @@ asio::awaitable<http_n::Response> RSSService::resumes(const Session& session, co
 
         co_return Response().setBody(body)
                             .setStatus(Code::OK).build();
-    } catch (std::exception e) {
+    } catch (const Exception& e) {
+        co_return Response().setStatus(e.code()).build();
+    } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "while fetching resumes:", e.what());
         co_return Response().setStatus(Code::SERVER_ERROR).build();
     }
@@ -183,72 +203,72 @@ asio::awaitable<http_n::Response> RSSService::resumes(const Session& session, co
 asio::awaitable<http_n::Response> RSSService::subscribe(const Session& session, const http_n::Request& request, const pathParams_t&) {
     using namespace database_n;
 
-    json userInfo;
-    if (not validateUserIdentity(request, userInfo))
-        co_return Response().setStatus(Code::UNAUTHORIZED).build();
-
-    json subscriptions = request.body<nlohmann::json>();
     Transaction tx{pgsql_n::Transaction()};
     try {
+        co_await authenticate(request, m_http);
+        const json& userInfo = JWT::verify(request);
+
+        json subscriptions = request.body<nlohmann::json>();
+
         m_listingRepos->createWebsites(subscriptions, tx);
         m_subscriptionRepos->saveSubscriptions(userInfo["uuid"].get<std::string>(), subscriptions, tx);
+
         tx.get<pgsql_n::Transaction>().commit();
-    } catch (std::exception e) {
-        m_light->log(log_n::Level_en::ERROR, m_extraLogInformation, "Error during subscription to websites");
+        co_return Response().setStatus(Code::CREATED).build();
+    } catch (const Exception& e) {
         tx.get<pgsql_n::Transaction>().abort();
-        co_return Response().setStatus(Code::BAD_REQUEST).setBody<std::string>(e.what()).build();
-    }
-
-    co_return Response().setStatus(Code::CREATED).build();
-}
-
-asio::awaitable<http_n::Response> RSSService::subscriptions(const Session& session, const http_n::Request& request, const pathParams_t&) {
-    json userInfo;
-    if (not validateUserIdentity(request, userInfo))
-        co_return Response().setStatus(Code::UNAUTHORIZED).build();
-
-    const auto& subscriptions = m_subscriptionRepos->fetchSubscriptions(userInfo["uuid"].get<std::string>());
-    json body = json::array();
-    for (const auto& subscription : subscriptions) {
-        json website;
-        website["host"] = subscription.at("website_host").asString();
-        website["endpoint"] = subscription.at("website_endpoint").asString();
-        website["created_at"] = Time::toSecondsSinceEpoch(fromPGSQLFormat(subscription.at("created_at").asString()));
-
-        body.emplace_back(website);
-    }
-
-    co_return Response().setBody<json>(body)
-                        .setStatus(Code::OK).build();
-}
-
-asio::awaitable<http_n::Response> RSSService::updateResume(const Session& session, const http_n::Request& request, const pathParams_t& params) {
-    json userInfo;
-    if (not validateUserIdentity(request, userInfo))
-        co_return Response().setStatus(Code::UNAUTHORIZED).build();
-
-    if (not params.contains("tag"))
-        co_return Response().setStatus(Code::NOT_ALLOWED).build();
-
-    const json& requestBody = request.body<json>();
-    if (requestBody.empty() or not requestBody.is_array())
-        co_return Response().setStatus(Code::BAD_REQUEST).build();
-
-    try {
-        Resume updatedResume = m_resumeRepos->updateResumeSkills(userInfo["uuid"].get<std::string>(), params.at("tag"), requestBody.get<std::vector<std::string>>());
-        co_return Response().setBody<json>(updatedResume.toJSON())
-                            .setStatus(Code::OK).build();
-    } catch (std::exception e) {
-        m_light->log(log_n::Level_en::ERROR, "while updating resume:", e.what());
+        co_return Response().setStatus(e.code()).build();
+    } catch (const std::exception& e) {
+        m_light->log(log_n::Level_en::ERROR, "while saving subscriptions:", e.what());
+        tx.get<pgsql_n::Transaction>().abort();
         co_return Response().setStatus(Code::SERVER_ERROR).build();
     }
 }
 
-bool RSSService::validateUserIdentity(const http_n::Request& request, json& claims) const {
+asio::awaitable<http_n::Response> RSSService::subscriptions(const Session& session, const http_n::Request& request, const pathParams_t&) {
     try {
-        claims = JWT::verify(JWT::getToken(request));
+        co_await authenticate(request, m_http);
+        const json& userInfo = JWT::verify(request);
+
+        json body = json::array();
+        for (const auto& subscription : m_subscriptionRepos->fetchSubscriptions(userInfo["uuid"].get<std::string>())) {
+            json website;
+            website["host"] = subscription.at("website_host").asString();
+            website["endpoint"] = subscription.at("website_endpoint").asString();
+            website["created_at"] = Time::toSecondsSinceEpoch(fromPGSQLFormat(subscription.at("created_at").asString()));
+
+            body.emplace_back(website);
+        }
+
+        co_return Response().setBody<json>(body)
+                            .setStatus(Code::OK).build();
+    } catch (const Exception& e) {
+        co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
-        return false;
+        m_light->log(log_n::Level_en::ERROR, "while fetching subscriptions:", e.what());
+        co_return Response().setStatus(Code::SERVER_ERROR).build();
     }
-    return true;
+}
+
+asio::awaitable<http_n::Response> RSSService::updateResume(const Session& session, const http_n::Request& request, const pathParams_t& params) {
+    try {
+        co_await authenticate(request, m_http);
+        const json& userInfo = JWT::verify(request);
+
+        if (not params.contains("tag"))
+            throw NotSupported("Path parameter: \"tag\" is missing");
+
+        const json& requestBody = request.body<json>();
+        if (requestBody.empty() or not requestBody.is_array())
+            throw InvalidArgument("must be a JSON array", "Body");
+
+        const Resume& updatedResume = m_resumeRepos->updateResumeSkills(userInfo["uuid"].get<std::string>(), params.at("tag"), requestBody.get<std::vector<std::string>>());
+        co_return Response().setBody<json>(updatedResume.toJSON())
+                            .setStatus(Code::OK).build();
+    } catch (const Exception& e) {
+        co_return Response().setStatus(e.code()).build();
+    } catch (const std::exception& e) {
+        m_light->log(log_n::Level_en::ERROR, "while updating resume:", e.what());
+        co_return Response().setStatus(Code::SERVER_ERROR).build();
+    }
 }
