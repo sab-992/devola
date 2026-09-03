@@ -26,7 +26,7 @@ public:
 private:
     inline static const std::string TOKEN_COOKIE_NAME = "jwt";
     inline static const std::string ISSUER = "Devola";
-    inline static const std::chrono::seconds TTL = std::chrono::hours(24);
+    inline static const std::chrono::seconds TTL = std::chrono::minutes(15);
 
     static void setToken(http_n::Response& response, std::string_view token);
 
