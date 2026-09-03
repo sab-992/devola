@@ -8,7 +8,6 @@
 #include <chrono>
 #include <nlohmann/json.hpp>
 #include <vector>
-#include <ranges>
 
 
 struct Resume {

@@ -28,7 +28,6 @@ namespace http_n
         ~Response() = default;
 
         Response& operator=(Response other);
-        Response& operator=(Response&& other) = default;
 
         Response& set(std::string_view stringResponse);
         Response& setStatus(Code code);

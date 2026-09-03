@@ -3,6 +3,7 @@
 #include <core/exception.hpp>
 #include <core/file.hpp>
 #include <core/http.hpp>
+#include <core/jwt.hpp>
 #include <core/logging.hpp>
 #include <core/network.hpp>
 #include <core/process.hpp>
