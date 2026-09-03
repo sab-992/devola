@@ -7,27 +7,27 @@ function(create_library lib_path lib_type link_core)
 
     set(src_dir "${lib_path}/src")
     set(include_dir "${lib_path}/include")
-    
+
     if(NOT EXISTS ${src_dir})
         message(FATAL_ERROR "Source directory does not exist: ${src_dir}")
     endif()
-    
+
     if(NOT EXISTS ${include_dir})
         message(FATAL_ERROR "Include directory does not exist: ${include_dir}")
     endif()
-    
+
     find_cpp_files(${src_dir} cpp_sources)
-    
+
     if(NOT cpp_sources)
         message(FATAL_ERROR "No .cpp files found in ${src_dir}")
     endif()
-    
+
     message(STATUS "Creating library ${target_name} (${lib_type})")
-    
+
     add_library(${target_name} ${lib_type} ${cpp_sources})
 
     target_include_directories(${target_name} PUBLIC ${include_dir})
-    
+
     set_target_properties(${target_name} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON POSITION_INDEPENDENT_CODE ON)
 
     if(${link_core} AND TARGET core_lib)

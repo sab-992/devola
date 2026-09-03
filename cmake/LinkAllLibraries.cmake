@@ -1,6 +1,6 @@
 function(link_all_libraries target_name libs_dir)
     file(GLOB subdirectories RELATIVE ${libs_dir} "${libs_dir}/*")
-    
+
     foreach(subdir ${subdirectories})
         set(full_path "${libs_dir}/${subdir}")
 
