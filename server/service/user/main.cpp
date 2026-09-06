@@ -8,8 +8,10 @@ int main() {
         std::unique_ptr<UserService> server = UserService::create(configJSON);
 
         server->setDatabase(PostgreSQL::instance(configJSON["postgres"]));
+        server->setRevokedTokenCache(Redis::instance(configJSON["redis"]));
         server->setThreadPoolSize(2);
-        server->run();
+        // server->run();
+        server->test();
 
         return 0;
     } catch (Exception e) {

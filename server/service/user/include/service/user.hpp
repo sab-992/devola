@@ -6,6 +6,7 @@
 #include <core/utility.hpp>
 #include <core/jwt.hpp>
 #include <database/postgres.hpp>
+#include <database/redis.hpp>
 #include <user/repository.hpp>
 #include <service/tools.hpp>
 
@@ -24,12 +25,14 @@ public:
 
     std::string pathPrefix() const override;
     void setDatabase(std::shared_ptr<Database_i> database);
+    void setRevokedTokenCache(std::shared_ptr<Database_i> database);
 
     static std::unique_ptr<UserService> create(const json& configJSON);
 
 private:
     json m_configJSON;
     std::shared_ptr<Database_i> m_database;
+    std::shared_ptr<Database_i> m_revokedTokenCache;
     std::unique_ptr<UserRepository> m_userRepos;
 
     asio::awaitable<Response> authenticate(const Session& session, const http_n::Request& request, const pathParams_t&);

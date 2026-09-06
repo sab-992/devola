@@ -8,6 +8,11 @@
             "postgres": {
                 "host": "localhost",
                 "port": "5432"
+            },
+            "redis": {
+                "host": "localhost",
+                "port": 6380,
+                "database": 1
             }
         },
         "production": {
@@ -17,6 +22,11 @@
             "postgres": {
                 "host": "localhost",
                 "port": "5432"
+            },
+            "redis": {
+                "host": "localhost",
+                "port": 6380,
+                "database": 2
             }
         }
     }

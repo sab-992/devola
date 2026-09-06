@@ -305,7 +305,7 @@ pgsql_n::Options PostgreSQL::optionsFromJSON(const json& postgresJSON) const {
              postgresJSON["port"],
              "devola",
              "devola_app",
-             env(std::format("{}/settings/.env", ROOT_DIRECTORY))["POSTGRES_APP_USER_PASSWORD"] };
+             env(std::format("{}/settings/.env", ROOT_DIRECTORY))["POSTGRES_APP_PASSWORD"] };
 }
 
 std::string PostgreSQL::orderBy(const Query& query) const {

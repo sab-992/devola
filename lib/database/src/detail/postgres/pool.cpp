@@ -2,7 +2,7 @@
 
 
 // ----------------------------------------------------------
-//                            ACCESS
+//                            Access
 // ----------------------------------------------------------
 
 pgsql_n::ConnectionPool::Access::Access(ConnectionPool& pool) : m_pool(pool), m_connection(pool.acquire()) {}

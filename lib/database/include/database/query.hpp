@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <core/utility/interface/builder.hpp>
 #include <database/value.hpp>
 #include <memory>
@@ -8,6 +9,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+
 
 namespace database_n
 {
@@ -63,6 +65,7 @@ namespace database_n
             std::optional<size_t> limit;
             std::optional<size_t> offset;
             std::optional<std::vector<Sort>> sort;
+            std::optional<std::chrono::seconds> ttl;
         };
 
         Query();

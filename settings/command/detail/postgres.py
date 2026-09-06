@@ -53,7 +53,7 @@ class Postgres():
 
         env_path = os.path.join(self.fs.find_root_folder(), "settings", ".env")
         load_dotenv(env_path)
-        password = os.getenv("POSTGRES_APP_USER_PASSWORD")
+        password = os.getenv("POSTGRES_APP_PASSWORD")
 
         if (not password):
             raise RuntimeError(f"PGSQL: No user password given")

@@ -11,7 +11,8 @@
             },
             "redis": {
                 "host": "localhost",
-                "port": 6380
+                "port": 6390,
+                "database": 1
             }
         },
         "production": {
@@ -24,7 +25,8 @@
             },
             "redis": {
                 "host": "localhost",
-                "port": "port"
+                "port": 6390,
+                "database": 2
             }
         }
     }

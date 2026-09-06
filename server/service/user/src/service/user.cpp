@@ -3,7 +3,8 @@
 
 UserService::UserService(const Private_s&, const json& configJSON) : m_configJSON(configJSON), Basic("UserService", configJSON["server"]["port"]) {
     setStartSequence([&](Basic*){
-        assert(this->m_database && "[UserService]: No database given");
+        assert(this->m_database          && "[UserService]: No database given");
+        assert(this->m_revokedTokenCache && "[UserService]: No revoked token cache given");
         m_userRepos = std::make_unique<UserRepository>(tools());
     });
 
@@ -107,6 +108,10 @@ void UserService::setEndpoints() {
     ENDPOINT("POST", "/logout",       &UserService::logout);
     ENDPOINT("POST", "/refresh",      &UserService::refresh);
     ENDPOINT("POST", "/register",     &UserService::register_);
+}
+
+void UserService::setRevokedTokenCache(std::shared_ptr<Database_i> database) {
+    m_revokedTokenCache = database;
 }
 
 user::ServerTools UserService::tools() {
