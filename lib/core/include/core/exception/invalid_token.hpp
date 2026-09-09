@@ -1,10 +1,10 @@
 #pragma once
 
-#include <core/exception/exception.hpp>
+#include <core/exception/logic.hpp>
 
 
-class InvalidToken : public Exception {
+class InvalidToken : public LogicException {
 public:
-    InvalidToken(const std::string& functionName);
+    InvalidToken(const std::string& message);
     ~InvalidToken() = default;
 };

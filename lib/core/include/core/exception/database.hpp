@@ -5,6 +5,6 @@
 
 class DatabaseException : public Exception {
 public:
-    DatabaseException(const std::string& functionName);
+    DatabaseException(const std::string& message);
     ~DatabaseException() = default;
 };

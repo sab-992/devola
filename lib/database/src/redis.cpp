@@ -143,7 +143,7 @@ std::string Redis::extractTTL(const Query& query) const {
     if (not query.options().has_value() or not query.options()->ttl.has_value())
         return "";
 
-    return std::format("{}", query.options()->ttl.value());
+    return std::format(" EX {}", query.options()->ttl.value().count());
 }
 
 database_n::Value Redis::fromRedisReply(const redisReply *reply) const {
@@ -203,7 +203,7 @@ std::string Redis::fromValue(const Value& value) const {
         [&result, &value = std::as_const(value)](auto&& arg) { result = Converter::toString(arg); }
     }, value.raw());
 
-    return result;
+    return std::format("\"{}\"", result);
 }
 
 std::shared_ptr<Redis> Redis::instance(const json& redisJSON) {

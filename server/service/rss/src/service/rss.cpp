@@ -28,7 +28,7 @@ asio::awaitable<http_n::Response> RSSService::addResume(const Session& session, 
         const auto& addedResume = m_resumeRepos->createResume(userInfo["uuid"].get<std::string>(), requestBody);
         co_return Response().setBody(addedResume.toJSON())
                             .setStatus(Code::CREATED).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "while creating resume:", e.what());
@@ -46,7 +46,7 @@ asio::awaitable<http_n::Response> RSSService::deleteResume(const Session& sessio
 
         m_resumeRepos->deleteResume(userInfo["uuid"].get<std::string>(), params.at("tag"));
         co_return Response().setStatus(Code::NO_CONTENT).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "Unexpected error while deleting resume:", e.what());
@@ -104,7 +104,7 @@ asio::awaitable<http_n::Response> RSSService::feeds(const Session& session, cons
 
         co_return response.setStatus(Code::OK)
                           .setBody<nlohmann::json>(co_await m_listingRepos->fetchListings(subscriptions)).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "Unexpected error while fetching feeds:", e.what());
@@ -136,7 +136,7 @@ asio::awaitable<http_n::Response> RSSService::recommend(const Session& session, 
                                                                                                                           subscriptions));
         co_return Response().setStatus(Code::OK)
                             .setBody<json>(task.toJSON()).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "Unexpected error while starting recommendation task:", e.what());
@@ -156,7 +156,7 @@ asio::awaitable<http_n::Response> RSSService::recommendation(const Session& sess
 
         co_return Response().setBody<json>(body)
                             .setStatus(Code::OK).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "Unexpected error while fetching recommendation task's result:", e.what());
@@ -171,7 +171,7 @@ asio::awaitable<http_n::Response> RSSService::recommendations(const Session& ses
 
         co_return Response().setBody<json>(m_recommendationRepos->fetchTasks(userInfo["uuid"].get<std::string>()))
                             .setStatus(Code::OK).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "Unexpected error while fetching recommendation tasks:", e.what());
@@ -192,7 +192,7 @@ asio::awaitable<http_n::Response> RSSService::resumes(const Session& session, co
 
         co_return Response().setBody(body)
                             .setStatus(Code::OK).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "while fetching resumes:", e.what());
@@ -215,7 +215,7 @@ asio::awaitable<http_n::Response> RSSService::subscribe(const Session& session, 
 
         tx.get<pgsql_n::Transaction>().commit();
         co_return Response().setStatus(Code::CREATED).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         tx.get<pgsql_n::Transaction>().abort();
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
@@ -242,7 +242,7 @@ asio::awaitable<http_n::Response> RSSService::subscriptions(const Session& sessi
 
         co_return Response().setBody<json>(body)
                             .setStatus(Code::OK).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "while fetching subscriptions:", e.what());
@@ -265,7 +265,7 @@ asio::awaitable<http_n::Response> RSSService::updateResume(const Session& sessio
         const Resume& updatedResume = m_resumeRepos->updateResumeSkills(userInfo["uuid"].get<std::string>(), params.at("tag"), requestBody.get<std::vector<std::string>>());
         co_return Response().setBody<json>(updatedResume.toJSON())
                             .setStatus(Code::OK).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "while updating resume:", e.what());

@@ -1,5 +1,5 @@
 #include <core/exception/database.hpp>
 
 
-DatabaseException::DatabaseException(const std::string& functionName)
-    : Exception(functionName, "Database exception", network_n::Code::SERVER_ERROR) {}
+DatabaseException::DatabaseException(const std::string& message)
+    : Exception(message, "Database exception", Code::SERVER_ERROR) {}

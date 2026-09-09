@@ -2,4 +2,4 @@
 
 
 NotSupported::NotSupported(const std::string& functionName)
-    : Exception(functionName, "Not supported", network_n::Code::NOT_ALLOWED) {}
+    : LogicException(functionName, "Not supported", Code::NOT_ALLOWED) {}

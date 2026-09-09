@@ -2,7 +2,7 @@
 
 
 InvalidArgument::InvalidArgument(const std::string& message, const std::string& argument)
-    : Exception(message, "Invalid argument", network_n::Code::BAD_REQUEST) {
+    : LogicException(message, "Invalid argument", Code::BAD_REQUEST) {
     if (not argument.empty())
-        this->m_message = std::format("{} - {}", argument, this->m_message);
+        this->m_message = std::format("{} - {}", argument, message);
 }

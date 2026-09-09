@@ -1,9 +1,9 @@
 #pragma once
 
-#include <core/exception/exception.hpp>
+#include <core/exception/logic.hpp>
 
 
-class NotSupported : public Exception {
+class NotSupported : public LogicException {
 public:
     NotSupported(const std::string& functionName);
     ~NotSupported() = default;

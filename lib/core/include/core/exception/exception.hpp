@@ -7,6 +7,9 @@
 
 
 class Exception : public std::exception, public StringConvertible {
+protected:
+    using Code = network_n::Code;
+
 public:
     Exception(const std::string& message);
     ~Exception() = default;
@@ -20,7 +23,7 @@ public:
 protected:
     std::string m_message;
     const char* m_type;
-    const network_n::Code m_httpCodeEquivalent;
+    const Code m_httpCodeEquivalent;
 
-    Exception(const std::string& message, const char* type, const network_n::Code& httpCodeEquivalent);
+    Exception(const std::string& message, const char* type, Code httpCodeEquivalent);
 };

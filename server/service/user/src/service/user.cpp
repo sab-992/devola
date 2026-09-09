@@ -36,7 +36,7 @@ asio::awaitable<http_n::Response> UserService::authenticate(const Session& sessi
     try {
         validateJWT(request);
         co_return Response().setStatus(Code::OK).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "while authenticating user:", e.what());
@@ -61,7 +61,7 @@ asio::awaitable<http_n::Response> UserService::login(const Session& session, con
         JWT::generate(user->toJSON(), response);
 
         co_return response.setStatus(Code::OK).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "while signing user in:", e.what());
@@ -70,11 +70,24 @@ asio::awaitable<http_n::Response> UserService::login(const Session& session, con
 }
 
 asio::awaitable<http_n::Response> UserService::logout(const Session& session, const http_n::Request& request, const pathParams_t&) {
+    using namespace database_n;
+
     try {
-        const json& userInfo = validateJWT(request);
-        // TODO
-        co_return Response().setStatus(Code::OK).build();
-    } catch (const Exception& e) {
+        const std::string& token = JWT::getToken(request);
+        const json& claims = JWT::verify(token);
+
+        Query::Options opt;
+        opt.ttl = std::chrono::duration_cast<std::chrono::seconds>(Time::fromSecondSinceEpoch(claims["exp"].get<double>()) - Time::now());
+        m_revokedTokenCache->Create(Query().setTarget(token)
+                                           .setType(Query::Type_en::TARGETED)
+                                           .setCardinality(Query::Cardinality_en::NONE)
+                                           .setData({ { token, "" }})
+                                           .setOptions(opt).build());
+
+        auto response = Response();
+        JWT::clearBrowserToken(response);
+        co_return response.setStatus(Code::OK).build();
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "while signing user out:", e.what());
@@ -91,7 +104,7 @@ asio::awaitable<http_n::Response> UserService::refresh(const Session& session, c
         const json& userInfo = validateJWT(request);
         // TODO
         co_return Response().setStatus(Code::OK).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "while refreshing user's JWT:", e.what());
@@ -103,7 +116,7 @@ asio::awaitable<http_n::Response> UserService::register_(const Session& session,
     try {
         m_userRepos->createUser(request.body<nlohmann::json>());
         co_return Response().setStatus(Code::CREATED).build();
-    } catch (const Exception& e) {
+    } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
         m_light->log(log_n::Level_en::ERROR, "while creating user:", e.what());
