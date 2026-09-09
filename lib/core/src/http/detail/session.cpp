@@ -42,7 +42,7 @@ asio::awaitable<http_n::Request> http_n::server_n::Session::read() {
     const auto& [headers, body] = co_await version->async_receive(m_socket);
     Request request(headers, body);
     request.setProtocol(version);
-    m_light->log(log_n::Level_en::INFO, "Received", request.toString().size(), "bytes from", std::format("[{}].", m_remoteEndpoint));
+    m_light->log(log_n::Level_en::DEBUG, "Received", request.toString().size(), "bytes from", std::format("[{}].", m_remoteEndpoint));
     co_return request;
 }
 
@@ -70,7 +70,7 @@ void http_n::server_n::Session::write(http_n::Response& response) {
 
     auto stringResponse = std::make_shared<std::string>(response.toString());
     asio::async_write(m_socket, asio::buffer(*stringResponse), std::bind_front(&Session::onWriteCompleted, shared_from_this(), stringResponse));
-    m_light->log(log_n::Level_en::INFO, "Sent", stringResponse->size(), "bytes to", std::format("[{}].", m_remoteEndpoint));
+    m_light->log(log_n::Level_en::DEBUG, "Sent", stringResponse->size(), "bytes to", std::format("[{}].", m_remoteEndpoint));
 }
 
 void http_n::server_n::Session::write(http_n::Response&& response) {

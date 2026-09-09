@@ -16,9 +16,6 @@ inline std::mutex coutMutex;
 
 namespace log_n {
     class Light : public Singleton<Light> {
-    private:
-        using levelInfo_t = std::pair<std::string, rang::fg>;
-
     public:
         Light(const Private_s&);
         ~Light();
@@ -36,7 +33,7 @@ namespace log_n {
                 return;
             #endif
 
-            if (not m_levels.contains(level))
+            if (not LEVELS_COLOR.contains(level))
                 throw InvalidArgument("Unhandled", "Log type");
 
             std::lock_guard<std::mutex> guard(coutMutex);
@@ -54,13 +51,6 @@ namespace log_n {
         }
 
     private:
-        // Spaces after the string version of the log level are there to make sure every message starts at same column of terminal.
-        inline static const std::unordered_map<log_n::Level_en, levelInfo_t> m_levels = { { log_n::Level_en::DEBUG,   { "[DEBUG]", rang::fg::black } },
-                                                                                          { log_n::Level_en::ERROR,   { "[ERROR]", rang::fg::red } },
-                                                                                          { log_n::Level_en::INFO,    { "[INFO] ", rang::fg::blue } },
-                                                                                          { log_n::Level_en::SPECIAL, { "[SPEC] ", rang::fg::magenta } },
-                                                                                          { log_n::Level_en::WARNING, { "[WARN] ", rang::fg::yellow } } };
-
         void changeColor(log_n::Level_en level) const;
         void resetColor() const;
 

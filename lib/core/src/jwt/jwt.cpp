@@ -1,6 +1,10 @@
 #include <core/jwt/jwt.hpp>
 
 
+void JWT::clearBrowserToken(http_n::Response& response) {
+    response.setHeader("Set-Cookie", std::format("{}=; HttpOnly; Secure; Max-Age=0; SameSite=Strict; Path=/", TOKEN_COOKIE_NAME));
+}
+
 void JWT::generate(const json& extra_claims, http_n::Response& response) {
     if (not extra_claims.is_object())
         throw InvalidArgument("must be a JSON object", "Extra claims");
@@ -37,7 +41,7 @@ std::string JWT::secret() {
 }
 
 void JWT::setToken(http_n::Response& response, std::string_view token) {
-    response.setHeader("Set-Cookie", std::format("{}={}; HttpOnly; Secure; SameSite=Strict; Path=/", TOKEN_COOKIE_NAME, token));
+    response.setHeader("Set-Cookie", std::format("{}={}; HttpOnly; Secure; Max-Age={}; SameSite=Strict; Path=/", TOKEN_COOKIE_NAME, token, TTL.count()));
 }
 
 nlohmann::json JWT::verify(std::string_view token) {

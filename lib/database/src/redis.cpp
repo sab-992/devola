@@ -46,10 +46,8 @@ database_n::Result Redis::Create(const Query& query, Transaction* Transaction) {
             throw DatabaseException("Create query need to have a value for data() field.");
 
         const Value data = query.data().value().at(query.target());
+        const auto& command = Command::create(access->connection(), std::format("SET {} {}{} NX", query.target().c_str(), fromValue(data), extractTTL(query)));
 
-        // TODO update to get any type of data and convert it to str
-
-        const auto& command = Command::create(access->connection(), std::format("SET {} {}{} NX", query.target().c_str(), data.asString(), extractTTL(query)));
         return buildResult(command->reply(), query);
     } catch (const DatabaseException& e) {
         throw;
@@ -74,6 +72,7 @@ database_n::Result Redis::Read(const Query& query, Transaction* transaction) {
         return Result().setError(e.what()).build();
     }
 }
+
 database_n::Result Redis::Update(const Query& query, Transaction* transaction) {
     try {
         const auto& access = m_pool->access();
@@ -84,10 +83,8 @@ database_n::Result Redis::Update(const Query& query, Transaction* transaction) {
             throw DatabaseException("Create query need to have a value for data() field.");
 
         const Value data = query.data().value().at(query.target());
+        const auto& command = Command::create(access->connection(), std::format("SET {} {}{} XX", query.target().c_str(), fromValue(data), extractTTL(query)));
 
-        // TODO update to get any type of data and convert it to str
-
-        const auto& command = Command::create(access->connection(), std::format("SET {} {}{} XX", query.target().c_str(), data.asString(), extractTTL(query)));
         return buildResult(command->reply(), query);
     } catch (const DatabaseException& e) {
         throw;
@@ -149,8 +146,6 @@ std::string Redis::extractTTL(const Query& query) const {
     return std::format("{}", query.options()->ttl.value());
 }
 
-std::string Redis::extractValue(const Value& value) const {}
-
 database_n::Value Redis::fromRedisReply(const redisReply *reply) const {
     if (not reply)
         throw DatabaseException("Unexpected nullptr, dbResult should contain a value");
@@ -196,6 +191,21 @@ database_n::Value Redis::fromRedisReply(const redisReply *reply) const {
     }
 }
 
+std::string Redis::fromValue(const Value& value) const {
+    std::string result;
+
+    std::visit(overloads{
+        [](const std::shared_ptr<Query>&) {              throw NotSupported("Value is a nested Query. It cannot be bound as Redis params"); },
+        [](const std::shared_ptr<record_t>&) {           throw NotSupported("Value is a nested record. It cannot be bound as Redis params"); },
+        [](const std::monostate&) {                      throw NotSupported("Value is empty. It cannot be bound as Redis params"); },
+        [](const std::vector<std::byte>&) {              throw NotSupported("Value is a nested vector of bytes. It cannot be bound as Redis params"); },
+        [](const std::shared_ptr<std::vector<Value>>&) { throw NotSupported("Value is a nested vector of Values. It cannot be bound as Redis params"); },
+        [&result, &value = std::as_const(value)](auto&& arg) { result = Converter::toString(arg); }
+    }, value.raw());
+
+    return result;
+}
+
 std::shared_ptr<Redis> Redis::instance(const json& redisJSON) {
     static std::shared_ptr<Redis> instance = std::make_shared<Redis>(Private_s(), redisJSON);
     return instance;
@@ -214,4 +224,7 @@ void Redis::validateQuery(const Query& query) const {
 
     if (query.cardinality() == Cardinality_en::MULTIPLE)
         throw DatabaseException("Redis queries cardinality is either NONE or SINGLE");
+
+    if (query.target().empty())
+        throw DatabaseException("Redis queries need to have a non empty target");
 }

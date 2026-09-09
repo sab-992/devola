@@ -8,7 +8,7 @@ log_n::Light::~Light() {
 };
 
 void log_n::Light::changeColor(log_n::Level_en level) const {
-    std::cout << m_levels.at(level).second;
+    std::cout << LEVELS_COLOR.at(level).second;
 }
 
 void log_n::Light::displayExtraInformation(const std::vector<std::string>& information) const {
@@ -18,7 +18,7 @@ void log_n::Light::displayExtraInformation(const std::vector<std::string>& infor
 
 void log_n::Light::displayLevel(log_n::Level_en level) const {
     changeColor(level);
-    std::cout << m_levels.at(level).first;
+    std::cout << LEVELS_COLOR.at(level).first;
     resetColor();
 }
 

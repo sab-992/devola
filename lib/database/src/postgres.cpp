@@ -9,8 +9,8 @@ PostgreSQL::PostgreSQL(const Private_s&, const json& postgresJSON) : m_light(log
 void PostgreSQL::addParam(pqxx::params& params, const Value& value) const {
     std::visit(overloads{
         [&](const std::shared_ptr<Query>&) {},
-        [&](const std::shared_ptr<record_t>&) { throw LogicException("Value is a nested record. It cannot be bound as Postgres params"); },
-        [&](const std::shared_ptr<std::vector<Value>>&) { throw LogicException("Value is a nested list of values. It cannot be bound as Postgres params"); },
+        [&](const std::shared_ptr<record_t>&) {           throw NotSupported("Value is a nested record. It cannot be bound as Postgres params"); },
+        [&](const std::shared_ptr<std::vector<Value>>&) { throw NotSupported("Value is a nested list of values. It cannot be bound as Postgres params"); },
         [&, &value = std::as_const(value)](auto&& arg) {
             if (value.isNull())
                 params.append();

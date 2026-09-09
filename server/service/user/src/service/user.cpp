@@ -14,8 +14,21 @@ UserService::UserService(const Private_s&, const json& configJSON) : m_configJSO
 UserService::~UserService() {}
 
 nlohmann::json UserService::validateJWT(const http_n::Request& request) const {
+    using namespace database_n;
     const std::string& token = JWT::getToken(request);
-    // TODO move inside private function that will actually check if the JWT is banned/revoked and verify
+
+    if (trim(token).empty())
+        throw InvalidToken(std::format("Token is empty"));
+
+    const Result& result = this->m_revokedTokenCache->Read(Query().setTarget(token)
+                                                                  .setType(Query::Type_en::TARGETED)
+                                                                  .setCardinality(Query::Cardinality_en::SINGLE).build());
+    if (not result.isOK())
+        throw Exception(std::format("Revoked token cache returned error while validating JWT: {}", result.error().value()));
+
+    if (result.records().has_value() and not result.records().value()[0].at(token).isNull())
+        throw InvalidToken(std::format("Token \"{}...\" is revoked", token.substr(0, 15)));
+
     return JWT::verify(token);
 }
 

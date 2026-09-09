@@ -68,8 +68,8 @@ private:
 
     Result buildResult(redisReply* dbResult, const Query& query) const;
     std::string extractTTL(const Query& query) const;
-    std::string extractValue(const Value& value) const;
     Value fromRedisReply(const redisReply* reply) const;
+    std::string fromValue(const Value& value) const;
     redis_n::Options optionsFromJSON(const json& redisJSON) const;
     void validateQuery(const Query& query) const;
 };

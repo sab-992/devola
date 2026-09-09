@@ -113,7 +113,7 @@ void http_n::server_n::Basic::setThreadPoolSize(uint16_t size) {
 void http_n::server_n::Basic::startSequence() {
     if (not m_startSequence) return;
 
-    m_light->log(log_n::Level_en::INFO, m_extraLogInformation, "Initiating starting sequence ...");
+    m_light->log(log_n::Level_en::DEBUG, m_extraLogInformation, "Initiating starting sequence ...");
     m_startSequence(this);
 }
 

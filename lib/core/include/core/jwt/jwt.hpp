@@ -16,6 +16,7 @@ class JWT {
     using json = nlohmann::json;
 
 public:
+    static void clearBrowserToken(http_n::Response& response);
     static void generate(const json& extra_claims, http_n::Response& response);
 
     static std::string getToken(const http_n::Request& request);

@@ -9,9 +9,7 @@ int main() {
 
         server->setDatabase(PostgreSQL::instance(configJSON["postgres"]));
         server->setRevokedTokenCache(Redis::instance(configJSON["redis"]));
-        server->setThreadPoolSize(2);
-        // server->run();
-        server->test();
+        server->run();
 
         return 0;
     } catch (Exception e) {

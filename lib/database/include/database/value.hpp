@@ -15,14 +15,14 @@ namespace database_n
     class Value {
     public:
         using variant_t = std::variant<std::monostate,
-                                    bool,
-                                    int64_t,
-                                    double,
-                                    std::string,
-                                    std::vector<std::byte>,
-                                    std::shared_ptr<Query>,
-                                    std::shared_ptr<record_t>,
-                                    std::shared_ptr<std::vector<Value>>>;
+                                       bool,
+                                       int64_t,
+                                       double,
+                                       std::string,
+                                       std::vector<std::byte>,
+                                       std::shared_ptr<Query>,
+                                       std::shared_ptr<record_t>,
+                                       std::shared_ptr<std::vector<Value>>>;
 
         Value() = default;
         Value(bool boolean);
