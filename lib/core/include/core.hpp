@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/crypto.hpp>
 #include <core/exception.hpp>
 #include <core/file.hpp>
 #include <core/http.hpp>

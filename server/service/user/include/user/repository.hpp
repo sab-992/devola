@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/crypto.hpp>
 #include <core/http.hpp>
 #include <core/str.hpp>
 #include <core/file.hpp>
@@ -30,6 +31,7 @@ public:
 
 private:
     ServerTools m_tools;
+    std::shared_ptr<Cryptography> m_crypto;
     std::shared_ptr<log_n::Light> m_light = log_n::Light::instance();
 
     std::shared_ptr<Database_i> database();

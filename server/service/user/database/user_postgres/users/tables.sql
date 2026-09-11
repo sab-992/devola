@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS users (
     uuid              UUID UNIQUE NOT NULL DEFAULT uuidv7(),
-    username          VARCHAR(255) NOT NULL,
+    username          VARCHAR(255) NOT NULL UNIQUE,
     email             VARCHAR(255) NOT NULL UNIQUE,
     password          VARCHAR(255) NOT NULL, -- Hashed password
     first_name        VARCHAR(100),

@@ -106,7 +106,7 @@ export class FeedService {
 
     private getAllListings() {
         const byId = new Map<number, JobListing>();
-        if (this.feeds() !== null)
+        if (this.feeds() !== null && this.feeds.length > 0)
             for (const feed of this.feeds())
                 for (const listing of feed.listings)
                     if (!byId.has(listing.id))
