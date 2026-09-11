@@ -1,0 +1,2 @@
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_uuid_expire_at_revoked ON refresh_tokens (user_uuid, expire_at, revoked);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token ON refresh_tokens(token);
