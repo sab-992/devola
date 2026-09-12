@@ -3,7 +3,7 @@
 #include <core/exception.hpp>
 #include <core/http/detail/memento/request.hpp>
 #include <core/http/detail/settings.hpp>
-#include <core/network/detail/message.hpp>
+#include <core/network/message.hpp>
 #include <core/network/network.hpp>
 #include <memory>
 
