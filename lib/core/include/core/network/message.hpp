@@ -35,7 +35,9 @@ namespace network_n
         }
 
         std::string header(const std::string& name) const { return m_headers->get(name); }
-        headers_t headersMap() const { return m_headers->toMap(); }
+        const Cookie& cookie(const std::string& name) const { return m_headers->cookie(name); }
+
+        headers_t headersMap() const { return m_headers->headersToMap(); }
 
         std::vector<std::string> prepareTransmissionPackets() const {
             assert(not hasChangedSinceLastBuild() && "network_n::Message::build() needs to be called after making changes to the object");
@@ -43,6 +45,11 @@ namespace network_n
         }
 
         std::shared_ptr<Version_i> version() const { return m_version; }
+
+        Derived& setCookie(const std::string& name, const Cookie& cookie) {
+            m_headers->setCookie(name, cookie);
+            return DERIVED_REF_STATIC_CAST;
+        }
 
         template <typename T>
         Derived& setBody(const T& body) {

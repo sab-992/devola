@@ -22,18 +22,11 @@ void JWT::generate(const json& extra_claims, http_n::Response& response) {
 }
 
 std::string JWT::getToken(const http_n::Request& request) {
-    const std::string& cookie = request.header("Cookie");
-    size_t pos = cookie.find(TOKEN_COOKIE_NAME + "=");
-
-    if (pos == std::string::npos)
+    try {
+        return request.cookie(TOKEN_COOKIE_NAME).value();
+    } catch (const std::exception& e) {
         return "";
-
-    pos += TOKEN_COOKIE_NAME.length() + 1;
-    size_t end = cookie.find(";", pos);
-    if (end == std::string::npos)
-        end = cookie.length();
-
-    return cookie.substr(pos, end - pos);
+    }
 }
 
 std::string JWT::secret() {
@@ -41,11 +34,18 @@ std::string JWT::secret() {
 }
 
 void JWT::setToken(http_n::Response& response, std::string_view token) {
-    response.setHeader("Set-Cookie", std::format("{}={}; HttpOnly; Secure; Max-Age={}; SameSite=Strict; Path=/", TOKEN_COOKIE_NAME, token, TTL.count()));
+    response.setCookie(TOKEN_COOKIE_NAME, Cookie().setName(TOKEN_COOKIE_NAME)
+                                                  .setValue(token)
+                                                  .setRestrictionToBrowser(true)
+                                                  .setMaxAge(TTL)
+                                                  .setPath("/").build());
 }
 
 nlohmann::json JWT::verify(std::string_view token) {
     try {
+        if (token.empty())
+            throw InvalidToken("JSON web token is empty");
+
         auto decoded = jwt::decode(std::string(token));
         auto verifier = jwt::verify().allow_algorithm(jwt::algorithm::hs256{secret()})
                                      .with_issuer(ISSUER);

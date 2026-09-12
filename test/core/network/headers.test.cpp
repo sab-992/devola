@@ -46,7 +46,7 @@ TEST_F(HeadersTest, Parse_ParsesHeadersCorrectly) {
     Headers headers(this->getHeaderParserMockPtr());
     headers.parse(EXPECTED_HEADERS);
 
-    EXPECT_EQ(EXPECTED_HEADERS_UMAP.size(), headers.toMap().size());
+    EXPECT_EQ(EXPECTED_HEADERS_UMAP.size(), headers.headersToMap().size());
     for (const auto& [header, expected_value]: EXPECTED_HEADERS_UMAP)
         EXPECT_EQ(expected_value, headers.get(header));
     EXPECT_EQ(EXPECTED_STARTLINE, headers.startLine());
@@ -58,12 +58,12 @@ TEST_F(HeadersTest, SetHeader_AddsNewHeader) {
     const std::string HEADER = "Content-Type";
     const std::string EXPECTED_HEADER_VALUE = "application/json";
     Headers headers(this->getHeaderParserMockPtr());
-    const size_t PREVIOUS_SIZE = headers.toMap().size();
+    const size_t PREVIOUS_SIZE = headers.headersToMap().size();
 
     headers.setHeader(HEADER, EXPECTED_HEADER_VALUE);
 
     EXPECT_EQ(EXPECTED_HEADER_VALUE, headers.get(HEADER));
-    EXPECT_EQ(PREVIOUS_SIZE + 1, headers.toMap().size());
+    EXPECT_EQ(PREVIOUS_SIZE + 1, headers.headersToMap().size());
 }
 
 TEST_F(HeadersTest, SetHeader_OverwritesExistingHeader) {
@@ -75,11 +75,11 @@ TEST_F(HeadersTest, SetHeader_OverwritesExistingHeader) {
 
     Headers headers(this->getHeaderParserMockPtr());
     headers.setHeader(HEADER, OLD_HEADER_VALUE);
-    const size_t PREVIOUS_SIZE = headers.toMap().size();
+    const size_t PREVIOUS_SIZE = headers.headersToMap().size();
     headers.setHeader(HEADER, EXPECTED_HEADER_VALUE);
 
     EXPECT_EQ(EXPECTED_HEADER_VALUE, headers.get(HEADER));
-    EXPECT_EQ(PREVIOUS_SIZE, headers.toMap().size());
+    EXPECT_EQ(PREVIOUS_SIZE, headers.headersToMap().size());
 }
 
 TEST_F(HeadersTest, GetWithExistingHeader_ReturnsCorrectHeaderValue) {
@@ -126,7 +126,7 @@ TEST_F(HeadersTest, SetStartLine_OverwritesExistingStartLine) {
     EXPECT_EQ(EXPECTED_STARTLINE, headers.startLine());
 }
 
-TEST_F(HeadersTest, ToMap_ReturnsMapContainingAllHeaders) {
+TEST_F(HeadersTest, headersToMap_ReturnsMapContainingAllHeaders) {
     using namespace network_n;
 
     const std::unordered_map<std::string, std::string> headersUMap = { {"Accept", "application/xml"},
@@ -139,7 +139,7 @@ TEST_F(HeadersTest, ToMap_ReturnsMapContainingAllHeaders) {
         headers.setHeader(header, value);
     
 
-    EXPECT_EQ(headersUMap.size(), headers.toMap().size());
+    EXPECT_EQ(headersUMap.size(), headers.headersToMap().size());
     for (const auto& [header, expected_value]: headersUMap)
         EXPECT_EQ(expected_value, headers.get(header));
 }

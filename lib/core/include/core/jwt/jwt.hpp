@@ -6,6 +6,7 @@
 #include <core/utility/env.hpp>
 #include <core/http/request.hpp>
 #include <core/http/response.hpp>
+#include <core/network/cookie.hpp>
 #include <jwt-cpp/jwt.h>
 #include <jwt-cpp/traits/nlohmann-json/defaults.h>
 #include <nlohmann/json.hpp>
@@ -14,6 +15,7 @@
 
 class JWT {
     using json = nlohmann::json;
+    using Cookie = network_n::Cookie;
 
 public:
     static void clearBrowserToken(http_n::Response& response);

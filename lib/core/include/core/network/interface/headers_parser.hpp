@@ -1,9 +1,9 @@
 #pragma once
 
+#include <core/network/cookie.hpp>
 #include <core/network/detail/headers.hpp>
 #include <core/network/network.hpp>
 #include <string>
-#include <utility>
 
 
 namespace network_n
@@ -20,7 +20,7 @@ namespace network_n
 
             virtual std::string build(const network_n::Headers& headers) const = 0;
             virtual startLineInformation_t parseStartLine(std::string_view startLine) const = 0;
-            virtual std::pair<std::string, std::unordered_map<std::string, std::string>> parse(std::string_view stringHeaders) const = 0;
+            virtual std::tuple<std::string, std::unordered_map<std::string, std::string>, std::unordered_map<std::string, Cookie>> parse(std::string_view stringHeaders) const = 0;
         };
     }
 }

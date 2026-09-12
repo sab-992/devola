@@ -12,8 +12,25 @@ std::string http_n::version_n::http1_1_n::HeadersParser::build(const Headers& he
     if (startLine.empty()) throw InvalidArgument("Cannot be empty", "Start line");
 
     std::string stringHeaders = startLine;
-    for (const auto& [header, value] : headers.toMap())
+    for (const auto& [header, value] : headers.headersToMap())
         stringHeaders += std::format("\r\n{}: {}", header, value);
+
+    std::string addedCookies;
+    for (const auto& [name, cookie] : headers.addedCookiesToMap())
+        addedCookies += std::format("\r\nSet-Cookie: {}", cookie.buildForTransmission());
+
+    std::string cookies;
+    for (const auto& [name, cookie] : headers.cookiesToMap())
+        cookies += std::format("{}; ", cookie.toString());
+
+    if (not addedCookies.empty() and not cookies.empty())
+        throw LogicException("Message is trying to be a Request and a Response (has both cookie types)");
+
+    if (not addedCookies.empty())
+        return stringHeaders + addedCookies;
+    else if (not cookies.empty()) {
+        return stringHeaders + "\r\nCookie: " + cookies.substr(0, cookies.size() - 2);
+    }
 
     return stringHeaders;
 }
@@ -30,7 +47,7 @@ bool http_n::version_n::http1_1_n::HeadersParser::isRequest(const startLineInfor
     return information[2].find(PROTOCOL_VERSION_NAME) != std::string::npos;
 }
 
-std::pair<std::string, headers_t> http_n::version_n::http1_1_n::HeadersParser::parse(std::string_view stringHeaders) const {
+std::tuple<std::string, headers_t, cookies_t> http_n::version_n::http1_1_n::HeadersParser::parse(std::string_view stringHeaders) const {
     std::stringstream input;
     input << trim(stringHeaders);
 
@@ -41,6 +58,8 @@ std::pair<std::string, headers_t> http_n::version_n::http1_1_n::HeadersParser::p
 
     const std::string startLine = line;
     headers_t headersUMap;
+    cookies_t cookiesUMap;
+
     for (; std::getline(input, line);) {
         line = trim(line);
 
@@ -58,7 +77,16 @@ std::pair<std::string, headers_t> http_n::version_n::http1_1_n::HeadersParser::p
         headersUMap[name] = value;
     }
 
-    return { rTrim(startLine), headersUMap };
+    if (headersUMap.contains("Cookie")) {
+        const std::vector<std::string>& cookies = split(headersUMap["Cookie"], ";");
+        headersUMap.erase("Cookie");
+        for (const auto& stringCookie : cookies) {
+            const network_n::Cookie cookie(stringCookie);
+            cookiesUMap[cookie.name()] = cookie;
+        }
+    }
+
+    return { rTrim(startLine), headersUMap, cookiesUMap };
 }
 
 startLineInformation_t http_n::version_n::http1_1_n::HeadersParser::parseStartLine(std::string_view startLine) const {
