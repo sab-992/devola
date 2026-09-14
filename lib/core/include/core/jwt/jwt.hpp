@@ -3,10 +3,12 @@
 #define JWT_DISABLE_PICOJSON
 
 #include <chrono>
-#include <core/utility/env.hpp>
+#include <core/crypto/b64.hpp>
+#include <core/crypto/crypto.hpp>
 #include <core/http/request.hpp>
 #include <core/http/response.hpp>
 #include <core/network/cookie.hpp>
+#include <core/utility/env.hpp>
 #include <jwt-cpp/jwt.h>
 #include <jwt-cpp/traits/nlohmann-json/defaults.h>
 #include <nlohmann/json.hpp>
@@ -17,9 +19,16 @@ class JWT {
     using json = nlohmann::json;
     using Cookie = network_n::Cookie;
 
+    inline static const std::string ISSUER = "Devola";
+    inline static const std::string REFRESH_TOKEN_COOKIE_NAME = "rjwt";
+    inline static const std::string REFRESH_TOKEN_ENDPOINT = "/user/refresh";
+    inline static const int TOKEN_BYTES = 32;
+    inline static const std::string TOKEN_COOKIE_NAME = "jwt";
+    inline static const std::chrono::seconds TTL = std::chrono::minutes(15);
+
 public:
     static void clearBrowserToken(http_n::Response& response);
-    static void generate(const json& extra_claims, http_n::Response& response);
+    static std::string generate(const json& extra_claims, http_n::Response& response);
 
     static std::string getToken(const http_n::Request& request);
 
@@ -27,11 +36,10 @@ public:
     static json verify(const http_n::Request& request);
 
 private:
-    inline static const std::string TOKEN_COOKIE_NAME = "jwt";
-    inline static const std::string ISSUER = "Devola";
-    inline static const std::chrono::seconds TTL = std::chrono::minutes(15);
+    inline static std::shared_ptr<Cryptography> m_crypto = Cryptography::instance();
 
-    static void setToken(http_n::Response& response, std::string_view token);
-
+    static std::string generateJWT(const json& extra_claims);
+    static std::string generateRefreshToken();
     static std::string secret();
+    static void setToken(http_n::Response& response, std::string_view token, const std::string& cookieName, std::string_view path);
 };

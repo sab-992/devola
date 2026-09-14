@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/crypto/b64.hpp>
 #include <core/crypto/interface/hash_algorithm.hpp>
 #include <core/exception/invalid_credentials.hpp>
 #include <core/logging/light.hpp>

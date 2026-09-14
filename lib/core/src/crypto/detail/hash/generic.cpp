@@ -15,11 +15,5 @@ std::string Generic::hash(std::string_view secret) const {
                        reinterpret_cast<const unsigned char*>(secret.data()), secret.size(),
                        nullptr, 0);
 
-    const int variant = sodium_base64_VARIANT_ORIGINAL_NO_PADDING;
-    size_t base64Length = sodium_base64_ENCODED_LEN(sizeof(hashedSecret), variant);
-
-    std::vector<char> b64(base64Length);
-    sodium_bin2base64(b64.data(), base64Length, hashedSecret, sizeof(hashedSecret), variant);
-
-    return std::string(b64.data());
+    return b64Encode(hashedSecret, sizeof(hashedSecret), sodium_base64_VARIANT_ORIGINAL_NO_PADDING);
 }
