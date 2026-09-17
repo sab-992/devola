@@ -21,16 +21,20 @@ class JWT {
 
     inline static const std::string ISSUER = "Devola";
     inline static const std::string REFRESH_TOKEN_COOKIE_NAME = "rjwt";
-    inline static const std::string REFRESH_TOKEN_ENDPOINT = "/user/refresh";
+    inline static const std::string REFRESH_TOKEN_ENDPOINT = "/user/auth";
     inline static const int TOKEN_BYTES = 32;
     inline static const std::string TOKEN_COOKIE_NAME = "jwt";
-    inline static const std::chrono::seconds TTL = std::chrono::minutes(15);
 
 public:
+    inline static const std::chrono::seconds TTL = std::chrono::minutes(15);
+    inline static const std::chrono::seconds REFRESH_TTL = std::chrono::days(7);
+
     static void clearBrowserToken(http_n::Response& response);
-    static std::string generate(const json& extra_claims, http_n::Response& response);
+    static void generateJWT(const json& extra_claims, http_n::Response& response);
+    static std::string generateRefreshToken(http_n::Response& response);
 
     static std::string getToken(const http_n::Request& request);
+    static std::string getRefreshToken(const http_n::Request& request);
 
     static json verify(std::string_view token);
     static json verify(const http_n::Request& request);
@@ -38,8 +42,5 @@ public:
 private:
     inline static std::shared_ptr<Cryptography> m_crypto = Cryptography::instance();
 
-    static std::string generateJWT(const json& extra_claims);
-    static std::string generateRefreshToken();
     static std::string secret();
-    static void setToken(http_n::Response& response, std::string_view token, const std::string& cookieName, std::string_view path);
 };

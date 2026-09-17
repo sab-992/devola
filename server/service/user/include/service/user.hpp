@@ -7,6 +7,7 @@
 #include <core/jwt.hpp>
 #include <database/postgres.hpp>
 #include <database/redis.hpp>
+#include <token/repository.hpp>
 #include <user/repository.hpp>
 #include <service/tools.hpp>
 
@@ -33,6 +34,7 @@ private:
     json m_configJSON;
     std::shared_ptr<Database_i> m_database;
     std::shared_ptr<Database_i> m_revokedTokenCache;
+    std::unique_ptr<TokenRepository> m_tokenRepos;
     std::unique_ptr<UserRepository> m_userRepos;
 
     asio::awaitable<Response> authenticate(const Session& session, const http_n::Request& request, const pathParams_t&);
@@ -40,6 +42,7 @@ private:
     asio::awaitable<Response> logout(const Session& session, const http_n::Request& request, const pathParams_t&);
     asio::awaitable<Response> refresh(const Session& session, const http_n::Request& request, const pathParams_t&);
     asio::awaitable<Response> register_(const Session& session, const http_n::Request& request, const pathParams_t&);
+
     void setEndpoints();
     user::ServerTools tools();
     json validateJWT(const http_n::Request& request) const;

@@ -5,6 +5,7 @@ UserService::UserService(const Private_s&, const json& configJSON) : m_configJSO
     setStartSequence([&](Basic*){
         assert(this->m_database          && "[UserService]: No database given");
         assert(this->m_revokedTokenCache && "[UserService]: No revoked token cache given");
+        m_tokenRepos = std::make_unique<TokenRepository>(tools());
         m_userRepos = std::make_unique<UserRepository>(tools());
     });
 
@@ -58,7 +59,9 @@ asio::awaitable<http_n::Response> UserService::login(const Session& session, con
         if (not user)
             co_return response.setStatus(Code::NOT_FOUND).build();
 
-        JWT::generate(user->toJSON(), response);
+        JWT::generateJWT(user->toJSON(), response);
+        const auto& now = Time::now();
+        m_tokenRepos->createRefreshToken({ JWT::generateRefreshToken(response), user->uuid, now, now + JWT::REFRESH_TTL, false }, user->uuid);
 
         co_return response.setStatus(Code::OK).build();
     } catch (const LogicException& e) {
@@ -74,6 +77,13 @@ asio::awaitable<http_n::Response> UserService::logout(const Session& session, co
 
     try {
         const std::string& token = JWT::getToken(request);
+        if (trim(token).empty())
+            throw InvalidArgument("No JWT provided");
+
+        const std::string& refreshToken = JWT::getRefreshToken(request);
+        if (trim(refreshToken).empty())
+            throw InvalidArgument("No refresh token provided");
+
         const json& claims = JWT::verify(token);
 
         Query::Options opt;
@@ -84,6 +94,7 @@ asio::awaitable<http_n::Response> UserService::logout(const Session& session, co
                                            .setData({ { token, "" }})
                                            .setOptions(opt).build());
 
+        m_tokenRepos->revokeRefreshToken(refreshToken);
         auto response = Response();
         JWT::clearBrowserToken(response);
         co_return response.setStatus(Code::OK).build();
@@ -101,9 +112,12 @@ std::string UserService::pathPrefix() const {
 
 asio::awaitable<http_n::Response> UserService::refresh(const Session& session, const http_n::Request& request, const pathParams_t&) {
     try {
-        const json& userInfo = validateJWT(request);
-        // TODO
-        co_return Response().setStatus(Code::OK).build();
+        const std::string& userUUID = m_tokenRepos->validateRefreshToken(JWT::getRefreshToken(request));
+        const std::unique_ptr<User> user = m_userRepos->fetchUserByUUID(userUUID);
+
+        auto response = Response();
+        JWT::generateJWT(user->toJSON(), response);
+        co_return response.setStatus(Code::OK).build();
     } catch (const LogicException& e) {
         co_return Response().setStatus(e.code()).build();
     } catch (const std::exception& e) {
@@ -131,8 +145,8 @@ void UserService::setDatabase(std::shared_ptr<Database_i> database) {
 void UserService::setEndpoints() {
     ENDPOINT("POST", "/authenticate", &UserService::authenticate);
     ENDPOINT("POST", "/login",        &UserService::login);
-    ENDPOINT("POST", "/logout",       &UserService::logout);
-    ENDPOINT("POST", "/refresh",      &UserService::refresh);
+    ENDPOINT("POST", "/auth/logout",  &UserService::logout);
+    ENDPOINT("POST", "/auth/refresh", &UserService::refresh);
     ENDPOINT("POST", "/register",     &UserService::register_);
 }
 

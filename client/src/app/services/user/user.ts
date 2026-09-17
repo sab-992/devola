@@ -24,8 +24,21 @@ export class UserService {
     }
 
     public authenticate() {
-        return this.m_http.post(this.buildPath("/authenticate")).pipe(tap(this.handleAuthenticate.bind(this)),
-                                                                      catchError((error) => { this.handleAuthenticateError(error); return of(null); }));
+        return this.m_http.post(this.buildPath("/authenticate"))
+                          .pipe(tap(this.handleAuthenticate.bind(this)),
+                                catchError((error: HttpErrorResponse) => {
+                                    if (error.status === 401)
+                                        return this.refresh();
+
+                                    this.m_isAuthenticated.set(false);
+                                    this.redirect();
+                                    return of(null);
+                                }));
+    }
+
+    public refresh() {
+        return this.m_http.post(this.buildPath("/auth/refresh")).pipe(tap(this.handleAuthenticate.bind(this)),
+                                                                 catchError((error) => { this.handleRefreshError(error); return of(null); }));
     }
 
     public login(loginInformation: Login, callback: ErrorCallback | undefined=undefined) {
@@ -34,7 +47,7 @@ export class UserService {
 
     public logout(callback: ErrorCallback | undefined=undefined) {
         if (this.isAuthenticated())
-            this.m_http.post(this.buildPath("/logout")).subscribe({ next: this.handleLogout.bind(this), error: callback });
+            this.m_http.post(this.buildPath("/auth/logout")).subscribe({ next: this.handleLogout.bind(this), error: callback });
     }
 
     public register(registerInformation: Register, callback: () => void, errorCallback: ErrorCallback | undefined=undefined) {
@@ -49,17 +62,9 @@ export class UserService {
         this.m_isAuthenticated.set(true);
     }
 
-    private handleAuthenticateError(error: HttpErrorResponse) {
-        if (error.status !== 401)
-            throw new Error(`Error #${error.status} during authentication: ${error.message}`);
-
+    private handleRefreshError(_: HttpErrorResponse) {
         this.m_isAuthenticated.set(false);
-        const KNOWN_PATHS = routes.map(r => r.path).filter(p => p !== '**' && p !== undefined);
-        const currentPath = window.location.pathname.replace(/^\//, '');
-        const isKnownRoute = KNOWN_PATHS.includes(currentPath);
-
-        if (isKnownRoute)
-            this.m_router.navigate(["/"]);
+        this.redirect();
     }
 
     private handleLogin() {
@@ -70,5 +75,15 @@ export class UserService {
     private handleLogout() {
         this.m_isAuthenticated.set(false);
         this.m_router.navigate(['/']);
+    }
+
+    private redirect() {
+        this.m_isAuthenticated.set(false);
+        const KNOWN_PATHS = routes.map(r => r.path).filter(p => p !== '**' && p !== undefined);
+        const currentPath = window.location.pathname.replace(/^\//, '');
+        const isKnownRoute = KNOWN_PATHS.includes(currentPath);
+
+        if (isKnownRoute)
+            this.m_router.navigate(["/"]);
     }
 }

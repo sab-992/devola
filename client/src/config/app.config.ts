@@ -10,10 +10,10 @@ import { of } from 'rxjs';
 
 
 const authenticate = () => {
-      if (isPlatformServer(inject(PLATFORM_ID)))
+    if (isPlatformServer(inject(PLATFORM_ID)))
         return of(null);
 
-      return inject(UserService).authenticate();
+    return inject(UserService).authenticate();
 }
 
 export const appConfig: ApplicationConfig = {

@@ -1,18 +1,16 @@
 #pragma once
 
-#include <core/crypto.hpp>
 #include <core/http.hpp>
+#include <core/jwt.hpp>
 #include <core/str.hpp>
-#include <core/file.hpp>
 #include <core/utility.hpp>
-#include <dataclass/user.hpp>
-#include <database/query.hpp>
+#include <dataclass/refresh_token.hpp>
 #include <database/postgres.hpp>
 #include <database/utility/timestamp.hpp>
 #include <service/tools.hpp>
 
 
-class UserRepository {
+class TokenRepository {
     using Basic = http_n::server_n::Basic;
     using Session = http_n::server_n::Session;
     using json = nlohmann::json;
@@ -21,21 +19,20 @@ class UserRepository {
     using record_t = database_n::record_t;
 
 public:
-    UserRepository(const ServerTools& tools);
-    ~UserRepository() = default;
+    TokenRepository(const ServerTools& tools);
+    ~TokenRepository() = default;
 
-    friend std::unique_ptr<UserRepository> std::make_unique<UserRepository>();
+    friend std::unique_ptr<TokenRepository> std::make_unique<TokenRepository>();
 
-    void createUser(const json& userInformation);
-    std::unique_ptr<User> fetchUser(std::string_view username, std::string_view password);
-    std::unique_ptr<User> fetchUserByUUID(std::string_view userUUID);
+    void createRefreshToken(const RefreshToken& token, std::string_view userUUID);
+    std::string validateRefreshToken(std::string_view token);
+    void revokeRefreshToken(std::string_view token);
 
 private:
-    std::shared_ptr<Cryptography> m_crypto;
+    std::shared_ptr<Cryptography> m_crypto = Cryptography::instance();
     ServerTools m_tools;
 
     inline static std::shared_ptr<log_n::Light> m_light = log_n::Light::instance();
 
     std::shared_ptr<Database_i> database();
-    database_n::record_t RecordFromJSON(const json& userInformation);
 };

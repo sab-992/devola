@@ -45,6 +45,23 @@ std::unique_ptr<User> UserRepository::fetchUser(std::string_view username, std::
 
     m_crypto->verifyHash(record.at("password").asString(), password);
 
+    return std::make_unique<User>(User::fromDatabaseFormat(record));
+}
+
+std::unique_ptr<User> UserRepository::fetchUserByUUID(std::string_view userUUID) {
+    using namespace database_n;
+
+    const Result& result = database()->Read(Query().setTarget("users")
+                                                   .setProjection(User::projection())
+                                                   .setType(Query::Type_en::TARGETED)
+                                                   .setCardinality(Query::Cardinality_en::MULTIPLE)
+                                                   .setFilter({{ "uuid", { "=", userUUID } }}).build());
+
+    if (not result.isOK())
+        throw Exception(result.error().value());
+    else if (result.isEmpty() or result.size() != 1)
+        return nullptr;
+
     return std::make_unique<User>(User::fromDatabaseFormat(result.records()->at(0)));
 }
 

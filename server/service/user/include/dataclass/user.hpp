@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <core/time.hpp>
 #include <core/str.hpp>
 #include <database/utility/timestamp.hpp>
