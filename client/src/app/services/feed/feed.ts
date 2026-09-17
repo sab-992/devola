@@ -106,8 +106,8 @@ export class FeedService {
 
     private getAllListings() {
         const byId = new Map<number, JobListing>();
-        if (this.feeds() !== null && this.feeds.length > 0)
-            for (const feed of this.feeds())
+        for (const feed of this.feeds())
+            if (feed.listings && feed.listings.length > 0)
                 for (const listing of feed.listings)
                     if (!byId.has(listing.id))
                         byId.set(listing.id, listing);
