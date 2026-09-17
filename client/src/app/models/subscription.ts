@@ -1,5 +1,6 @@
-export interface FeedSubscription {
-    host: string;
-    endpoint: string;
-    created_at: number;
+import { Subscriber } from "@classes/subscriber/subscriber";
+
+export interface Subscription {
+    event: string;
+    subscriber: Subscriber;
 }

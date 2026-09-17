@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { FeedSubscription } from '@models/subscription';
+import { FeedSubscription } from '@models/feed-subscription';
 import { HttpService } from '@services/http/http';
 import { environment } from '@environments/environment';
 

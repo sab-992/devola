@@ -14,6 +14,9 @@
         "target": "ES2022",
         "module": "preserve",
         "paths": {
+            "@classes/*": [
+                "./src/app/classes/*"
+            ],
             "@components/*": [
                 "./src/app/components/*"
             ],

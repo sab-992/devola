@@ -1,23 +1,40 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { inject, Service, signal } from '@angular/core';
+import { inject, OnDestroy, Service, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { GenericSubscriber } from '@classes/generic-subscriber/subscriber';
 import { environment } from '@environments/environment';
 import { Login } from '@models/login';
 import { Register } from '@models/register';
+import { Subscription } from '@models/subscription';
 import { HttpService } from '@services/http/http';
-import { catchError, of, tap } from 'rxjs';
+import { PublisherService } from '@services/publisher/publisher';
+import { catchError, EMPTY, finalize, Observable, of, tap } from 'rxjs';
 import { routes } from '@config/app.routes';
 
 
 type ErrorCallback = (error: HttpErrorResponse) => void;
 
 @Service()
-export class UserService {
+export class UserService implements OnDestroy {
     private readonly m_isAuthenticated = signal(false);
     private readonly m_http: HttpService = inject(HttpService);
+    private readonly m_publisher: PublisherService = inject(PublisherService);
     private readonly m_router: Router = inject(Router);
+    private readonly m_subscribed: Subscription[] = [];
+    private static m_isHandlingAuthError: boolean = false;
 
-    constructor() {}
+    constructor() {
+        this.m_subscribed.push(this.m_publisher.subscribe("unauthorized", GenericSubscriber.create((data: object) => {
+            if (!UserService.m_isHandlingAuthError)
+                this.handleAuthenticationError(data as HttpErrorResponse).subscribe();
+        })));
+    }
+
+    public ngOnDestroy(): void {
+        this.m_subscribed.forEach((subscription) => {
+            this.m_publisher.unsubscribe(subscription.event, subscription.subscriber);
+        });
+    }
 
     public get isAuthenticated() {
         return this.m_isAuthenticated.asReadonly();
@@ -26,19 +43,12 @@ export class UserService {
     public authenticate() {
         return this.m_http.post(this.buildPath("/authenticate"))
                           .pipe(tap(this.handleAuthenticate.bind(this)),
-                                catchError((error: HttpErrorResponse) => {
-                                    if (error.status === 401)
-                                        return this.refresh();
-
-                                    this.m_isAuthenticated.set(false);
-                                    this.redirect();
-                                    return of(null);
-                                }));
+                                catchError(this.handleAuthenticationError.bind(this)));
     }
 
     public refresh() {
-        return this.m_http.post(this.buildPath("/auth/refresh")).pipe(tap(this.handleAuthenticate.bind(this)),
-                                                                 catchError((error) => { this.handleRefreshError(error); return of(null); }));
+        return this.m_http.post<null>(this.buildPath("/auth/refresh")).pipe(tap(this.handleAuthenticate.bind(this)),
+                                                                            catchError((error) => { this.handleRefreshError(error); return of(null); }));
     }
 
     public login(loginInformation: Login, callback: ErrorCallback | undefined=undefined) {
@@ -60,6 +70,20 @@ export class UserService {
 
     private handleAuthenticate() {
         this.m_isAuthenticated.set(true);
+    }
+
+    private handleAuthenticationError(error: HttpErrorResponse): Observable<null> {
+        if (UserService.m_isHandlingAuthError)
+            return EMPTY;
+
+        UserService.m_isHandlingAuthError = true;
+        if (error.status === 401)
+            return this.refresh().pipe(finalize(() => UserService.m_isHandlingAuthError = false));
+
+        UserService.m_isHandlingAuthError = false;
+        this.m_isAuthenticated.set(false);
+        this.redirect();
+        return EMPTY;
     }
 
     private handleRefreshError(_: HttpErrorResponse) {

@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { FeedSubscription } from '@models/subscription';
+import { FeedSubscription } from '@models/feed-subscription';
 import { SubscriptionService } from '@services/subscription/subscription';
 import { HeaderComponent } from "@components/header/header";
 import { TimeService } from '@services/time/time';
