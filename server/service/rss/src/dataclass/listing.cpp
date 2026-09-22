@@ -15,6 +15,15 @@ Listing Listing::fromDatabaseFormat(const database_n::record_t& record) {
              fromPGSQLFormat(record.at("expire_at").asString()) };
 }
 
+std::chrono::time_point<std::chrono::system_clock> Listing::parseDate(std::string_view date) const {
+    if (date.size() >= 3 and date.compare(date.size() - 3, 3, "GMT") == 0)
+        return Time::timepoint("%a, %d %b %Y %H:%M:%S GMT", date);
+    else
+        return Time::timepoint("%a, %d %b %Y %H:%M:%S %z", date);
+
+    throw Exception(std::format("Failed to parse listing date: {}", date));
+}
+
 void Listing::setAttribute(std::string_view attribute, std::string_view value) {
     if (attribute == "id")
         id = std::stoll(std::string(value));
@@ -35,9 +44,9 @@ void Listing::setAttribute(std::string_view attribute, std::string_view value) {
     else if (attribute == "link")
         link = value;
     else if (attribute == "created_at")
-        created_at = Time::timepoint("%a, %d %b %Y %H:%M:%S %z", value);
+        created_at = parseDate(value);
     else if (attribute == "expire_at")
-        expire_at = Time::timepoint("%a, %d %b %Y %H:%M:%S %z", value);
+        expire_at = parseDate(value);
 }
 
 void Listing::normalize() {
@@ -48,7 +57,8 @@ void Listing::normalize() {
 }
 
 nlohmann::json Listing::toJSON() const {
-    auto object = nlohmann::json({ { "website_host",     website_host },
+    auto object = nlohmann::json({ { "id",               id },
+                                   { "website_host",     website_host },
                                    { "website_endpoint", website_endpoint },
                                    { "title",            title },
                                    { "category",         category },
@@ -58,9 +68,6 @@ nlohmann::json Listing::toJSON() const {
                                    { "link",             link },
                                    { "created_at",       Time::toSecondsSinceEpoch(created_at) },
                                    { "expire_at",        Time::toSecondsSinceEpoch(expire_at) }});
-
-    if (id.has_value() and id.value() >= 0)
-        object["id"] = id;
 
     return object;
 }

@@ -51,6 +51,10 @@ asio::awaitable<void> http_n::server_n::Basic::handleClient(asio::ip::tcp::socke
     try {
         auto session = Session::create(asio::ssl::stream<asio::ip::tcp::socket>(std::move(socket), m_sslContext));
 
+        #ifdef DEBUG_MODE_ENABLED
+            session->setExtraLogInformation(m_extraLogInformation);
+        #endif
+
         co_await session->handshake();
         Request request = co_await session->read();
         const std::string& method = request.method();

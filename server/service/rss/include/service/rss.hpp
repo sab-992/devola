@@ -5,6 +5,7 @@
 #include <core/jwt.hpp>
 #include <core/utility.hpp>
 #include <database/postgres.hpp>
+#include <database/redis.hpp>
 #include <dataclass/listing.hpp>
 #include <listing/repository.hpp>
 #include <recommendation/repository.hpp>

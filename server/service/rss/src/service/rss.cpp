@@ -4,7 +4,7 @@
 RSSService::RSSService(const Private_s&, const json& configJSON) : m_configJSON(configJSON), Basic("RSSService", configJSON["server"]["port"]) {
     setStartSequence([&](Basic*){
         assert(this->m_database && "[RSSService]: No database given");
-        // TODO: assert(this->m_cache && "[RSSService]: No cache given");
+        assert(this->m_cache && "[RSSService]: No cache given");
 
         m_listingRepos = std::make_unique<ListingRepository>(tools());
         m_recommendationRepos = std::make_shared<RecommendationRepository>(tools());

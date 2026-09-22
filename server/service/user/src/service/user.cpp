@@ -23,7 +23,7 @@ nlohmann::json UserService::validateJWT(const http_n::Request& request) const {
 
     const Result& result = this->m_revokedTokenCache->Read(Query().setTarget(token)
                                                                   .setType(Query::Type_en::TARGETED)
-                                                                  .setCardinality(Query::Cardinality_en::SINGLE).build());
+                                                                  .setCardinality(Query::Cardinality_en::MULTIPLE).build());
     if (not result.isOK())
         throw Exception(std::format("Revoked token cache returned error while validating JWT: {}", result.error().value()));
 
@@ -88,11 +88,14 @@ asio::awaitable<http_n::Response> UserService::logout(const Session& session, co
 
         Query::Options opt;
         opt.ttl = std::chrono::duration_cast<std::chrono::seconds>(Time::fromSecondSinceEpoch(claims["exp"].get<double>()) - Time::now());
-        m_revokedTokenCache->Create(Query().setTarget(token)
-                                           .setType(Query::Type_en::TARGETED)
-                                           .setCardinality(Query::Cardinality_en::NONE)
-                                           .setData({ { token, "" }})
-                                           .setOptions(opt).build());
+        const Result& result = m_revokedTokenCache->Create(Query().setTarget(token)
+                                                                  .setType(Query::Type_en::TARGETED)
+                                                                  .setCardinality(Query::Cardinality_en::NONE)
+                                                                  .setData({{ token, "" }})
+                                                                  .setOptions(opt).build());
+
+        if (not result.isOK())
+            throw Exception(result.error().value());
 
         m_tokenRepos->revokeRefreshToken(refreshToken);
         auto response = Response();

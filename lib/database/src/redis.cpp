@@ -22,7 +22,7 @@ Redis::Command::Command(const PrivateCommand_s&, redisContext* context, std::vec
     for (auto elem : argv)
         out += std::format("{} ", elem);
 
-    throw DatabaseException(std::format("{} - Command: ", message, out));
+    throw DatabaseException(std::format("{} - Command: {}", message, out));
 }
 
 Redis::Command::~Command() {
@@ -59,7 +59,8 @@ database_n::Result Redis::Create(const Query& query, Transaction* Transaction) {
             throw DatabaseException("Create query need to have a value for data() field.");
 
         const Value data = query.data().value().at(query.target());
-        const auto& command = Command::create(access->connection(), "SET", query.target(), fromValue(data), extractTTL(query), "NX");
+        const auto& ttl = extractTTL(query);
+        const auto& command = Command::create(access->connection(), "SET", query.target(), fromValue(data), "NX", ttl.first, ttl.second);
 
         return buildResult(command->reply(), query);
     } catch (const DatabaseException& e) {
@@ -96,7 +97,8 @@ database_n::Result Redis::Update(const Query& query, Transaction* transaction) {
             throw DatabaseException("Create query need to have a value for data() field.");
 
         const Value data = query.data().value().at(query.target());
-        const auto& command = Command::create(access->connection(), "SET", query.target(), fromValue(data), extractTTL(query), "XX");
+        const auto& ttl = extractTTL(query);
+        const auto& command = Command::create(access->connection(), "SET", query.target(), fromValue(data), "XX", ttl.first, ttl.second);
 
         return buildResult(command->reply(), query);
     } catch (const DatabaseException& e) {
@@ -152,11 +154,11 @@ database_n::Result Redis::buildResult(redisReply* dbResult, const Query& query) 
     return result.build();
 }
 
-std::string Redis::extractTTL(const Query& query) const {
+std::pair<std::string, std::string> Redis::extractTTL(const Query& query) const {
     if (not query.options().has_value() or not query.options()->ttl.has_value())
-        return "";
+        return { "", "" };
 
-    return std::format(" EX {}", query.options()->ttl.value().count());
+    return { "EX", std::to_string(query.options()->ttl.value().count()) };
 }
 
 database_n::Value Redis::fromRedisReply(const redisReply *reply) const {

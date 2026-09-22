@@ -11,7 +11,7 @@
 
 
 struct Listing {
-    std::optional<int64_t> id = -1;
+    int64_t id = INT64_MAX;
     std::string website_host;
     std::string website_endpoint;
     std::string title;
@@ -28,4 +28,6 @@ struct Listing {
     nlohmann::json toJSON() const;
 
     static Listing fromDatabaseFormat(const database_n::record_t& record);
+private:
+    std::chrono::time_point<std::chrono::system_clock> parseDate(std::string_view date) const;
 };

@@ -75,7 +75,7 @@ private:
     std::unique_ptr<redis_n::ConnectionPool> m_pool;
 
     Result buildResult(redisReply* dbResult, const Query& query) const;
-    std::string extractTTL(const Query& query) const;
+    std::pair<std::string, std::string> extractTTL(const Query& query) const;
     Value fromRedisReply(const redisReply* reply) const;
     std::string fromValue(const Value& value) const;
     redis_n::Options optionsFromJSON(const json& redisJSON) const;

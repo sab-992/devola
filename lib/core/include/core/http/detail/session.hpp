@@ -30,6 +30,7 @@ namespace http_n
             void write(http_n::Response&& response);
             void error(network_n::Code errorCode);
             void shutdown();
+            void setExtraLogInformation(std::vector<std::string> extraInformation);
 
             static std::shared_ptr<Session> create(sslSocket_t&& socket);
 
@@ -38,6 +39,7 @@ namespace http_n
             bool m_sslEstablished;
             sslSocket_t m_socket;
             std::string m_remoteEndpoint;
+            std::vector<std::string> m_extraLogInformation;
 
             inline static std::shared_ptr<log_n::Light> m_light = log_n::Light::instance();
 
