@@ -31,15 +31,23 @@ class Redis : public database_n::Database_i {
         struct PrivateCommand_s {};
 
     public:
-        Command(const PrivateCommand_s&, redisContext* context, std::string_view command);
+        Command(const PrivateCommand_s&, redisContext* context, std::vector<std::string>&& filteredArgs);
         ~Command();
 
         redisReply* reply();
 
-        static std::unique_ptr<Command> create(redisContext* context, std::string_view command);
+        template<std::convertible_to<std::string_view>... Args>
+        inline static std::unique_ptr<Command> create(redisContext* context,  Args&&... args) {
+            std::vector<std::string> filteredArgs;
+            // TODO: also create the argvlen here and pass it as argument in constructor of Command
+            ((addArgument(filteredArgs, args)), ...);
+            return std::make_unique<Redis::Command>(PrivateCommand_s(), context, std::move(filteredArgs));
+        }
 
     private:
         redisReply* m_reply;
+
+        static void addArgument(std::vector<std::string>& vector, std::string_view arg);
     };
 
 public:

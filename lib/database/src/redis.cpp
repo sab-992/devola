@@ -3,14 +3,26 @@
 // ----------------------------------------------------------
 //                          Command
 // ----------------------------------------------------------
+Redis::Command::Command(const PrivateCommand_s&, redisContext* context, std::vector<std::string>&& filteredArgs) {
+    std::vector<const char*> argv;
+    std::vector<size_t> argvlen;
+    for (const auto& arg : filteredArgs) {
+        argv.emplace_back(arg.c_str());
+        argvlen.emplace_back(arg.size());
+    }
 
-Redis::Command::Command(const PrivateCommand_s&, redisContext* context, std::string_view command) {
-    m_reply = static_cast<redisReply*>(redisCommand(context, command.data()));
-    if (m_reply == nullptr)
-        throw DatabaseException(std::format("Unexpected reply or connection issue. Command: \"{}\"", command));
+    m_reply = static_cast<redisReply*>(redisCommandArgv(context, argv.size(), argv.data(), argvlen.data()));
 
-    if (m_reply->type == REDIS_REPLY_ERROR)
-        throw DatabaseException(std::format("Error in the reply. Command: \"{}\"", command));
+    if (m_reply and m_reply->type != REDIS_REPLY_ERROR)
+        return;
+
+    const std::string& message = not m_reply ? std::format("No reply: {}", context->errstr) : "Redis error" + std::vformat(m_reply->str ? ": {}" : "", std::make_format_args(m_reply->str));
+
+    std::string out;
+    for (auto elem : argv)
+        out += std::format("{} ", elem);
+
+    throw DatabaseException(std::format("{} - Command: ", message, out));
 }
 
 Redis::Command::~Command() {
@@ -18,12 +30,13 @@ Redis::Command::~Command() {
         freeReplyObject(m_reply);
 }
 
-redisReply* Redis::Command::reply() {
-    return m_reply;
+void Redis::Command::addArgument(std::vector<std::string>& vector, std::string_view arg) {
+    if (not arg.empty())
+        vector.emplace_back(arg);
 }
 
-std::unique_ptr<Redis::Command> Redis::Command::create(redisContext* context, std::string_view command) {
-    return std::make_unique<Redis::Command>(PrivateCommand_s(), context, command);
+redisReply* Redis::Command::reply() {
+    return m_reply;
 }
 
 // ----------------------------------------------------------
@@ -46,7 +59,7 @@ database_n::Result Redis::Create(const Query& query, Transaction* Transaction) {
             throw DatabaseException("Create query need to have a value for data() field.");
 
         const Value data = query.data().value().at(query.target());
-        const auto& command = Command::create(access->connection(), std::format("SET {} {}{} NX", query.target().c_str(), fromValue(data), extractTTL(query)));
+        const auto& command = Command::create(access->connection(), "SET", query.target(), fromValue(data), extractTTL(query), "NX");
 
         return buildResult(command->reply(), query);
     } catch (const DatabaseException& e) {
@@ -63,7 +76,7 @@ database_n::Result Redis::Read(const Query& query, Transaction* transaction) {
 
         validateQuery(query);
 
-        const auto& command = Command::create(access->connection(), std::format("GET {}", query.target().c_str()));
+        const auto& command = Command::create(access->connection(), "GET", query.target());
         return buildResult(command->reply(), query);
     } catch (const DatabaseException& e) {
         throw;
@@ -83,7 +96,7 @@ database_n::Result Redis::Update(const Query& query, Transaction* transaction) {
             throw DatabaseException("Create query need to have a value for data() field.");
 
         const Value data = query.data().value().at(query.target());
-        const auto& command = Command::create(access->connection(), std::format("SET {} {}{} XX", query.target().c_str(), fromValue(data), extractTTL(query)));
+        const auto& command = Command::create(access->connection(), "SET", query.target(), fromValue(data), extractTTL(query), "XX");
 
         return buildResult(command->reply(), query);
     } catch (const DatabaseException& e) {
@@ -103,7 +116,7 @@ database_n::Result Redis::Delete(const Query& query, Transaction* transaction) {
         if (query.cardinality() == Cardinality_en::SINGLE)
             throw DatabaseException("Redis DELETE queries cardinality can only be SINGLE");
 
-        const auto& command = Command::create(access->connection(), std::format("DEL {}", query.target().c_str()));
+        const auto& command = Command::create(access->connection(), "DEL", query.target());
         redisReply* reply = command->reply();
 
         if (not reply)
@@ -203,7 +216,7 @@ std::string Redis::fromValue(const Value& value) const {
         [&result, &value = std::as_const(value)](auto&& arg) { result = Converter::toString(arg); }
     }, value.raw());
 
-    return std::format("\"{}\"", result);
+    return result;
 }
 
 std::shared_ptr<Redis> Redis::instance(const json& redisJSON) {
@@ -221,9 +234,6 @@ redis_n::Options Redis::optionsFromJSON(const json& redisJSON) const {
 void Redis::validateQuery(const Query& query) const {
     if (query.type() != database_n::Query::Type_en::TARGETED)
         throw DatabaseException("Redis queries can only be targeted");
-
-    if (query.cardinality() == Cardinality_en::MULTIPLE)
-        throw DatabaseException("Redis queries cardinality is either NONE or SINGLE");
 
     if (query.target().empty())
         throw DatabaseException("Redis queries need to have a non empty target");
