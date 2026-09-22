@@ -419,7 +419,11 @@ database_n::Result PostgreSQL::success(const pqxx::result& dbResult) const {
     if(dbResult.empty())
         return result.setAffected(0).build();
 
-    result.setAffected(dbResult.affected_rows());
+    try {
+        result.setAffected(dbResult.affected_rows());
+    } catch (const std::exception&) {
+        result.setAffected(dbResult.size());
+    }
 
     std::vector<record_t> records;
     for (const pqxx::row& row : dbResult) {
