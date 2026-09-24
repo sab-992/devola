@@ -26,16 +26,10 @@ class CMake(Command, Directory, ServiceUpdater):
 
     def command_explicit(self, args: Namespace, extra_args: list[str]=[]) -> list[list[str]]:
         cmake_command = ["cmake"]
-
-        if platform.system() == "Windows":
-            cmake_command.append(f"-DPostgreSQL_ROOT={POSTGRE_INSTALLATION_PATH}")
-
         return [cmake_command + [f"-DCMAKE_BUILD_TYPE=Debug", *extra_args, "..", "--fresh"] + self.__fs.extra_build_options()]
 
     def details(self) -> str:
-        return "Use the CMakeLists.txt to prepare the environment for the application.\n\n" \
-               "For windows, make sure you have postgres installed, and that the path in " \
-               "\"settings/config.py\" for the POSTGRE_INSTALLATION_PATH matches your current installation path."
+        return "Use the CMakeLists.txt to prepare the environment for the application.\n\n"
 
     def setup(self, args: Namespace) -> None:
         self.update_services()

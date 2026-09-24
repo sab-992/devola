@@ -29,9 +29,7 @@ class Install(Command):
         return "Installs dependencies needed for the project.\n\n" \
                "You do not need to install dependencies if you already have them. " \
                "Here is the list of every dependencies needed:\n" \
-               f"{"".join(f"\t-{dep}\n" for dep in DEPENDENCIES)}\n" \
-               "For Windows, you can chose either to install using 'chocolatey' (default) or 'vcpkg'.\n" \
-               "In order to do this, go in the config.py and change 'USE_VCPKG' to 'True' to use either one of them."
+               f"{"".join(f"\t-{dep}\n" for dep in DEPENDENCIES)}\n"
 
     def setup(self, args: Namespace) -> None:
         Postgres().setup()

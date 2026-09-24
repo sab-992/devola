@@ -2,7 +2,6 @@
 
 #include <core/file/service.hpp>
 #include <core/process/detail/process/linux.hpp>
-#include <core/process/detail/process/windows.hpp>
 #include <core/process/detail/status.hpp>
 #include <fcntl.h>
 #include <format>

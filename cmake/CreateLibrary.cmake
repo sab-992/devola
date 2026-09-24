@@ -34,8 +34,4 @@ function(create_library lib_path lib_type link_core)
         add_dependencies(${target_name} core_lib)
         target_link_libraries(${target_name} PUBLIC core_lib)
     endif()
-
-    if (WIN32)
-        set_target_properties(${target_name} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
-    endif()
 endfunction()

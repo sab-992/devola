@@ -21,15 +21,7 @@ class Test(Command, Directory, ServiceUpdater):
         return "test"
 
     def command_explicit(self, args: Namespace) -> list[list[str]]:
-        if platform.system() == "Windows":
-            path = "test/Debug/tests.exe"
-            # Fallback case (might be GNU compiler on Windows)
-            if not os.path.isfile(path):
-                path = "test/tests.exe"
-        else:
-            path = "./test/tests"
-
-        command: list[str] = [self.uniformizePath(path)]
+        command: list[str] = [self.uniformizePath("./test/tests")]
 
         if args.regex:
             command.append(f"--gtest_filter={args.regex}")

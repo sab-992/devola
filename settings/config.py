@@ -13,10 +13,6 @@ FRONT_END_DOCKER_SERVICE_NAME: str = "angular"
 NGINX_DOCKER_SERVICE_NAME: str     = "nginx"
 PGADMIN_DOCKER_SERVICE_NAME: str   = "pgadmin"
 
-# Windows only:
-POSTGRE_INSTALLATION_PATH: str = "C:/Program Files/PostgreSQL/17"
-USE_VCPKG: bool = False
-
 # Linux only:
 UPDATE_PACKAGE_REPOS_COMMAND: str = "sudo pacman -Syu"
 INSTALL_COMMAND: str = "sudo pacman -S"
