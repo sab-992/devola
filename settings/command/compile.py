@@ -1,7 +1,5 @@
-import platform
 from argparse import Namespace
 
-from settings.config import POSTGRE_INSTALLATION_PATH
 from settings.command.launch import Launch
 from settings.command.test import Test
 from settings.command.detail.command import Command

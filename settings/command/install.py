@@ -1,7 +1,7 @@
 import platform
 from argparse import Namespace
 
-from settings.config import DEPENDENCIES, USE_VCPKG, UPDATE_PACKAGE_REPOS_COMMAND, INSTALL_COMMAND, LIBPQXX_PACKAGE
+from settings.config import DEPENDENCIES, UPDATE_PACKAGE_REPOS_COMMAND, INSTALL_COMMAND, LIBPQXX_PACKAGE
 from settings.command.detail.command import Command
 from settings.command.detail.errors import NotSupportedOperatingSystem
 from settings.command.detail.options import MANUAL_OPTION
