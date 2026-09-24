@@ -41,7 +41,6 @@ namespace network_n
         NONE = 0 // For error handling
     };
 
-
     constexpr std::string getReasonFromStatus(Code code) {
         switch (code) {
             case Code::OK:                return "OK";
@@ -61,8 +60,7 @@ namespace network_n
 
     struct Status_s : public StringConvertible {
     public:
-        Status_s(Code code = Code::NONE) : m_code(code), m_reason(getReasonFromStatus(code)) {}
-
+        Status_s(Code code = Code::NONE);
         Status_s(const Status_s& other) = default;
         Status_s(Status_s&& other) = default;
 
@@ -71,21 +69,21 @@ namespace network_n
         Status_s& operator=(const Status_s& other) = default;
         Status_s& operator=(Status_s&& other) = default;
 
-        bool operator==(const Status_s& other) const { return m_code == other.m_code; }
-        bool operator==(const Code& code) const { return m_code == code; }
-        bool operator==(uint16_t code) const { return to_underlying(m_code) == code; }
+        bool operator==(const Status_s& other) const;
+        bool operator==(const Code& code) const;
+        bool operator==(uint16_t code) const;
 
-        bool operator!=(const Status_s& other) const { return !(*this == other); }
-        bool operator!=(const Code& code) const { return !(*this == code); }
-        bool operator!=(uint16_t code) const { return !(*this == code); }
+        bool operator!=(const Status_s& other) const;
+        bool operator!=(const Code& code) const;
+        bool operator!=(uint16_t code) const;
 
         friend bool operator==(const Code& lhs, const Status_s& rhs) { return rhs == lhs; }
         friend bool operator==(uint16_t lhs, const Status_s& rhs) { return rhs == lhs; }
 
-        Code code() const { return m_code; }
-        std::string reason() const { return m_reason; }
+        Code code() const;
+        std::string reason() const;
 
-        std::string toString() const override { return std::format("{} {}", to_underlying(m_code), m_reason); }
+        std::string toString() const override;
 
     private:
         Code m_code;
