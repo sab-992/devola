@@ -7,6 +7,18 @@ network_n::Cookie::Cookie(std::string_view cookie) {
     parse(cookie);
 }
 
+bool network_n::Cookie::operator==(const Cookie& other) const {
+    return m_isBrowserOnly == other.m_isBrowserOnly and
+            m_maxAge        == other.m_maxAge        and
+            m_name          == other.m_name          and
+            m_path          == other.m_path          and
+            m_value         == other.m_value;
+}
+
+bool network_n::Cookie::operator==(std::string_view other) const {
+    return toString() == other;
+}
+
 network_n::Cookie& network_n::Cookie::build() & {
     return *this;
 }

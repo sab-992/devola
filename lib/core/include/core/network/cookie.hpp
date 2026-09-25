@@ -17,6 +17,9 @@ namespace network_n
 
         ~Cookie() = default;
 
+        bool operator==(const Cookie& other) const;
+        bool operator==(std::string_view other) const;
+
         Cookie& build() & override;
         Cookie build() && override;
 
