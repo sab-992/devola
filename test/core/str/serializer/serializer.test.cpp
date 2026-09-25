@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <core/str/detail/serializer/factory.hpp>
+#include <core/str/serializer_factory.hpp>
 #include <helper/core/inner_types.hpp>
 
 

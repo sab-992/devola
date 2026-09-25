@@ -14,7 +14,7 @@ namespace serializer_n
 
         friend std::unique_ptr<XML> std::make_unique<XML>();
 
-        xml_n::Document deserialize(std::string_view content) const override { return xml_n::Document(content); }
-        std::string serialize(const xml_n::Document& object) const override { return object.toString(); }
+        xml_n::Document deserialize(std::string_view content) const override;
+        std::string serialize(const xml_n::Document& object) const override;
     };
 }

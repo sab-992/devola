@@ -14,7 +14,7 @@ namespace serializer_n
 
         friend std::unique_ptr<JSON> std::make_unique<JSON>();
 
-        nlohmann::json deserialize(std::string_view content) const override { return nlohmann::json::parse(content); }
-        std::string serialize(const nlohmann::json& object) const override { return object.dump(); }
+        nlohmann::json deserialize(std::string_view content) const override;
+        std::string serialize(const nlohmann::json& object) const override;
     };
 }

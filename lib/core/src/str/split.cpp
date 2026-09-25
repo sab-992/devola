@@ -1,0 +1,21 @@
+#include <core/str/split.hpp>
+
+
+void split(std::string_view element, std::vector<std::string>& resultVector, std::string_view splittingToken, size_t start, size_t end) {
+    size_t countFromStart = end == std::string::npos ? end : end - start;
+    std::string_view string = element.substr(start, countFromStart);
+
+    size_t indexSplitToken;
+    while((indexSplitToken = string.find(splittingToken)) != std::string::npos) {
+        const std::string_view part = string.substr(0, indexSplitToken);
+        resultVector.push_back(std::string(part));
+        string = string.substr(indexSplitToken + splittingToken.size());
+    }
+    resultVector.push_back(std::string(string));
+}
+
+std::vector<std::string> split(std::string_view element, std::string_view splittingToken, size_t start, size_t end) {
+    std::vector<std::string> result;
+    split(element, result, splittingToken, start, end);
+    return result;
+}
