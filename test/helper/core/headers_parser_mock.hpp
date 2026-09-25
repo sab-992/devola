@@ -4,10 +4,11 @@
 #include <core/network/interface/headers_parser.hpp>
 #include <core/network/network.hpp>
 #include <string>
-#include <utility>
 
 
 class HeadersParserMock : public network_n::version_n::HeadersParser_i {
+    using Cookie = network_n::Cookie;
+
 public:
     static std::shared_ptr<HeadersParserMock> get(bool isChunked=false, bool isDownload=false) {
         return std::shared_ptr<HeadersParserMock>(new HeadersParserMock(isChunked, isDownload));
@@ -31,7 +32,7 @@ public:
         return stringHeaders;
     }
 
-    std::pair<std::string, std::unordered_map<std::string, std::string>> parse(std::string_view stringHeaders) const override {
+    std::tuple<std::string, std::unordered_map<std::string, std::string>, cookies_t> parse(std::string_view stringHeaders) const override {
         const std::string startLine = "HTTP/1.1 200 OK";
         std::unordered_map<std::string, std::string> headersUMap = { {"Content-Type",   "application/json"},
                                                                      {"Content-Length", "256"},
@@ -44,7 +45,9 @@ public:
         if (m_isDownload)
             headersUMap.insert({ "X-IsDownload", "true" });
 
-        return { startLine , headersUMap };
+        const std::string cookieName = "test-cookie";
+        return { startLine , headersUMap, {{ cookieName, Cookie().setName(cookieName)
+                                                                 .setValue("this is a cookie").build() }}};
     }
 
     startLineInformation_t parseStartLine(std::string_view startLine) const override { return { "HTTP/1.1", "200", "OK" }; }

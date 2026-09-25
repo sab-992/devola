@@ -80,12 +80,14 @@ TEST_F(HeadersParserTest, ParseWithValidStartlineAndHeaders_ReturnsStartlineAndH
     const std::string EXPECTED_STARTLINE = "HTTP/1.1 200 OK";
     const std::string EXPECTED_HEADER = "Transfer-Encoding";
     const std::string EXPECTED_HEADER_VALUE = "chunked";
-    const std::pair<std::string, headers_t> EXPECTED_HTTP_HEADERS = { EXPECTED_STARTLINE, { {EXPECTED_HEADER, EXPECTED_HEADER_VALUE } } };
+    const std::string EXPECTED_COOKIE_NAME = "test-cookie";
+    const std::string EXPECTED_COOKIE = std::format("{}=example", EXPECTED_COOKIE_NAME);
+    const std::tuple<std::string, headers_t, cookies_t> EXPECTED_HTTP_HEADERS = { EXPECTED_STARTLINE, {{ EXPECTED_HEADER, EXPECTED_HEADER_VALUE }}, {{ EXPECTED_COOKIE_NAME, Cookie(EXPECTED_COOKIE) }}};
     auto parser = HeadersParser::instance();
     Headers h(parser);
     h.setStartLine(EXPECTED_STARTLINE);
 
-    const std::pair<std::string, headers_t> result = parser->parse(std::format("{}\r\n{}: {}", EXPECTED_STARTLINE, EXPECTED_HEADER, EXPECTED_HEADER_VALUE));
+    const auto& result = parser->parse(std::format("{}\r\n{}: {}\nCookie: {}", EXPECTED_STARTLINE, EXPECTED_HEADER, EXPECTED_HEADER_VALUE, EXPECTED_COOKIE));
 
     EXPECT_EQ(EXPECTED_HTTP_HEADERS, result);
 }

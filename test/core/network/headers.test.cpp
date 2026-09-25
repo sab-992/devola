@@ -40,7 +40,7 @@ TEST_F(HeadersTest, Build_ReturnsValidHeaders) {
 
 TEST_F(HeadersTest, Parse_ParsesHeadersCorrectly) {
     using namespace network_n;
-    const auto& [EXPECTED_STARTLINE, EXPECTED_HEADERS_UMAP] = this->getHeaderParserMockPtr()->parse("");
+    const auto& [EXPECTED_STARTLINE, EXPECTED_HEADERS_UMAP, EXPECTED_COOKIES_MAP] = this->getHeaderParserMockPtr()->parse("");
     const std::string EXPECTED_HEADERS = EXPECTED_STARTLINE + std::format("\r\n{}", buildHeaders(EXPECTED_HEADERS_UMAP));
 
     Headers headers(this->getHeaderParserMockPtr());
@@ -50,6 +50,7 @@ TEST_F(HeadersTest, Parse_ParsesHeadersCorrectly) {
     for (const auto& [header, expected_value]: EXPECTED_HEADERS_UMAP)
         EXPECT_EQ(expected_value, headers.get(header));
     EXPECT_EQ(EXPECTED_STARTLINE, headers.startLine());
+    EXPECT_EQ(EXPECTED_COOKIES_MAP, headers.cookiesToMap());
 }
 
 TEST_F(HeadersTest, SetHeader_AddsNewHeader) {
