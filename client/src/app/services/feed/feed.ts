@@ -75,7 +75,7 @@ export class FeedService {
     }
 
     public fetchFeed() : void {
-        this.m_http.get<Feed[]>(this.buildPath("/feed")).subscribe(this.updateFeeds.bind(this))
+        this.m_http.get<Feed[]>(this.buildPath("/feed"), { next: this.updateFeeds.bind(this) });
     }
 
     private buildPath(path: string) {

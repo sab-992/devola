@@ -1,5 +1,5 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable, ReplaySubject } from 'rxjs';
 import { Resume } from '@models/resume';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpService } from '@services/http/http';
@@ -34,19 +34,29 @@ export class ResumeService {
     }
 
     public addResume(payload: Resume): Observable<Resume> {
-        return this.m_http.post<Resume, Resume>(this.buildPath("/resumes"), payload);
+        const sub = new ReplaySubject<Resume>(1);
+        this.m_http.post<Resume, Resume>(this.buildPath("/resumes"), payload, { next: (resume) => { sub.next(resume); sub.complete(); },
+                                                                                error: (error) => sub.error(error) });
+        return sub.asObservable();
     }
 
-    public deleteResume(tag: string) {
-        return this.m_http.delete(`${this.buildPath("/resumes")}/${tag}`);
+    public deleteResume(tag: string) : Observable<never> {
+        this.m_http.delete<null>(`${this.buildPath("/resumes")}/${tag}`, { error: (error) => { throw new Error(`Error while deleting resume: ${error}`); }});
+        return EMPTY;
     }
 
     public fetchResumes() : Observable<Resume[]> {
-        return this.m_http.get<Resume[]>(this.buildPath("/resumes"));
+        const sub = new ReplaySubject<Resume[]>(1);
+        this.m_http.get<Resume[]>(this.buildPath("/resumes"), { next: (resumes) => { sub.next(resumes); sub.complete(); },
+                                                                error: (error) => sub.error(error) });
+        return sub.asObservable();
     }
 
     public updateResume(tag: string, skills: string[]) {
-        return this.m_http.patch<Resume, string[]>(`${this.buildPath("/resumes")}/${tag}`, skills);
+        const sub = new ReplaySubject<Resume>(1);
+        this.m_http.patch<Resume, string[]>(`${this.buildPath("/resumes")}/${tag}`, skills, { next: (resume) => { sub.next(resume); sub.complete(); },
+                                                                                              error: (error) => sub.error(error) });
+        return sub.asObservable();
     }
 
     private async extractPdfText(file: File): Promise<string> {

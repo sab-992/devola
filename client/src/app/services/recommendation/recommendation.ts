@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { environment } from '@environments/environment';
 import { HttpService } from '@services/http/http';
-import { Observable, map } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import { ResumeScore, RecommendationRun, RecommendationResult } from '@models/recommendation';
 
 
@@ -12,15 +12,33 @@ export class RecommendationService {
     private readonly m_http = inject(HttpService);
 
     public fetchResult(uuid: string): Observable<RecommendationResult[]> {
-        return this.m_http.get<RawRecommendationResult[]>(`${this.buildPath("/recommendations")}/${uuid}`).pipe(map((results) => results.map((result) => this.parseResult(result))));
+        const sub = new ReplaySubject<RecommendationResult[]>(1);
+
+            this.m_http.get<RawRecommendationResult[]>(`${this.buildPath("/recommendations")}/${uuid}`, {
+                next: (results) => {
+                    sub.next(results.map((result) => this.parseResult(result)));
+                    sub.complete();
+                },
+                error: (error) => sub.error(error)
+            });
+
+        return sub.asObservable();
     }
 
     public fetchRuns(): Observable<RecommendationRun[]> {
-        return this.m_http.get<RecommendationRun[]>(this.buildPath("/recommendations"));
+        const sub = new ReplaySubject<RecommendationRun[]>(1);
+
+            this.m_http.get<RecommendationRun[]>(this.buildPath("/recommendations"), { next: (runs) => { sub.next(runs); sub.complete(); },
+                                                                                       error: (error) => sub.error(error) });
+
+        return sub.asObservable();
     }
 
     public startRecommendation(): Observable<RecommendationRun> {
-        return this.m_http.post<RecommendationRun>(this.buildPath("/recommendations"));
+        const sub = new ReplaySubject<RecommendationRun>(1);
+        this.m_http.post<RecommendationRun>(this.buildPath("/recommendations"), null, { next: (run) => { sub.next(run); sub.complete(); },
+                                                                                        error: (error) => sub.error(error) });
+        return sub.asObservable();
     }
 
     private buildPath(path: string) {

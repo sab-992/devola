@@ -1,16 +1,19 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
-
+import { Observable, ReplaySubject } from 'rxjs';
 import { FeedSubscription } from '@models/feed-subscription';
 import { HttpService } from '@services/http/http';
 import { environment } from '@environments/environment';
+
 
 @Injectable({ providedIn: 'root' })
 export class SubscriptionService {
     private readonly m_http = inject(HttpService);
 
     public fetchSubscriptions(): Observable<FeedSubscription[]> {
-        return this.m_http.get<FeedSubscription[]>(this.buildPath("/subscriptions"));
+        const sub = new ReplaySubject<FeedSubscription[]>(1);
+        this.m_http.get<FeedSubscription[]>(this.buildPath("/subscriptions"), { next: (subscriptions) => { sub.next(subscriptions); sub.complete(); },
+                                                                                error: (error) => sub.error(error) });
+        return sub.asObservable();
     }
 
     public parseURL(url: string): { host: string, endpoint: string } {
@@ -28,7 +31,10 @@ export class SubscriptionService {
     }
 
     public saveSubscriptions(subscriptions: FeedSubscription[]): Observable<FeedSubscription[]> {
-        return this.m_http.put<FeedSubscription[], FeedSubscription[]>(this.buildPath("/subscriptions"), subscriptions);
+        const sub = new ReplaySubject<FeedSubscription[]>(1);
+        this.m_http.put<FeedSubscription[], FeedSubscription[]>(this.buildPath("/subscriptions"), subscriptions, { next: (updatedSubscriptions) => { sub.next(updatedSubscriptions); sub.complete(); },
+                                                                                error: (error) => sub.error(error) });
+        return sub.asObservable();
     }
 
     private buildPath(path: string) {
