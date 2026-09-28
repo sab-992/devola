@@ -2,6 +2,11 @@
 
 
 void split(std::string_view element, std::vector<std::string>& resultVector, std::string_view splittingToken, size_t start, size_t end) {
+    if (element.empty()) {
+        resultVector.emplace_back("");
+        return;
+    }
+
     size_t countFromStart = end == std::string::npos ? end : end - start;
     std::string_view string = element.substr(start, countFromStart);
 

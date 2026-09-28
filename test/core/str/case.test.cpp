@@ -9,7 +9,7 @@
 class LowercaseTest : public ::testing::TestWithParam<CASE_STRING_PARAM_TYPES> {};
 
 TEST_P(LowercaseTest, ToLowerWithValidParameters_ReturnsLowercaseString) {
-    auto [input, expected] = GetParam();
+    const auto& [input, expected] = GetParam();
     EXPECT_EQ(toLower(input), expected);
 }
 
@@ -25,7 +25,7 @@ INSTANTIATE_TEST_SUITE_P(LowercaseTestSuite, LowercaseTest, ::testing::Values(CA
 class UppercaseTest : public ::testing::TestWithParam<CASE_STRING_PARAM_TYPES> {};
 
 TEST_P(UppercaseTest, ToUpperWithValidParameters_ReturnsUppercaseString) {
-    auto [input, expected] = GetParam();
+    const auto& [input, expected] = GetParam();
     EXPECT_EQ(toUpper(input), expected);
 }
 

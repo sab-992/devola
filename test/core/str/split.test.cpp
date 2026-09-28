@@ -10,7 +10,7 @@
 class SplitTest : public ::testing::TestWithParam<SPLIT_STRING_PARAM_TYPES> {};
 
 TEST_P(SplitTest, SplitWithValidParameters_ReturnCorrectlySplitParts) {
-    const auto [input, expected] = GetParam();
+    const auto& [input, expected] = GetParam();
 
     std::vector<std::string> result;
     split(std::get<0>(input), result, std::get<1>(input), std::get<2>(input), std::get<3>(input));
