@@ -5,15 +5,11 @@ std::string replace(std::string_view element, std::string_view replacedToken, st
     if (element.empty())
         return "";
 
-    size_t countFromStart = end == std::string::npos ? end : end - start;
-    if (element.substr(start, countFromStart).empty())
-        return "";
-
-    std::string string = std::string(element.substr(start, countFromStart));
-
-    size_t indexReplacedToken;
-    while((indexReplacedToken = string.find(replacedToken)) != std::string::npos)
-        string.replace(indexReplacedToken, indexReplacedToken + replacedToken.size(), replacementToken);
+    size_t indexReplacedToken = 0;
+    size_t fixedEnd = end == std::string::npos ? element.size() : end;
+    std::string string = std::string(element);
+    while((indexReplacedToken = string.find(replacedToken, indexReplacedToken)) != std::string::npos and indexReplacedToken < fixedEnd)
+        string.replace(indexReplacedToken, replacedToken.size(), replacementToken);
 
     return string;
 }
