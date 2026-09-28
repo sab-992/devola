@@ -2,16 +2,13 @@
   "image": "dpage/pgadmin4",
   "container_name": "pgadmin",
   "env_file": [
-    "../settings/database.env"
+    "../settings/.env"
   ],
   "ports": [
     "5050:80"
   ],
   "networks": [
     "app-network"
-  ],
-  "depends_on": [
-    "database"
   ],
   "restart": "unless-stopped"
 }

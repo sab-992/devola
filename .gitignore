@@ -1,4 +1,8 @@
 ## Ignore compiled files
+pyrefly.toml
+*.crt
+*.key
+*.pem
 */out/*
 */build/*
 build

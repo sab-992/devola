@@ -1,0 +1,10 @@
+<button type="button" mat-icon-button [class]="{ 'theme-toggle': true, 'light-hover': !isLightMode(), 'dark-hover': isLightMode() }"
+    [attr.aria-label]="isLightMode() ? 'Switch to dark mode' : 'Switch to light mode'" (click)="toggleTheme()">
+    <mat-icon>
+        @if (isLightMode()) {
+            dark_mode
+        } @else {
+            light_mode
+        }
+    </mat-icon>
+</button>

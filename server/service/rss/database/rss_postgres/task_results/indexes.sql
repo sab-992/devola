@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_task_results_user_task_uuid ON task_results (user_uuid, task_uuid);

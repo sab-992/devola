@@ -31,12 +31,12 @@ class Shutdown(Command):
 
     def details(self) -> str:
         return "Stops ALL locally running containers."
-    
-    def setup(self, args: Namespace) -> str:
+
+    def setup(self, args: Namespace) -> None:
         ids = subprocess.check_output(["docker", "ps", "-q"]).decode().split()
 
         if ids:
             subprocess.run(["docker", "stop"] + ids)
 
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         pass

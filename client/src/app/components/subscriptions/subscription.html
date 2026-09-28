@@ -1,0 +1,121 @@
+<div class="sub-page">
+    <app-header />
+
+    <main class="sub-body">
+        <section class="sub-card">
+            <h2 class="sub-card__title">Add a feed</h2>
+            <div class="add-form">
+                <mat-form-field appearance="outline" class="add-form__field">
+                    <mat-label>Host</mat-label>
+                    <input class="padding-fix" matInput type="text" placeholder="himalayas.app" [value]="newHost()"
+                        (input)="updateNewHost($any($event.target).value)" />
+                </mat-form-field>
+
+                <div class="action action-border"><button type="button" mat-flat-button class="add-form__submit"
+                        (click)="addSubscription()"><mat-icon>add</mat-icon> Add feed</button></div>
+            </div>
+            <mat-error class="field-error">
+                @if(addError()) { {{ addError() }} }
+            </mat-error>
+        </section>
+
+        <section class="sub-card sub-feeds-card">
+            <div class="sub-card__header">
+                <h2 class="sub-card__title">Subscribed feeds</h2>
+                <span class="sub-card__count">
+                    {{ draft().length }} feed{{ draft().length === 1 ? '' : 's' }}
+                </span>
+            </div>
+
+            @if (loading()) {
+            <div class="sub-state">
+                <mat-spinner diameter="28" />
+            </div>
+            } @else if (loadError()) {
+            <div class="sub-state">
+                <div>
+                    <mat-icon>rss_feed</mat-icon>
+                    <p>{{ loadError() }}</p>
+                </div>
+                <button type="button" mat-button (click)="load()">Retry</button>
+            </div>
+            } @else {
+            <ul class="feed-list sub-feeds">
+                @for (subscription of draft(); track $index) {
+                <li class="feed-row">
+                    @if (editingIndex() === $index) {
+                    <div class="feed-row__edit">
+                        <mat-form-field appearance="outline" class="feed-row__field">
+                            <mat-label>Host</mat-label>
+                            <input matInput type="text" [value]="editHost()"
+                                (input)="updateEditHost($any($event.target).value)" />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="feed-row__field">
+                            <mat-label>Endpoint</mat-label>
+                            <input matInput type="text" [value]="editEndpoint()"
+                                (input)="updateEditEndpoint($any($event.target).value)" />
+                        </mat-form-field>
+                        <div class="feed-row__edit-actions">
+                            <button class="action" type="button" mat-icon-button aria-label="Confirm edit"
+                                (click)="confirmEdit()">
+                                <mat-icon>check</mat-icon>
+                            </button>
+                            <button class="danger" type="button" mat-icon-button aria-label="Cancel edit"
+                                (click)="cancelEdit()">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                    <mat-error class="field-error">@if (editError()) { {{ editError() }} }</mat-error>
+                    } @else {
+                    <div class="feed-row__info">
+                        <span class="feed-row__host">{{ subscription.host }}</span>
+                        <span class="feed-row__endpoint">{{ subscription.endpoint }}</span>
+                        <div class="feed-row__actions">
+                            <button class="action" type="button" mat-icon-button aria-label="Edit feed"
+                                (click)="startEdit($index)">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button class="danger" type="button" mat-icon-button aria-label="Remove feed"
+                                (click)="removeSubscription($index)">
+                                <mat-icon>delete_outline</mat-icon>
+                            </button>
+                        </div>
+                        <span class="feed-row__created">{{ subscription.created_at === -1 ? 'Just now' :
+                            timeAgo(subscription.created_at) }}</span>
+                    </div>
+                    }
+                </li>
+                } @empty {
+                <li class="sub-state">
+                    <p>No feeds subscribed yet.</p>
+                </li>
+                }
+            </ul>
+            }
+        </section>
+    </main>
+
+    @if (isDirty()) {
+    <div class="change-bar">
+        <span class="change-bar__label">You have unsaved changes</span>
+
+        @if (saveError()) {
+        <span class="change-bar__error">{{ saveError() }}</span>
+        }
+
+        <div class="change-bar__actions">
+            <button class="danger" type="button" mat-button [disabled]="saving()" (click)="discardChanges()">
+                Discard
+            </button>
+            <button class="action" type="button" mat-flat-button [disabled]="saving()" (click)="saveChanges()">
+                @if (saving()) {
+                <mat-spinner diameter="18" />
+                } @else {
+                Save changes
+                }
+            </button>
+        </div>
+    </div>
+    }
+</div>

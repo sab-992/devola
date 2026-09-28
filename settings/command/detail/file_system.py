@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .errors import InvalidInputError
 from .log import log, Color
-from settings.config import EXTRA_BUILD_OPTIONS_FILENAME, DATABASE_LIB_NAME, ROOT_FOLDER_NAME
+from settings.config import EXTRA_BUILD_OPTIONS_FILENAME, DATABASE_LIB_NAME, ROOT_FOLDER_NAME, SERVICES_PATH
 
 
 class FileSystem():
@@ -37,6 +37,7 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET {service_name_lower} PROPERTY CXX_STANDARD 20)
 endif()
 
+target_compile_definitions({service_name_lower} PRIVATE SERVICE_DIRECTORY="${'{'}CMAKE_CURRENT_LIST_DIR{'}'}")
 target_include_directories({service_name_lower} PRIVATE "${'{'}{service_name_lower}_path{'}'}/include")
 target_link_libraries({service_name_lower} PRIVATE {librairies_str})
 """
@@ -52,6 +53,32 @@ int main() {'{'}
 {'}'}
 """
 
+    def database_compose(self, db_file_name: str,  service_name: str, db_identifier: str) -> str:
+        return \
+f"""
+networks:
+  app-network:
+    external: true
+services:
+  {db_identifier}:
+    build:
+      context: ../../../docker
+      dockerfile: {db_file_name}.Dockerfile
+    container_name: {db_identifier}
+    env_file:
+    - ../settings/.env
+    networks:
+    - app-network
+    restart: unless-stopped
+    volumes:
+    - {db_identifier}_vol:/var/lib/postgresql/data
+    - ../database/{db_identifier}:/docker-entrypoint-initdb.d
+volumes:
+  {db_identifier}_vol:
+    driver: local
+    name: {db_identifier}_vol"""
+
+    # Needs to be relative paths for docker
     def docker_compose(self, service_name: str, env_file_dir: str, libraries: set[str]) -> str:
         path_to_server = "../../.."
         path_to_root_folder = f"{path_to_server}/.."
@@ -65,7 +92,7 @@ services:
     image: gcc:latest
     working_dir: /app
     env_file:
-      - {env_file_dir}/{service_name}.env
+      - {env_file_dir}/.env
     container_name: {service_name}
     environment:
       - SERVICE_NAME={service_name}
@@ -102,8 +129,8 @@ networks:
         extra_options: dict[str, str] = json.loads(self.read(path))
         return [*sum(extra_options.items(), ())]
 
-    def find_root_folder(self):
-        current_path = Path.cwd()
+    def find_root_folder(self) -> Path:
+        current_path = Path(os.path.abspath(__file__))
 
         for parent in [current_path] + list(current_path.parents):
             current_path = parent / ROOT_FOLDER_NAME
@@ -113,12 +140,18 @@ networks:
         raise Exception("Root folder not found!")
 
     def git_ignore(self, name: str) -> str:
-        return f"""\
-/docker/docker-compose.{name}.yml
-"""
+        return f"/docker/docker-compose.{name}.yml"
+
+    def get_files(self, path: str) -> list[str]:
+        return [file for file in os.listdir(path) if os.path.isfile(os.path.join(path, file))]
 
     def get_directories(self, path: str) -> list[str]:
         return [directory for directory in os.listdir(path) if os.path.isdir(os.path.join(path, directory))]
+
+    def get_services(self) -> list[str]:
+        service_full_path = os.path.join(self.find_root_folder(), SERVICES_PATH)
+        os.makedirs(service_full_path, exist_ok=True);
+        return self.get_directories(service_full_path)
 
     def make_directory(self, dir_path: str, dir_name: str):
         root_folder = self.find_root_folder()
@@ -127,36 +160,22 @@ networks:
         log(f"Created: \"{dir_name}\" directory ", True, Color.GREEN)
         return new_service_directory_path
 
-    def nginx(self, service_name: str, use_upload_config: bool = False) -> str:
+    def nginx(self, service_name: str) -> str:
         return f"""\
-server {'{'}
-    location /api/{service_name} {'{'}
-{
-f"""\
-        proxy_pass http://{service_name};
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+location /api/{service_name} {'{'}
+    proxy_pass http://{service_name};
+    proxy_http_version 1.1;
 
-        # Upload specific settings
-        proxy_request_buffering off;
-        proxy_buffering off;
-        proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-        chunked_transfer_encoding on;
-""" if use_upload_config else f"""\
-    location /api/{service_name} {'{'}
-        proxy_pass http://{service_name};
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;"
-"""
-}
-    {'}'}
-{'}'}
-"""
+    proxy_buffering off;
+    proxy_request_buffering off;
+
+    chunked_transfer_encoding on;
+{'}'}"""
+
     def packages(self, libraries: set[str]) -> str:
         find_packages = "find_package(core_lib REQUIRED)"
         libraries_sorted = sorted(libraries)
@@ -173,8 +192,10 @@ f"""\
         if not os.path.isfile(file_path):
             raise InvalidInputError("Path does not exists!")
 
+        content = ""
         with open(file_path, 'r') as f:
-            return f.read()
+            content = f.read()
+        return content
 
     def write(self, folder_path: str, file_name: str, content: str, skip_if_exists: bool=False):
         if len(folder_path) <= 0:
@@ -186,7 +207,7 @@ f"""\
         file_path = os.path.join(folder_path, file_name)
 
         if (os.path.isfile(file_path) and skip_if_exists):
-            return
+            return True
 
         operation: str = "Updated" if os.path.isfile(file_path) else "Created"
 
@@ -194,3 +215,4 @@ f"""\
             f.write(content)
 
         log(f"{operation}: \"{file_name}\"", True, Color.YELLOW)
+        return False

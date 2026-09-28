@@ -11,7 +11,8 @@
     "app-network"
   ],
   "volumes": [
-    "../nginx/conf.d:/etc/nginx/conf.d:ro"
+    "./nginx:/etc/nginx:ro",
+    "./nginx/conf.d:/etc/nginx/conf.d:ro"
   ],
   "restart": "unless-stopped"
 }

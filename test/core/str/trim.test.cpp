@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <core/str/trim.h>
+#include <core/str/trim.hpp>
 #include <string>
 
 
@@ -9,7 +9,7 @@
 class TrimTest : public ::testing::TestWithParam<TRIM_STRING_PARAM_TYPES> {};
 
 TEST_P(TrimTest, TrimWithValidParameters_ReturnsCorrectlyTrimmedString) {
-    auto [input, expected] = GetParam();
+    const auto& [input, expected] = GetParam();
     EXPECT_EQ(trim(input), expected);
 }
 

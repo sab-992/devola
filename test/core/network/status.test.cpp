@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <core/network/network.h>
+#include <core/network/network.hpp>
 
 
 class StatusTest : public ::testing::Test {};

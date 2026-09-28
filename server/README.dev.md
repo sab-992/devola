@@ -8,7 +8,7 @@ devola/
 │   ├── CMakeLists.txt
 │   ├── include/
 │   │   ├── private_module_a/
-│   │   │   ├── file2.h
+│   │   │   ├── file2.hpp
 │   │   │   └── ...     (Other private module headers)
 │   │   └── ...     (Other private modules)
 │   ├── src/
@@ -32,10 +32,10 @@ devola/
 │   │   │   ├── lib_a/
 │   │   │   │   ├── module_a/
 │   │   │   │   │   ├── detail/
-│   │   │   │   │   ├── file1.h
+│   │   │   │   │   ├── file1.hpp
 │   │   │   │   │   └── ...     (Other module headers)
 │   │   │   │   └── ...     (Other modules)
-│   │   │   └── lib_a.h     (Umbrella header)
+│   │   │   └── lib_a.hpp     (Umbrella header)
 │   │   └── src/
 │   │       ├── module_a/
 │   │       │   ├── file1.cpp

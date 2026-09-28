@@ -1,7 +1,7 @@
-#include <core/network/detail/headers.h>
+#include <core/network/detail/headers.hpp>
 
 
-network_n::Headers::Headers(std::shared_ptr<protocol_n::HeadersParser_i> parser) {
+network_n::Headers::Headers(std::shared_ptr<HeadersParser_i> parser) {
     setParser(parser);
 }
 
@@ -20,6 +20,15 @@ std::string network_n::Headers::build() const {
     return m_parser->build(*this);
 }
 
+const network_n::Cookie& network_n::Headers::cookie(const std::string& name) const {
+    if (m_setCookies.contains(name))
+        return m_setCookies.at(name);
+    else if (m_cookies.contains(name))
+        return m_cookies.at(name);
+
+    throw Exception(std::format("Cookie \"{}\" not found", name));
+}
+
 std::string network_n::Headers::get(const std::string& name) const {
     return m_headersMap.contains(name) ? m_headersMap.at(name) : "";
 }
@@ -28,21 +37,22 @@ void network_n::Headers::parse(std::string_view stringHeaders) {
     if (stringHeaders.empty())
         return;
 
-    const auto& [startLine, headersUMap] = m_parser->parse(stringHeaders);
+    const auto& [startLine, headersUMap, cookies] = m_parser->parse(stringHeaders);
 
     m_headersMap = headersUMap;
     m_startLine = startLine;
+    m_cookies = cookies;
 }
 
-std::string network_n::Headers::startLine() const {
-    return m_startLine;
+void network_n::Headers::setCookie(const std::string& name, Cookie value) {
+    m_setCookies[name] = value;
 }
 
 void network_n::Headers::setHeader(const std::string& name, std::string_view value) {
     m_headersMap[name] = value;
 }
 
-void network_n::Headers::setParser(std::shared_ptr<protocol_n::HeadersParser_i> parser) {
+void network_n::Headers::setParser(std::shared_ptr<HeadersParser_i> parser) {
     if (parser == nullptr)
         throw InvalidArgument("No parser given", "Headers parser");
 
@@ -53,7 +63,19 @@ void network_n::Headers::setStartLine(std::string_view startLine) {
     m_startLine = trim(startLine);
 }
 
-headersUMap_t network_n::Headers::toMap() const {
+std::string network_n::Headers::startLine() const {
+    return m_startLine;
+}
+
+cookies_t network_n::Headers::addedCookiesToMap() const {
+    return m_setCookies;
+}
+
+cookies_t network_n::Headers::cookiesToMap() const {
+    return m_cookies;
+}
+
+headers_t network_n::Headers::headersToMap() const {
     return m_headersMap;
 }
 

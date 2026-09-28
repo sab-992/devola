@@ -1,5 +1,5 @@
-#include <core/exception/not_supported.h>
+#include <core/exception/not_supported.hpp>
 
 
-NotSupported::NotSupported(const std::string& message)
-    : Exception(message, "Not supported", network_n::Code::NOT_ALLOWED) {}
+NotSupported::NotSupported(const std::string& functionName)
+    : LogicException(functionName, "Not supported", Code::NOT_ALLOWED) {}

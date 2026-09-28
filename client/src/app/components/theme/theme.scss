@@ -1,0 +1,26 @@
+.theme-toggle {
+    position: relative;
+    z-index: 1;
+    padding: 0.6rem 1rem;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--grey);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.light-hover {
+    &:hover {
+        color: #ffd000;
+    }
+}
+
+.dark-hover {
+    &:hover {
+        color: #5900ff;
+    }
+}

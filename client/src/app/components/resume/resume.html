@@ -1,0 +1,201 @@
+<div class="resume-page">
+    <app-header />
+
+    <main style="align-items: center;" class="resume-body">
+
+        <section class="resume-card add-resume-card">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <h2 class="resume-card__title">Upload your resume</h2>
+                <div style="display: flex; justify-content: end;">
+                    @if (saveError()) {
+                    <p class="field-error">{{ saveError() }}</p>
+                    }
+                    @if (saveSuccess()) {
+                    <p class="save-success">Resume saved.</p>
+                    }
+                    <button style="position: relative; right: 5px;" type="button" class="resume-save action action-border"
+                        [disabled]="!canSave()" (click)="save()">
+                        @if (saving()) {
+                        <mat-spinner diameter="20" />
+                        } @else {
+                        Save resume
+                        }
+                    </button>
+                </div>
+            </div>
+
+
+            <div style="display:flex;">
+                @if (!selectedFile()) {
+                <label style="width: 1fr;" class="dropzone" [class.is-dragover]="dragOver()"
+                    (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onFileDropped($event)">
+                    <input type="file" class="dropzone__input" accept=".pdf,.docx,.txt,.md"
+                        (change)="onFileSelected($event)" />
+                    <mat-icon>upload_file</mat-icon>
+                    <p class="dropzone__label"><strong>Click to upload</strong> or drag and drop</p>
+                    <span class="dropzone__hint">PDF, DOCX, TXT, or MD</span>
+                </label>
+                } @else {
+                <div class="file-row">
+                    <mat-icon class="file-row__icon">description</mat-icon>
+
+                    <div class="file-row__info">
+                        <span class="file-row__name">{{ selectedFile()!.name }}</span>
+                        @if (extracting()) {
+                        <span class="file-row__status">Extracting text…</span>
+                        } @else if (extractError()) {
+                        <span class="file-row__status file-row__status--error">{{ extractError() }}</span>
+                        } @else {
+                        <span class="file-row__status">{{ characterCount() | number }} characters extracted</span>
+                        }
+                    </div>
+
+                    @if (extracting()) {
+                    <mat-spinner diameter="20" />
+                    } @else {
+                    <button class="danger" type="button" mat-icon-button aria-label="Remove file" (click)="clearFile()">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                    }
+                </div>
+                }
+                <div style="margin-left:1rem; width: 100%;">
+                    <h2 class="resume-card__title">Details</h2>
+
+                    <mat-form-field appearance="outline" class="resume-field">
+                        <mat-label>Resume name</mat-label>
+                        <input matInput type="text" placeholder="e.g. Senior Backend Resume" [value]="tag()"
+                            (input)="updateTag($any($event.target).value)" />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="resume-field">
+                        <mat-label>Skills</mat-label>
+                        <mat-chip-grid #skillGrid aria-label="Skills related to this resume">
+                            @for (skill of skills(); track skill) {
+                            <mat-chip-row (removed)="removeSkill(skill)">
+                                {{ skill }}
+                                <button class="danger" matChipRemove aria-label="Remove skill">
+                                    <mat-icon>cancel</mat-icon>
+                                </button>
+                            </mat-chip-row>
+                            }
+                            <input placeholder="Add a skill and press Enter…" [matChipInputFor]="skillGrid"
+                                [matChipInputSeparatorKeyCodes]="separatorKeyCodes" matChipInputAddOnBlur
+                                (matChipInputTokenEnd)="addSkill($event)" />
+                        </mat-chip-grid>
+                    </mat-form-field>
+                </div>
+            </div>
+        </section>
+
+    <section class="resume-card resume-list">
+        <h2 class="resume-card__title">Your resumes</h2>
+
+        @if (loadingResumes()) {
+            <div class="resume-state">
+            <mat-spinner diameter="28" />
+            </div>
+        } @else if (resumesError()) {
+            <div class="resume-state">
+            <p>{{ resumesError() }}</p>
+            <button type="button" mat-button (click)="loadResumes()">Retry</button>
+            </div>
+        } @else {
+            <ul class="saved-resumes">
+            @for (resume of resumes(); track resume.tag) {
+                <li class="saved-resume">
+                <div class="saved-resume__top">
+                    <span class="saved-resume__tag">{{ resume.tag }}</span>
+
+                    <div class="saved-resume__actions">
+                    @if (editingResumeTag() !== resume.tag) {
+                        <button type="button" mat-icon-button aria-label="Edit skills" (click)="startEditSkills(resume)">
+                        <mat-icon class="action">edit</mat-icon>
+                        </button>
+                    }
+
+                    @if (confirmDeleteTag() === resume.tag) {
+                        <button
+                        type="button"
+                        mat-button
+                        class="danger"
+                        [disabled]="deletingTag() === resume.tag"
+                        (click)="confirmDelete(resume.tag)"
+                        >
+                        @if (deletingTag() === resume.tag) {
+                            <mat-spinner diameter="16" />
+                        } @else {
+                            Confirm
+                        }
+                        </button>
+                        <button class="action" type="button" mat-icon-button aria-label="Cancel delete" (click)="cancelDelete()">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    } @else {
+                        <button class="danger" type="button" mat-icon-button aria-label="Delete resume" (click)="requestDelete(resume.tag)">
+                            <mat-icon>delete_outline</mat-icon>
+                        </button>
+                    }
+                    </div>
+                </div>
+
+                @if (editingResumeTag() === resume.tag) {
+                    <mat-form-field appearance="outline" class="resume-field saved-resume__edit-field">
+                    <mat-label>Skills</mat-label>
+                    <mat-chip-grid #editGrid aria-label="Skills for this resume">
+                        @for (skill of editSkills(); track skill) {
+                        <mat-chip-row (removed)="removeEditSkill(skill)">
+                            {{ skill }}
+                            <button class="danger" matChipRemove aria-label="Remove skill">
+                                <mat-icon>cancel</mat-icon>
+                            </button>
+                        </mat-chip-row>
+                        }
+                        <input
+                        placeholder="Add a skill and press Enter…"
+                        [matChipInputFor]="editGrid"
+                        [matChipInputSeparatorKeyCodes]="separatorKeyCodes"
+                        matChipInputAddOnBlur
+                        (matChipInputTokenEnd)="addEditSkill($event)"
+                        />
+                    </mat-chip-grid>
+                    </mat-form-field>
+
+                    @if (editSkillsError()) {
+                    <p class="field-error">{{ editSkillsError() }}</p>
+                    }
+
+                    <div class="saved-resume__edit-actions">
+                    <button type="button" mat-button [disabled]="editSkillsSaving()" (click)="cancelEditSkills()">
+                        Cancel
+                    </button>
+                    <button type="button" mat-flat-button [disabled]="editSkillsSaving()" (click)="saveEditSkills()">
+                        @if (editSkillsSaving()) {
+                        <mat-spinner diameter="18" />
+                        } @else {
+                        Save skills
+                        }
+                    </button>
+                    </div>
+                } @else {
+                    <div class="saved-resume__skills">
+                    @for (skill of resume.skills; track skill) {
+                        @if(skill.length !== 0) {
+                            <span class="skill-pill">{{ skill }}</span>
+                        }
+                    } @empty {
+                        <span class="saved-resume__no-skills">No skills added</span>
+                    }
+                    </div>
+                }
+                </li>
+            } @empty {
+                <li class="resume-state">
+                <p>No resumes saved yet.</p>
+                </li>
+            }
+            </ul>
+        }
+        </section>
+    </main>
+</div>

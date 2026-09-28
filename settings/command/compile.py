@@ -1,13 +1,12 @@
-import platform
 from argparse import Namespace
 
-from settings.config import POSTGRE_INSTALLATION_PATH
 from settings.command.launch import Launch
 from settings.command.test import Test
 from settings.command.detail.command import Command
 from settings.command.detail.directory import Directory
 from settings.command.detail.file_system import FileSystem
 from settings.command.detail.options import LAUNCH_OPTION, MANUAL_OPTION
+from settings.command.detail.postgres import Postgres
 from settings.command.detail.service_updater import ServiceUpdater
 
 
@@ -25,22 +24,16 @@ class CMake(Command, Directory, ServiceUpdater):
 
     def command_explicit(self, args: Namespace, extra_args: list[str]=[]) -> list[list[str]]:
         cmake_command = ["cmake"]
-
-        if platform.system() == "Windows":
-            cmake_command.append(f"-DPostgreSQL_ROOT={POSTGRE_INSTALLATION_PATH}")
-
         return [cmake_command + [f"-DCMAKE_BUILD_TYPE=Debug", *extra_args, "..", "--fresh"] + self.__fs.extra_build_options()]
 
     def details(self) -> str:
-        return "Use the CMakeLists.txt to prepare the environment for the application.\n\n" \
-               "For windows, make sure you have postgres installed, and that the path in " \
-               "\"settings/config.py\" for the POSTGRE_INSTALLATION_PATH matches your current installation path."
+        return "Use the CMakeLists.txt to prepare the environment for the application.\n\n"
 
-    def setup(self, args: Namespace) -> str:
+    def setup(self, args: Namespace) -> None:
         self.update_services()
         self.set_working_directory(self.build_directory())
 
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         self.reset_working_directory()
 
 class Make(Command, Directory, ServiceUpdater):
@@ -55,6 +48,7 @@ class Make(Command, Directory, ServiceUpdater):
         return "make"
 
     def command_explicit(self, args: Namespace, build_type: bool=True) -> list[list[str]]:
+        Postgres().run()
         make_command = ["cmake", "--build", "."]
 
         commands = [make_command]
@@ -66,11 +60,11 @@ class Make(Command, Directory, ServiceUpdater):
     def details(self) -> str:
         return "Use the environment made by the 'cmake' command and build/compiles the application."
 
-    def setup(self, args: Namespace) -> str:
+    def setup(self, args: Namespace) -> None:
         self.update_services()
         self.set_working_directory(self.build_directory())
 
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         self.reset_working_directory()
 
 class MakeAll(Command, Directory, ServiceUpdater):
@@ -90,11 +84,11 @@ class MakeAll(Command, Directory, ServiceUpdater):
     def details(self) -> str:
         return "Combines the 'cmake' command and the 'make' command to prepare the application environment and build it."
 
-    def setup(self, args: Namespace) -> str:
+    def setup(self, args: Namespace) -> None:
         self.update_services()
         self.set_working_directory(self.build_directory())
 
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         self.reset_working_directory()
 
 class MakeTest(Command, Directory, ServiceUpdater):
@@ -119,9 +113,9 @@ class MakeTest(Command, Directory, ServiceUpdater):
     def details(self) -> str:
         return "Compiles the google tests."
 
-    def setup(self, args: Namespace) -> str:
+    def setup(self, args: Namespace) -> None:
         self.update_services()
         self.set_working_directory(self.build_directory())
 
-    def teardown(self, args: Namespace) -> str:
+    def teardown(self, args: Namespace) -> None:
         self.reset_working_directory()

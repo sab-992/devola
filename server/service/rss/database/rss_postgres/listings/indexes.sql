@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_listings_website_host_endpoint ON listings (website_host, website_endpoint);

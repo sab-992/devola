@@ -2,7 +2,7 @@ function(include_services service_dir)
     file(GLOB src_subdirs RELATIVE "${service_dir}" "${service_dir}/*")
     foreach(subdir ${src_subdirs})
         set(service_path "${service_dir}/${subdir}")
-        
+
         if(IS_DIRECTORY "${service_path}")
             include("${service_path}/CMakeLists.txt")
         endif()

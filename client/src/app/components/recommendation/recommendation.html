@@ -1,0 +1,112 @@
+<div class="recs-page">
+    <app-header />
+
+    <div class="recs-body">
+        <section style="height: 97%; overflow: hidden;">
+            <h1 class="recs-list__title">Recommendation runs</h1>
+
+            <div class="recs-list">
+                @if (loadingRuns()) {
+                <div class="recs-state">
+                    <mat-spinner diameter="28" />
+                </div>
+                } @else if (runsError()) {
+                <div class="recs-state">
+                    <p>{{ runsError() }}</p>
+                    <button type="button" mat-button (click)="retryRuns()">Retry</button>
+                </div>
+                } @else {
+                <ul class="run-list">
+                    @for (run of sortedRuns(); track run.uuid) {
+                    <li>
+                        <button type="button" class="run-card" [class.is-active]="selectedRun()?.uuid === run.uuid"
+                            (click)="selectRun(run)">
+                            <span class="run-card__status" [class]="'status-' + run.status">
+                                {{ formatStatus(run.status) }}
+                            </span>
+                            <span class="run-card__started">Started {{ timeAgo(run.started_at) }}</span>
+                            <span class="run-card__updated">Updated {{ timeAgo(run.last_updated_at) }}</span>
+                        </button>
+                    </li>
+                    } @empty {
+                    <li class="recs-state">
+                        <p>No recommendation runs yet.</p>
+                    </li>
+                    }
+                </ul>
+                }
+            </div>
+        </section>
+
+        <section class="recs-detail">
+            @if (!selectedRun()) {
+            <div class="recs-detail__placeholder">
+                <mat-icon>insights</mat-icon>
+                <p>Select a run to see its recommended listings.</p>
+            </div>
+            } @else if (selectedRun()!.status !== 'completed') {
+            <div class="recs-detail__placeholder">
+                <mat-icon>hourglass_top</mat-icon>
+                <p>This run is {{ selectedRun()!.status }}. Results will appear once it completes.</p>
+            </div>
+            } @else if (loadingResults()) {
+            <div class="recs-detail__placeholder">
+                <mat-spinner diameter="28" />
+            </div>
+            } @else if (resultsError()) {
+            <div class="recs-detail__placeholder">
+                <p>{{ resultsError() }}</p>
+                <button type="button" mat-button (click)="selectRun(selectedRun()!)">Retry</button>
+            </div>
+            } @else {
+            <h2 class="recs-detail__title">
+                {{ sortedResults().length }} recommended listing{{ sortedResults().length === 1 ? '' : 's' }}
+            </h2>
+
+            <ul class="result-list">
+                @for (result of sortedResults(); track result.listing_id) {
+                <li class="result-card">
+                    <div class="result-card__top">
+                        <h3 class="result-card__title">{{ result.title }}</h3>
+                        <a [href]="result.link" target="_blank" rel="noopener noreferrer" class="result-card__link"
+                            aria-label="Open listing">
+                            <mat-icon>north_east</mat-icon>
+                        </a>
+                    </div>
+                    <p class="result-card__company">{{ result.company }} · {{ result.website_host }}</p>
+
+                    <ul class="result-card__scores">
+                        @for (score of result.scores; track score.tag) {
+                        <li class="score-row">
+                            <span class="score-row__tag">{{ score.tag }}</span>
+                            <span class="score-row__bar">
+                                <span class="score-row__fill" [style.width.%]="scoreWidth(score.score, result)"></span>
+                            </span>
+                            <span class="score-row__value">{{ score.score | number: '1.0-2' }}</span>
+                        </li>
+                        } @empty {
+                            <li class="not-recommended">
+                                <p>No resumes were recommended for this listing.</p>
+                            </li>
+                        }
+                    </ul>
+                </li>
+                } @empty {
+                <li class="recs-state">
+                    <p>No listings were recommended for this run.</p>
+                </li>
+                }
+            </ul>
+            }
+        </section>
+    </div>
+
+    <button type="button" mat-fab class="recs-fab" aria-label="Start a new recommendation run" [disabled]="starting()"
+        (click)="startRun()">
+        @if (starting()) {
+        <mat-spinner diameter="24" />
+        } @else {
+        <mat-icon>add</mat-icon>
+        }
+    </button>
+</div>
