@@ -9,7 +9,7 @@
 
     std::vector<const char*> process_n::Factory::convertToCharVector(const std::vector<std::string>& vector) {
         std::vector<const char*> result(vector.size() + 1);
-        for (size_t i = 0; i < vector.size(); i++)
+        for (size_t i = 0; i < vector.size(); ++i)
             result[i] = vector[i].c_str();
 
         result[result.size() - 1] = nullptr;

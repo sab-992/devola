@@ -219,7 +219,7 @@ nlohmann::json RecommendationRepository::sortScores(const json& rawScores) const
 
 nlohmann::json RecommendationRepository::topNScores(const json& scoresArray, size_t N) const {
     json topN = json::array();
-    for (size_t i = 0; i < std::min(size_t(N), scoresArray.size()); i++)
+    for (size_t i = 0; i < std::min(size_t(N), scoresArray.size()); ++i)
         topN.push_back(scoresArray[i]);
     return topN;
 }

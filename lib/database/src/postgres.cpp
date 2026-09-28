@@ -106,7 +106,7 @@ database_n::Result PostgreSQL::Create(const Query& query, Transaction* transacti
         std::string stringColumns;
         std::string values;
 
-        for (size_t i = 0; i < columns.size(); i++) {
+        for (size_t i = 0; i < columns.size(); ++i) {
             if (i != 0) {
                 stringColumns.append(", ");
                 values.append(", ");
@@ -210,7 +210,7 @@ std::string PostgreSQL::getProjection(const std::vector<std::string>& projection
         throw Exception("Projection exists but is empty");
 
     std::string columns;
-    for (size_t i = 0; i < projection.size(); i++) {
+    for (size_t i = 0; i < projection.size(); ++i) {
         if (i != 0)
             columns.append(", ");
 
@@ -230,7 +230,7 @@ std::string PostgreSQL::groupBy(const Query& query) const {
         return "";
 
     std::string result = " GROUP BY ";
-    for (size_t i = 0; i < columns.size(); i++) {
+    for (size_t i = 0; i < columns.size(); ++i) {
         if (i != 0)
             result += ", ";
 
@@ -291,7 +291,7 @@ std::string PostgreSQL::offset(const Query& query) const {
 
 std::string PostgreSQL::onCondition(const std::vector<Query::JoinCondition>& conditions) const {
     std::string result;
-    for (size_t i = 0; i < conditions.size(); i++) {
+    for (size_t i = 0; i < conditions.size(); ++i) {
         if (i != 0)
             result += " AND ";
 
@@ -317,7 +317,7 @@ std::string PostgreSQL::orderBy(const Query& query) const {
         return "";
 
     std::string result = " ORDER BY ";
-    for (size_t i = 0; i < sort.size(); i++) {
+    for (size_t i = 0; i < sort.size(); ++i) {
         if (i != 0)
             result += ", ";
 
@@ -337,7 +337,7 @@ database_n::Result PostgreSQL::Other(const Query& query, Transaction* transactio
         pqxx::params params;
         if (query.functionData().has_value()) {
             const auto& functionData = query.functionData().value();
-            for (size_t i = 0; i < functionData.size(); i++) {
+            for (size_t i = 0; i < functionData.size(); ++i) {
                 addParam(params, functionData[i]);
                 values.append(i != 0 ? std::format(", ${}", i + 1) : std::format("${}", i + 1));
             }
@@ -368,7 +368,7 @@ std::string PostgreSQL::projection(const Query& query) const {
     const std::vector<std::string>& columns = query.projection().value();
 
     std::string result;
-    for (size_t i = 0; i < columns.size(); i++)
+    for (size_t i = 0; i < columns.size(); ++i)
         result.append(i != 0 ? std::format(", {}", columns[i]) : columns[i]);
 
     return result;

@@ -125,7 +125,7 @@ void http_n::server_n::Basic::startThreadPool() {
     if (m_threadPoolSize > 0)
         m_light->log(log_n::Level_en::INFO, m_extraLogInformation, "Launching", m_threadPoolSize, "threads ...");
 
-    for (uint16_t i = 0; i < m_threadPoolSize + BASE_THREADS; i++) {
+    for (uint16_t i = 0; i < m_threadPoolSize + BASE_THREADS; ++i) {
         m_threadIds.emplace_back(m_threadRegistry->start([&](){
             try {
                 m_ioContext.run();

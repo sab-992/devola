@@ -55,7 +55,7 @@ size_t parser_n::Listings::relevancy(std::string_view name, const aliases_t& ali
     std::function<std::pair<bool, std::string>(const std::string&)> truthy = [](const std::string& key) -> std::pair<bool, std::string> { return { true, key }; };
 
     size_t i = 0;
-    for (; i < aliases.size(); i++) {
+    for (; i < aliases.size(); ++i) {
         const std::string& candidate = aliases[i];
 
         if (name == candidate)

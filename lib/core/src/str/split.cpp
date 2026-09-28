@@ -7,11 +7,12 @@ void split(std::string_view element, std::vector<std::string>& resultVector, std
 
     size_t indexSplitToken;
     while((indexSplitToken = string.find(splittingToken)) != std::string::npos) {
-        const std::string_view part = string.substr(0, indexSplitToken);
-        resultVector.push_back(std::string(part));
+        std::string_view part = string.substr(0, indexSplitToken);
+        resultVector.emplace_back(part);
         string = string.substr(indexSplitToken + splittingToken.size());
     }
-    resultVector.push_back(std::string(string));
+
+    resultVector.emplace_back(string);
 }
 
 std::vector<std::string> split(std::string_view element, std::string_view splittingToken, size_t start, size_t end) {
