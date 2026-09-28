@@ -6,7 +6,7 @@ DATABASE_LIB_NAME: str = "database"
 # Paths (always from the root .../devola/)
 SERVICES_PATH: str = "server/service"
 EXTRA_BUILD_OPTIONS_FILENAME: str = "extra_build_options.json"
-ROOT_FOLDER_NAME: str = "devola-unrefactored"
+ROOT_FOLDER_NAME: str = "devola"
 
 # Docker containers names
 FRONT_END_DOCKER_SERVICE_NAME: str = "angular"
