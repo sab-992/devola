@@ -13,9 +13,9 @@ http_n::server_n::Basic::Basic(const std::string& name, uint16_t port)
     m_sslContext.set_options(asio::ssl::context::no_sslv2 |
                              asio::ssl::context::no_sslv3);
     SSL_CTX_set_alpn_select_cb(m_sslContext.native_handle(), alpnSelectCallback, nullptr);
-    std::string serverSettingsDir = std::format("{}/server/settings", ROOT_DIRECTORY);
-    m_sslContext.use_certificate_chain_file(std::format("{}/cert.pem", serverSettingsDir));
-    m_sslContext.use_private_key_file(std::format("{}/key.pem", serverSettingsDir), asio::ssl::context::pem);
+    const std::string& secretsDirPath = std::format("{}/server/settings/secrets", ROOT_DIRECTORY);
+    m_sslContext.use_certificate_chain_file(std::format("{}/cert.pem", secretsDirPath));
+    m_sslContext.use_private_key_file(std::format("{}/key.pem", secretsDirPath), asio::ssl::context::pem);
     m_signals.async_wait([&](const auto&, const auto&){ stop(); });
 }
 

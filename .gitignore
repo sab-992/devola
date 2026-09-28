@@ -5,6 +5,7 @@ pyrefly.toml
 *.pem
 */out/*
 */build/*
+/server/settings/secrets/*
 build
 *.pyc
 .clangd

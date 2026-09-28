@@ -63,8 +63,7 @@ http_n::sslSocket_t http_n::Http::prepareSSLHandshake(std::shared_ptr<network_n:
 
     sslContext.set_verify_mode(m_sslMode);
     sslContext.set_default_verify_paths();
-    // TODO: add in README to create a certificate/key for localhost/127.0.0.1 in .../server/settings and make a symlink to it at /etc/nginx/ssl/cert.pem and /etc/nginx/ssl/key.pem
-    sslContext.load_verify_file(std::format("{}/server/settings/cert.pem", ROOT_DIRECTORY));
+    sslContext.load_verify_file(std::format("{}/server/settings/secrets/cert.pem", ROOT_DIRECTORY));
 
     asio::ssl::stream<tcp::socket> socket(*m_ioContext, sslContext);
     SSL_set_tlsext_host_name(socket.native_handle(), hostName.c_str());
