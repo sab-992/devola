@@ -7,7 +7,7 @@ from dataclasses import dataclass
 @dataclass
 class Listing:
     id: int
-    content_chunks: list[str]
+    content: str
 
 class ListingParser:
     @staticmethod
@@ -19,7 +19,7 @@ class ListingParser:
             if (len(listing) != 2 or len(listing[0]) <= 0
                                 or len(listing[1]) <= 0):
                 continue
-            listings.append(Listing(int(listing[0]), ListingParser.chunk(ListingParser.clean_listing(listing[1]))))
+            listings.append(Listing(int(listing[0]), ListingParser.clean_listing(listing[1])))
 
         return listings
 
@@ -49,18 +49,3 @@ class ListingParser:
         text = re.sub(r"[ \t]+", " ", text)
         text = re.sub(r"\n{2,}", "\n", text)
         return text.strip()
-
-    @staticmethod
-    def chunk(text: str) -> list[str]:
-        MIN_WORDS = 4
-        raw_lines = [l.strip("-•*  \t") .strip() for l in text.splitlines()]
-        chunks = []
-        for line in raw_lines:
-            if not line:
-                continue
-            # Split long lines with multiple sentences.
-            for sentence in re.split(r"(?<=[.!?])\s+", line):
-                sentence = sentence.strip()
-                if sentence and len(sentence.split()) >= MIN_WORDS:
-                    chunks.append(sentence)
-        return chunks
