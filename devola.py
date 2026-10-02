@@ -4,7 +4,8 @@ from settings.command import service, compile, deploy, install, launch, shutdown
 from settings.command.detail.command import Command
 from settings.command.detail.options import OptionsType
 
-COMMANDS: dict[str, Command] = { "cmake"       : compile.CMake(),
+COMMANDS: dict[str, Command] = { "build"       : compile.Build(),
+                                 "cmake"       : compile.CMake(),
                                  "make"        : compile.Make(),
                                  "makeall"     : compile.MakeAll(),
                                  "maketest"    : compile.MakeTest(),

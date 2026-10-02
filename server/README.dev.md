@@ -1,74 +1,30 @@
-# devola/server
+# Devola
 
 ## File structure
+
 ```
-devola/
-├── app/
-│   ├── main.cpp
-│   ├── CMakeLists.txt
-│   ├── include/
-│   │   ├── private_module_a/
-│   │   │   ├── file2.hpp
-│   │   │   └── ...     (Other private module headers)
-│   │   └── ...     (Other private modules)
-│   ├── src/
-│   │   ├── private_module_a/
-│   │   │   ├── file2.cpp
-│   │   │   └── ...     (Other private module files)
-│   │   └── ...
-│   └── tests/
-│       ├── private_module_a/
-│       │   ├── test1.cpp
-│       │   └── ...     (Other private module files)
-│       └── ...
-├── client/
-├── cmake/
-├── database/
+server/
+├── CMakeLists.txt
+├── doc/
+│   └── ...
 ├── docker/
-├── libs/
-│   ├── CMakeLists.txt
-│   ├── lib_a/
+│   └── ...
+├── service/
+│   ├── service_A/
+│   │   ├── database/
+│   │   ├── docker/
 │   │   ├── include/
-│   │   │   ├── lib_a/
-│   │   │   │   ├── module_a/
-│   │   │   │   │   ├── detail/
-│   │   │   │   │   ├── file1.hpp
-│   │   │   │   │   └── ...     (Other module headers)
-│   │   │   │   └── ...     (Other modules)
-│   │   │   └── lib_a.hpp     (Umbrella header)
-│   │   └── src/
-│   │       ├── module_a/
-│   │       │   ├── file1.cpp
-│   │       │   └── ...     (Other module files)
-│   │       └── ...     (Other modules)
-│   └── ...     (Other libraries)
-├── nginx/
-├── server/
-│   ├── CMakeLists.txt
-│   └── service/
-│       ├── service_a/
-│       │   ├── main.cpp
-│       │   ├── CMakeLists.txt
-│       │   ├── include/
-│       │   │   ├── private_module_b/
-│       │   │   └── ...
-│       │   ├── src/
-│       │   └── tests/
+│   │   │   └── ...         # Contains .hpp files
+│   │   ├── settings/
+│   │   ├── src/
+│   │   │   └── ...         # Contains .cpp files
+│   │   ├── CMakeLists.txt/
+│   │   └── main.cpp/
+│   └── service_B/
 │       └── ...
 ├── settings/
-│   ├── command/
-│   ├── .env
-│   └── ...
-├── tests/
-│   ├── CMakeLists.txt
-│   ├── lib_a
-│   │   ├── module_a/
-│   │   │   ├── test2.cpp
-│   │   │   └── ...
-│   │   └── ...
-│   └── ...
-├── CMakeLists.txt
-├── devola.py
-├── README.md
-└── requirements.txt
+│   └── secrets             # Contains server's certificate and private key (Can be symlinks)
+│       ├── cert.pem
+│       └── key.pem
+└── main.cpp
 ```
