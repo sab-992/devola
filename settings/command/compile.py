@@ -10,6 +10,31 @@ from settings.command.detail.postgres import Postgres
 from settings.command.detail.service_updater import ServiceUpdater
 
 
+class Build(Command, Directory, ServiceUpdater):
+    def __init__(self):
+        Command.__init__(self)
+        ServiceUpdater.__init__(self)
+
+    def arguments(self) -> dict[str, dict]:
+        return { "manual": MANUAL_OPTION }
+
+    def command(self) -> str:
+        return "build"
+
+    def command_explicit(self, args: Namespace) -> list[list[str]]:
+        return [["cmake", "-S", ".", "-B", "build", "-DCMAKE_BUILD_TYPE=Release"], ["cmake", "--build", "build"]]
+
+    def details(self) -> str:
+        return "Use the CMakeLists.txt to prepare the environment for the application.\n\n"
+
+    def setup(self, args: Namespace) -> None:
+        self.update_services()
+        # self.set_working_directory(self.build_directory())
+
+    def teardown(self, args: Namespace) -> None:
+        # self.reset_working_directory()
+        pass
+
 class CMake(Command, Directory, ServiceUpdater):
     def __init__(self):
         Command.__init__(self)

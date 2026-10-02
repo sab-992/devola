@@ -161,7 +161,7 @@ void RecommendationRepository::runTask(std::string_view userUUID,
 bool RecommendationRepository::sendResumes(processId_t processIdentifier, std::string_view taskUUID, const std::vector<Resume>& resumes) const {
     std::string resumeMessage;
     for (const auto& resume : resumes)
-        resumeMessage += std::format("{}[SEP]{}[END]\n", resume.tag, resume.content);
+        resumeMessage += std::format("{}[SEP]{}[SEP]{}[END]\n", resume.tag, join(resume.skills, ","), resume.content);
 
     m_registry->send(processIdentifier, NAMED_PIPE_NAME, resumeMessage);
 
